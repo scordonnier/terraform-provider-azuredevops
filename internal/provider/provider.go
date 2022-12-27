@@ -2,49 +2,52 @@ package provider
 
 import (
 	"context"
-	"net/http"
-
+	"encoding/base64"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
-var _ provider.Provider = &ScaffoldingProvider{}
+var _ provider.Provider = &AzureDevOpsProvider{}
 
-// ScaffoldingProvider defines the provider implementation.
-type ScaffoldingProvider struct {
+type AzureDevOpsProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
 }
 
-// ScaffoldingProviderModel describes the provider data model.
-type ScaffoldingProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
+type AzureDevOpsProviderModel struct {
+	OrganizationUrl     string `tfsdk:"organization_url"`
+	PersonalAccessToken string `tfsdk:"personal_access_token"`
 }
 
-func (p *ScaffoldingProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "scaffolding"
+func (p *AzureDevOpsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "azuredevops"
 	resp.Version = p.version
 }
 
-func (p *ScaffoldingProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *AzureDevOpsProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
-				Optional:            true,
+			"organization_url": schema.StringAttribute{
+				MarkdownDescription: "The url of the Azure DevOps instance which should be used.",
+				Required:            true,
+			},
+			"personal_access_token": schema.StringAttribute{
+				MarkdownDescription: "The personal access token which should be used.",
+				Required:            true,
 			},
 		},
 	}
 }
 
-func (p *ScaffoldingProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data ScaffoldingProviderModel
+func (p *AzureDevOpsProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var data AzureDevOpsProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
@@ -52,30 +55,26 @@ func (p *ScaffoldingProvider) Configure(ctx context.Context, req provider.Config
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
-
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
+	client := clients.NewAzureDevOpsClient(data.OrganizationUrl, "Basic "+base64.StdEncoding.EncodeToString([]byte(":"+data.PersonalAccessToken)), p.version)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
 
-func (p *ScaffoldingProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		NewExampleResource,
+func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{
+		core.NewTeamProjectDataSource,
 	}
 }
 
-func (p *ScaffoldingProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewExampleDataSource,
+func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
+	return []func() resource.Resource{
+		serviceendpoint.NewResourceServiceEndpointAzureRm,
 	}
 }
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &ScaffoldingProvider{
+		return &AzureDevOpsProvider{
 			version: version,
 		}
 	}

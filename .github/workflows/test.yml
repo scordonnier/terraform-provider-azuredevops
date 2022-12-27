@@ -8,6 +8,9 @@ on:
     paths-ignore:
       - 'README.md'
   push:
+    branches:
+      - 'main'
+      - 'develop'
     paths-ignore:
       - 'README.md'
 
@@ -30,19 +33,19 @@ jobs:
       - run: go mod download
       - run: go build -v .
 
-  generate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-      - run: go generate ./...
-      - name: git diff
-        run: |
-          git diff --compact-summary --exit-code || \
-            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
+#  generate:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/setup-go@v3
+#        with:
+#          go-version-file: 'go.mod'
+#          cache: true
+#      - run: go generate ./...
+#      - name: git diff
+#        run: |
+#          git diff --compact-summary --exit-code || \
+#            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
 
   # Run acceptance tests in a matrix with Terraform CLI versions
   test:
