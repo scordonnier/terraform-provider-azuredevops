@@ -1,4 +1,4 @@
-package provider
+package core
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ datasource.DataSource = &TeamProjectDataSourceImpl{}
+var _ datasource.DataSource = &TeamProjectDataSource{}
 
-func TeamProjectDataSource() datasource.DataSource {
-	return &TeamProjectDataSourceImpl{}
+func NewTeamProjectDataSource() datasource.DataSource {
+	return &TeamProjectDataSource{}
 }
 
-type TeamProjectDataSourceImpl struct {
+type TeamProjectDataSource struct {
 	client *core.Client
 }
 
@@ -26,11 +26,11 @@ type TeamProjectDataSourceModel struct {
 	Id   types.String `tfsdk:"id"`
 }
 
-func (d *TeamProjectDataSourceImpl) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *TeamProjectDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project"
 }
 
-func (d *TeamProjectDataSourceImpl) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *TeamProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "", // TODO: Documentation
 		Attributes: map[string]schema.Attribute{
@@ -46,7 +46,7 @@ func (d *TeamProjectDataSourceImpl) Schema(_ context.Context, _ datasource.Schem
 	}
 }
 
-func (d *TeamProjectDataSourceImpl) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *TeamProjectDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -54,15 +54,15 @@ func (d *TeamProjectDataSourceImpl) Configure(_ context.Context, req datasource.
 	d.client = req.ProviderData.(*clients.AzureDevOpsClient).CoreClient
 }
 
-func (d *TeamProjectDataSourceImpl) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data TeamProjectDataSourceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+func (d *TeamProjectDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var model TeamProjectDataSourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	name := data.Name.ValueString()
+	name := model.Name.ValueString()
 	if name == "" {
 		resp.Diagnostics.AddError("Project name must not be empty", "")
 		return
@@ -79,8 +79,8 @@ func (d *TeamProjectDataSourceImpl) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	data.Id = types.StringValue(project.Id.String())
-	data.Name = types.StringValue(*project.Name)
+	model.Id = types.StringValue(project.Id.String())
+	model.Name = types.StringValue(*project.Name)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }

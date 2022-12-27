@@ -27,10 +27,14 @@ func NewRestClient(baseUrl string, authorization string, providerVersion string)
 }
 
 func (c *RestClient) GetJSON(ctx context.Context, pathSegments []string, queryParams url.Values, apiVersion string) (*http.Response, error) {
-	return c.sendRequest(ctx, http.MethodGet, pathSegments, queryParams, apiVersion)
+	return c.sendRequest(ctx, http.MethodGet, pathSegments, queryParams, nil, apiVersion)
 }
 
-func (c *RestClient) ParseJSON(response *http.Response, v any) error {
+func (c *RestClient) DeleteJSON(ctx context.Context, pathSegments []string, queryParams url.Values, apiVersion string) (*http.Response, error) {
+	return c.sendRequest(ctx, http.MethodDelete, pathSegments, queryParams, nil, apiVersion)
+}
+
+func (c *RestClient) ParseJSON(ctx context.Context, response *http.Response, v any) error {
 	if response == nil || response.Body == nil {
 		return nil
 	}
@@ -48,6 +52,14 @@ func (c *RestClient) ParseJSON(response *http.Response, v any) error {
 	}
 	body = c.trimByteOrderMark(body)
 	return json.Unmarshal(body, &v)
+}
+
+func (c *RestClient) PostJSON(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
+	return c.sendRequest(ctx, http.MethodPost, pathSegments, queryParams, body, apiVersion)
+}
+
+func (c *RestClient) PutJSON(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
+	return c.sendRequest(ctx, http.MethodPut, pathSegments, queryParams, body, apiVersion)
 }
 
 func (c *RestClient) UnwrapError(response *http.Response) (err error) {
@@ -100,25 +112,9 @@ func (c *RestClient) UnwrapError(response *http.Response) (err error) {
 	return wrappedError
 }
 
-func (c *RestClient) createRequest(ctx context.Context, httpMethod string, pathSegments []string, queryParams url.Values, apiVersion string) (*http.Request, error) {
-	endpointUrl := c.generateUrl(pathSegments, queryParams, apiVersion)
-	tflog.Info(ctx, "Request Url = "+endpointUrl)
-	req, err := http.NewRequest(httpMethod, endpointUrl, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add(headerKeyAccept, mediaTypeApplicationJson)
-	req.Header.Add(headerKeyAuthorization, c.authorization)
-	req.Header.Add(headerKeyUserAgent, "go/"+runtime.Version()+" ("+runtime.GOOS+" "+runtime.GOARCH+") terraform-provider-azuredevops/"+c.providerVersion)
-
-	return req, nil
-}
-
 func (c *RestClient) generateUrl(pathSegments []string, queryParams url.Values, apiVersion string) string {
 	var builder strings.Builder
-	builder.WriteString(c.baseUrl)
-	builder.WriteString("_apis")
+	builder.WriteString(strings.TrimSuffix(c.baseUrl, "/"))
 	for _, segment := range pathSegments {
 		builder.WriteString("/")
 		builder.WriteString(url.PathEscape(segment))
@@ -132,11 +128,27 @@ func (c *RestClient) generateUrl(pathSegments []string, queryParams url.Values, 
 	return builder.String()
 }
 
-func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSegments []string, queryParams url.Values, apiVersion string) (*http.Response, error) {
-	req, err := c.createRequest(ctx, httpMethod, pathSegments, queryParams, apiVersion)
+func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
+	endpointUrl := c.generateUrl(pathSegments, queryParams, apiVersion)
+	tflog.Info(ctx, "Request Url = "+endpointUrl)
+	var jsonReader io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+
+		jsonReader = bytes.NewReader(jsonBody)
+	}
+	req, err := http.NewRequest(httpMethod, endpointUrl, jsonReader)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add(headerKeyAccept, mediaTypeApplicationJson)
+	req.Header.Add(headerKeyAuthorization, c.authorization)
+	req.Header.Add(headerKeyContentType, mediaTypeApplicationJson)
+	req.Header.Add(headerKeyUserAgent, "go/"+runtime.Version()+" ("+runtime.GOOS+" "+runtime.GOARCH+") terraform-provider-azuredevops/"+c.providerVersion)
 
 	resp, err := http.DefaultClient.Do(req)
 	if resp != nil && (resp.StatusCode < 200 || resp.StatusCode >= 300) {

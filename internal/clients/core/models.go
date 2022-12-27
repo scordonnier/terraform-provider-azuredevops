@@ -5,6 +5,22 @@ import (
 	"time"
 )
 
+type IdentityRef struct {
+	Links             interface{} `json:"_links,omitempty"`
+	Descriptor        *string     `json:"descriptor,omitempty"`
+	DisplayName       *string     `json:"displayName,omitempty"`
+	Url               *string     `json:"url,omitempty"`
+	DirectoryAlias    *string     `json:"directoryAlias,omitempty"`
+	Id                *string     `json:"id,omitempty"`
+	ImageUrl          *string     `json:"imageUrl,omitempty"`
+	Inactive          *bool       `json:"inactive,omitempty"`
+	IsAadIdentity     *bool       `json:"isAadIdentity,omitempty"`
+	IsContainer       *bool       `json:"isContainer,omitempty"`
+	IsDeletedInOrigin *bool       `json:"isDeletedInOrigin,omitempty"`
+	ProfileUrl        *string     `json:"profileUrl,omitempty"`
+	UniqueName        *string     `json:"uniqueName,omitempty"`
+}
+
 type ProjectState string
 
 type ProjectVisibility string

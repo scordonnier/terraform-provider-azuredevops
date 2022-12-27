@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	pathApis     = "_apis"
 	pathProjects = "projects"
 )
 
@@ -20,13 +21,13 @@ func NewClient(restClient *networking.RestClient) *Client {
 }
 
 func (client *Client) GetProject(ctx context.Context, id string) (*TeamProject, error) {
-	pathSegments := []string{pathProjects, id}
+	pathSegments := []string{pathApis, pathProjects, id}
 	resp, err := client.restClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
 	}
 
 	var project *TeamProject
-	err = client.restClient.ParseJSON(resp, &project)
+	err = client.restClient.ParseJSON(ctx, resp, &project)
 	return project, err
 }

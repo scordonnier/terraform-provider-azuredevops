@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
 )
 
 var _ provider.Provider = &AzureDevOpsProvider{}
@@ -60,13 +62,13 @@ func (p *AzureDevOpsProvider) Configure(ctx context.Context, req provider.Config
 
 func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		TeamProjectDataSource,
+		core.NewTeamProjectDataSource,
 	}
 }
 
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewExampleResource,
+		serviceendpoint.NewResourceServiceEndpointAzureRm,
 	}
 }
 
