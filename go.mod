@@ -1,6 +1,6 @@
-module github.com/hashicorp/terraform-provider-scaffolding-framework
+module github.com/scordonnier/terraform-provider-azuredevops
 
-go 1.18
+go 1.19
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
