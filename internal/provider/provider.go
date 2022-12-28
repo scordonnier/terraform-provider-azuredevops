@@ -41,6 +41,7 @@ func (p *AzureDevOpsProvider) Schema(_ context.Context, _ provider.SchemaRequest
 			"personal_access_token": schema.StringAttribute{
 				MarkdownDescription: "The personal access token which should be used.",
 				Required:            true,
+				Sensitive:           true,
 			},
 		},
 	}
@@ -69,6 +70,8 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		serviceendpoint.NewResourceServiceEndpointAzureRm,
+		serviceendpoint.NewResourceServiceEndpointBitbucket,
+		serviceendpoint.NewResourceServiceEndpointShare,
 	}
 }
 

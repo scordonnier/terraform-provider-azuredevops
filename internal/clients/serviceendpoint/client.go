@@ -2,6 +2,7 @@ package serviceendpoint
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"net/url"
@@ -24,7 +25,7 @@ func NewClient(restClient *networking.RestClient) *Client {
 }
 
 func (c *Client) CreateServiceEndpoint(ctx context.Context, args *CreateOrUpdateServiceEndpointArgs, projectId string) (*ServiceEndpoint, error) {
-	pathSegments := []string{pathApis, pathServiceEndpoint, pathEndpoints}
+	pathSegments := []string{projectId, pathApis, pathServiceEndpoint, pathEndpoints}
 	serviceEndpoint, err := c.createOrUpdateServiceEndpoint(ctx, nil, args, projectId)
 	if err != nil {
 		return nil, err
@@ -39,9 +40,9 @@ func (c *Client) CreateServiceEndpoint(ctx context.Context, args *CreateOrUpdate
 	return serviceEndpoint, err
 }
 
-func (c *Client) DeleteServiceEndpoint(ctx context.Context, id string, projectId string) error {
+func (c *Client) DeleteServiceEndpoint(ctx context.Context, id string, projectIds []string) error {
 	pathSegments := []string{pathApis, pathServiceEndpoint, pathEndpoints, id}
-	queryParams := url.Values{"projectIds": []string{projectId}}
+	queryParams := url.Values{"projectIds": projectIds}
 	_, err := c.restClient.DeleteJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
 	return err
 }
@@ -56,6 +57,24 @@ func (c *Client) GetServiceEndpoint(ctx context.Context, id string, projectId st
 	var serviceEndpoint *ServiceEndpoint
 	err = c.restClient.ParseJSON(ctx, resp, &serviceEndpoint)
 	return serviceEndpoint, err
+}
+
+func (c *Client) ShareServiceEndpoint(ctx context.Context, id string, name string, description string, projectId string, projectIds []string) error {
+	var serviceEndpointProjectReferences []ServiceEndpointProjectReference
+	for _, projectId := range projectIds {
+		projectReferenceUUID := uuid.MustParse(projectId)
+		serviceEndpointProjectReferences = append(serviceEndpointProjectReferences, ServiceEndpointProjectReference{
+			Description: &description,
+			Name:        &name,
+			ProjectReference: &ProjectReference{
+				Id: &projectReferenceUUID,
+			},
+		})
+	}
+
+	pathSegments := []string{projectId, pathApis, pathServiceEndpoint, pathEndpoints, id}
+	_, err := c.restClient.PatchJSON(ctx, pathSegments, nil, serviceEndpointProjectReferences, networking.ApiVersion70)
+	return err
 }
 
 func (c *Client) UpdateServiceEndpoint(ctx context.Context, id string, args *CreateOrUpdateServiceEndpointArgs, projectId string) (*ServiceEndpoint, error) {
@@ -120,6 +139,14 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeServicePrincipal),
 		}
+	case ServiceEndpointTypeBitbucket:
+		return &EndpointAuthorization{
+			Parameters: &map[string]string{
+				ServiceEndpointAuthorizationParamsPassword: args.Password,
+				ServiceEndpointAuthorizationParamsUserName: args.UserName,
+			},
+			Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
+		}
 	default:
 		return nil
 	}
@@ -144,6 +171,8 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 	switch args.Type {
 	case ServiceEndpointTypeAzureRm:
 		return utils.String("https://management.azure.com/")
+	case ServiceEndpointTypeBitbucket:
+		return utils.String("https://api.bitbucket.org/")
 	default:
 		return nil
 	}
