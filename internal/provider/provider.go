@@ -69,6 +69,7 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		serviceendpoint.NewResourceServiceEndpointAzureRm,
+		serviceendpoint.NewResourceServiceEndpointBitbucket,
 	}
 }
 

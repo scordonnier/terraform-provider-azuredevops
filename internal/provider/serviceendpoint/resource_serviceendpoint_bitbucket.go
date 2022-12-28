@@ -17,34 +17,31 @@ import (
 	"regexp"
 )
 
-var _ resource.Resource = &ResourceServiceEndpointAzureRm{}
-var _ resource.ResourceWithImportState = &ResourceServiceEndpointAzureRm{}
+var _ resource.Resource = &ResourceServiceEndpointBitbucket{}
+var _ resource.ResourceWithImportState = &ResourceServiceEndpointBitbucket{}
 
-func NewResourceServiceEndpointAzureRm() resource.Resource {
-	return &ResourceServiceEndpointAzureRm{}
+func NewResourceServiceEndpointBitbucket() resource.Resource {
+	return &ResourceServiceEndpointBitbucket{}
 }
 
-type ResourceServiceEndpointAzureRm struct {
+type ResourceServiceEndpointBitbucket struct {
 	client *serviceendpoint.Client
 }
 
-type ResourceServiceEndpointAzureRmModel struct {
-	Description         types.String `tfsdk:"description"`
-	Id                  types.String `tfsdk:"id"`
-	Name                types.String `tfsdk:"name"`
-	ProjectId           types.String `tfsdk:"project_id"`
-	ServicePrincipalId  types.String `tfsdk:"service_principal_id"`
-	ServicePrincipalKey types.String `tfsdk:"service_principal_key"`
-	SubscriptionId      types.String `tfsdk:"subscription_id"`
-	SubscriptionName    types.String `tfsdk:"subscription_name"`
-	TenantId            types.String `tfsdk:"tenant_id"`
+type ResourceServiceEndpointBitbucketModel struct {
+	Description types.String `tfsdk:"description"`
+	Id          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	Password    types.String `tfsdk:"password"`
+	ProjectId   types.String `tfsdk:"project_id"`
+	UserName    types.String `tfsdk:"username"`
 }
 
-func (r *ResourceServiceEndpointAzureRm) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_serviceendpoint_azurerm"
+func (r *ResourceServiceEndpointBitbucket) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_serviceendpoint_bitbucket"
 }
 
-func (r *ResourceServiceEndpointAzureRm) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ResourceServiceEndpointBitbucket) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "",
 		Attributes: map[string]schema.Attribute{
@@ -63,6 +60,11 @@ func (r *ResourceServiceEndpointAzureRm) Schema(_ context.Context, _ resource.Sc
 				MarkdownDescription: "", // TODO: Documentation
 				Required:            true,
 			},
+			"password": schema.StringAttribute{
+				MarkdownDescription: "", // TODO: Documentation
+				Required:            true,
+				Sensitive:           true,
+			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "", // TODO: Documentation
 				Required:            true,
@@ -70,33 +72,16 @@ func (r *ResourceServiceEndpointAzureRm) Schema(_ context.Context, _ resource.Sc
 					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"), "must be a valid UUID"),
 				},
 			},
-			"service_principal_id": schema.StringAttribute{
+			"username": schema.StringAttribute{
 				MarkdownDescription: "", // TODO: Documentation
 				Required:            true,
 				Sensitive:           true,
-			},
-			"service_principal_key": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
-				Required:            true,
-				Sensitive:           true,
-			},
-			"subscription_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
-				Required:            true,
-			},
-			"subscription_name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
-				Required:            true,
-			},
-			"tenant_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
-				Required:            true,
 			},
 		},
 	}
 }
 
-func (r *ResourceServiceEndpointAzureRm) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *ResourceServiceEndpointBitbucket) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -104,15 +89,15 @@ func (r *ResourceServiceEndpointAzureRm) Configure(_ context.Context, req resour
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 
-func (r *ResourceServiceEndpointAzureRm) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ResourceServiceEndpointBitbucket) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *ResourceServiceEndpointBitbucketModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	args := getAzureRmCreateOrUpdateServiceEndpointArgs(model)
+	args := getBitbucketCreateOrUpdateServiceEndpointArgs(model)
 	serviceEndpoint, err := r.client.CreateServiceEndpoint(ctx, args, model.ProjectId.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create service endpoint", err.Error())
@@ -124,8 +109,8 @@ func (r *ResourceServiceEndpointAzureRm) Create(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointAzureRm) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ResourceServiceEndpointBitbucket) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *ResourceServiceEndpointBitbucketModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -151,23 +136,19 @@ func (r *ResourceServiceEndpointAzureRm) Read(ctx context.Context, req resource.
 
 	model.Description = types.StringValue(*serviceEndpoint.Description)
 	model.Name = types.StringValue(*serviceEndpoint.Name)
-	model.ServicePrincipalId = types.StringValue((*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServicePrincipalId])
-	model.SubscriptionId = types.StringValue((*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionId])
-	model.SubscriptionName = types.StringValue((*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionName])
-	model.TenantId = types.StringValue((*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServiceTenantId])
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointAzureRm) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ResourceServiceEndpointBitbucket) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *ResourceServiceEndpointBitbucketModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	args := getAzureRmCreateOrUpdateServiceEndpointArgs(model)
+	args := getBitbucketCreateOrUpdateServiceEndpointArgs(model)
 	id := model.Id.ValueString()
 	_, err := r.client.UpdateServiceEndpoint(ctx, id, args, model.ProjectId.ValueString())
 	if err != nil {
@@ -183,8 +164,8 @@ func (r *ResourceServiceEndpointAzureRm) Update(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointAzureRm) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ResourceServiceEndpointBitbucket) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *ResourceServiceEndpointBitbucketModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -198,19 +179,16 @@ func (r *ResourceServiceEndpointAzureRm) Delete(ctx context.Context, req resourc
 	}
 }
 
-func (r *ResourceServiceEndpointAzureRm) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ResourceServiceEndpointBitbucket) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func getAzureRmCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointAzureRmModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+func getBitbucketCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointBitbucketModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
-		Description:         model.Description.ValueString(),
-		Name:                model.Name.ValueString(),
-		ServicePrincipalId:  model.ServicePrincipalId.ValueString(),
-		ServicePrincipalKey: model.ServicePrincipalKey.ValueString(),
-		SubscriptionId:      model.SubscriptionId.ValueString(),
-		SubscriptionName:    model.SubscriptionName.ValueString(),
-		TenantId:            model.TenantId.ValueString(),
-		Type:                serviceendpoint.ServiceEndpointTypeAzureRm,
+		Description: model.Description.ValueString(),
+		Name:        model.Name.ValueString(),
+		Password:    model.Password.ValueString(),
+		Type:        serviceendpoint.ServiceEndpointTypeBitbucket,
+		UserName:    model.UserName.ValueString(),
 	}
 }

@@ -13,9 +13,11 @@ const (
 	ServiceEndpointDataSubscriptionName = "subscriptionName"
 
 	ServiceEndpointAuthorizationParamsAuthenticationType  = "authenticationType"
+	ServiceEndpointAuthorizationParamsPassword            = "password"
 	ServiceEndpointAuthorizationParamsServicePrincipalId  = "serviceprincipalid"
 	ServiceEndpointAuthorizationParamsServicePrincipalKey = "serviceprincipalkey"
 	ServiceEndpointAuthorizationParamsServiceTenantId     = "tenantid"
+	ServiceEndpointAuthorizationParamsUserName            = "username"
 
 	ServiceEndpointAuthorizationSchemeJwt                    = "JWT"
 	ServiceEndpointAuthorizationSchemeKubernetes             = "Kubernetes"
@@ -48,12 +50,14 @@ const (
 type CreateOrUpdateServiceEndpointArgs struct {
 	Description         string
 	Name                string
+	Password            string
 	ServicePrincipalId  string
 	ServicePrincipalKey string
 	SubscriptionId      string
 	SubscriptionName    string
 	TenantId            string
 	Type                string
+	UserName            string
 }
 
 type EndpointAuthorization struct {
