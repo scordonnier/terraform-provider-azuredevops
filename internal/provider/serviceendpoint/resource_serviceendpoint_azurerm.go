@@ -27,15 +27,15 @@ type ResourceServiceEndpointAzureRm struct {
 }
 
 type ResourceServiceEndpointAzureRmModel struct {
-	Description         types.String `tfsdk:"description"`
+	Description         string       `tfsdk:"description"`
 	Id                  types.String `tfsdk:"id"`
-	Name                types.String `tfsdk:"name"`
-	ProjectId           types.String `tfsdk:"project_id"`
-	ServicePrincipalId  types.String `tfsdk:"service_principal_id"`
-	ServicePrincipalKey types.String `tfsdk:"service_principal_key"`
-	SubscriptionId      types.String `tfsdk:"subscription_id"`
-	SubscriptionName    types.String `tfsdk:"subscription_name"`
-	TenantId            types.String `tfsdk:"tenant_id"`
+	Name                string       `tfsdk:"name"`
+	ProjectId           string       `tfsdk:"project_id"`
+	ServicePrincipalId  string       `tfsdk:"service_principal_id"`
+	ServicePrincipalKey string       `tfsdk:"service_principal_key"`
+	SubscriptionId      string       `tfsdk:"subscription_id"`
+	SubscriptionName    string       `tfsdk:"subscription_name"`
+	TenantId            string       `tfsdk:"tenant_id"`
 }
 
 func (r *ResourceServiceEndpointAzureRm) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -110,7 +110,7 @@ func (r *ResourceServiceEndpointAzureRm) Create(ctx context.Context, req resourc
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId.ValueString(), r.client, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
 	if err != nil {
 		return
 	}
@@ -128,17 +128,17 @@ func (r *ResourceServiceEndpointAzureRm) Read(ctx context.Context, req resource.
 		return
 	}
 
-	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId.ValueString(), r.client, resp)
+	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
 	if err != nil {
 		return
 	}
 
-	model.Description = types.StringValue(*serviceEndpoint.Description)
-	model.Name = types.StringValue(*serviceEndpoint.Name)
-	model.ServicePrincipalId = types.StringValue((*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServicePrincipalId])
-	model.SubscriptionId = types.StringValue((*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionId])
-	model.SubscriptionName = types.StringValue((*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionName])
-	model.TenantId = types.StringValue((*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServiceTenantId])
+	model.Description = *serviceEndpoint.Description
+	model.Name = *serviceEndpoint.Name
+	model.ServicePrincipalId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServicePrincipalId]
+	model.SubscriptionId = (*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionId]
+	model.SubscriptionName = (*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionName]
+	model.TenantId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServiceTenantId]
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -151,7 +151,7 @@ func (r *ResourceServiceEndpointAzureRm) Update(ctx context.Context, req resourc
 		return
 	}
 
-	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId.ValueString(), r.client, resp)
+	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
 	if err != nil {
 		return
 	}
@@ -167,7 +167,7 @@ func (r *ResourceServiceEndpointAzureRm) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId.ValueString(), r.client, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
 }
 
 func (r *ResourceServiceEndpointAzureRm) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -176,13 +176,13 @@ func (r *ResourceServiceEndpointAzureRm) ImportState(ctx context.Context, req re
 
 func (r *ResourceServiceEndpointAzureRm) getCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointAzureRmModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
-		Description:         model.Description.ValueString(),
-		Name:                model.Name.ValueString(),
-		ServicePrincipalId:  model.ServicePrincipalId.ValueString(),
-		ServicePrincipalKey: model.ServicePrincipalKey.ValueString(),
-		SubscriptionId:      model.SubscriptionId.ValueString(),
-		SubscriptionName:    model.SubscriptionName.ValueString(),
-		TenantId:            model.TenantId.ValueString(),
+		Description:         model.Description,
+		Name:                model.Name,
+		ServicePrincipalId:  model.ServicePrincipalId,
+		ServicePrincipalKey: model.ServicePrincipalKey,
+		SubscriptionId:      model.SubscriptionId,
+		SubscriptionName:    model.SubscriptionName,
+		TenantId:            model.TenantId,
 		Type:                serviceendpoint.ServiceEndpointTypeAzureRm,
 	}
 }

@@ -41,6 +41,7 @@ func (p *AzureDevOpsProvider) Schema(_ context.Context, _ provider.SchemaRequest
 			"personal_access_token": schema.StringAttribute{
 				MarkdownDescription: "The personal access token which should be used.",
 				Required:            true,
+				Sensitive:           true,
 			},
 		},
 	}

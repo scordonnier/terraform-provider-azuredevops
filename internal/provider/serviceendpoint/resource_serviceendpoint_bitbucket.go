@@ -27,12 +27,12 @@ type ResourceServiceEndpointBitbucket struct {
 }
 
 type ResourceServiceEndpointBitbucketModel struct {
-	Description types.String `tfsdk:"description"`
+	Description string       `tfsdk:"description"`
 	Id          types.String `tfsdk:"id"`
-	Name        types.String `tfsdk:"name"`
-	Password    types.String `tfsdk:"password"`
-	ProjectId   types.String `tfsdk:"project_id"`
-	UserName    types.String `tfsdk:"username"`
+	Name        string       `tfsdk:"name"`
+	Password    string       `tfsdk:"password"`
+	ProjectId   string       `tfsdk:"project_id"`
+	UserName    string       `tfsdk:"username"`
 }
 
 func (r *ResourceServiceEndpointBitbucket) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -95,7 +95,7 @@ func (r *ResourceServiceEndpointBitbucket) Create(ctx context.Context, req resou
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId.ValueString(), r.client, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
 	if err != nil {
 		return
 	}
@@ -113,13 +113,13 @@ func (r *ResourceServiceEndpointBitbucket) Read(ctx context.Context, req resourc
 		return
 	}
 
-	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId.ValueString(), r.client, resp)
+	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
 	if err != nil {
 		return
 	}
 
-	model.Description = types.StringValue(*serviceEndpoint.Description)
-	model.Name = types.StringValue(*serviceEndpoint.Name)
+	model.Description = *serviceEndpoint.Description
+	model.Name = *serviceEndpoint.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -132,7 +132,7 @@ func (r *ResourceServiceEndpointBitbucket) Update(ctx context.Context, req resou
 		return
 	}
 
-	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId.ValueString(), r.client, resp)
+	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
 	if err != nil {
 		return
 	}
@@ -148,7 +148,7 @@ func (r *ResourceServiceEndpointBitbucket) Delete(ctx context.Context, req resou
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId.ValueString(), r.client, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
 }
 
 func (r *ResourceServiceEndpointBitbucket) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -157,10 +157,10 @@ func (r *ResourceServiceEndpointBitbucket) ImportState(ctx context.Context, req 
 
 func (r *ResourceServiceEndpointBitbucket) getCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointBitbucketModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
-		Description: model.Description.ValueString(),
-		Name:        model.Name.ValueString(),
-		Password:    model.Password.ValueString(),
+		Description: model.Description,
+		Name:        model.Name,
+		Password:    model.Password,
 		Type:        serviceendpoint.ServiceEndpointTypeBitbucket,
-		UserName:    model.UserName.ValueString(),
+		UserName:    model.UserName,
 	}
 }

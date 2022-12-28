@@ -22,7 +22,7 @@ type TeamProjectDataSource struct {
 }
 
 type TeamProjectDataSourceModel struct {
-	Name types.String `tfsdk:"name"`
+	Name string       `tfsdk:"name"`
 	Id   types.String `tfsdk:"id"`
 }
 
@@ -62,7 +62,7 @@ func (d *TeamProjectDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	name := model.Name.ValueString()
+	name := model.Name
 	if name == "" {
 		resp.Diagnostics.AddError("Project name must not be empty", "")
 		return
@@ -80,7 +80,7 @@ func (d *TeamProjectDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	model.Id = types.StringValue(project.Id.String())
-	model.Name = types.StringValue(*project.Name)
+	model.Name = *project.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
