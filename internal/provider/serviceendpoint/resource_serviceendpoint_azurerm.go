@@ -2,7 +2,6 @@ package serviceendpoint
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"regexp"
 )
 
@@ -112,10 +110,8 @@ func (r *ResourceServiceEndpointAzureRm) Create(ctx context.Context, req resourc
 		return
 	}
 
-	args := getAzureRmCreateOrUpdateServiceEndpointArgs(model)
-	serviceEndpoint, err := r.client.CreateServiceEndpoint(ctx, args, model.ProjectId.ValueString())
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId.ValueString(), r.client, resp)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create service endpoint", err.Error())
 		return
 	}
 
@@ -132,20 +128,8 @@ func (r *ResourceServiceEndpointAzureRm) Read(ctx context.Context, req resource.
 		return
 	}
 
-	id := model.Id.ValueString()
-	serviceEndpoint, err := r.client.GetServiceEndpoint(ctx, id, model.ProjectId.ValueString())
+	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId.ValueString(), r.client, resp)
 	if err != nil {
-		if utils.ResponseWasNotFound(err) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-
-		resp.Diagnostics.AddError(fmt.Sprintf("Error looking up service endpoint with Id '%s', %+v", id, err), "")
-		return
-	}
-
-	if serviceEndpoint == nil {
-		resp.State.RemoveResource(ctx)
 		return
 	}
 
@@ -167,16 +151,8 @@ func (r *ResourceServiceEndpointAzureRm) Update(ctx context.Context, req resourc
 		return
 	}
 
-	args := getAzureRmCreateOrUpdateServiceEndpointArgs(model)
-	id := model.Id.ValueString()
-	_, err := r.client.UpdateServiceEndpoint(ctx, id, args, model.ProjectId.ValueString())
+	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId.ValueString(), r.client, resp)
 	if err != nil {
-		if utils.ResponseWasNotFound(err) {
-			resp.Diagnostics.AddError(fmt.Sprintf("Service connection with Id '%s' does not exist", id), "")
-			return
-		}
-
-		resp.Diagnostics.AddError(fmt.Sprintf("Error looking up service endpoint with Id '%s', %+v", id, err), "")
 		return
 	}
 
@@ -191,18 +167,14 @@ func (r *ResourceServiceEndpointAzureRm) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	id := model.Id.ValueString()
-	err := r.client.DeleteServiceEndpoint(ctx, id, model.ProjectId.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Service connection with Id '%s' failed to delete", id), err.Error())
-	}
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId.ValueString(), r.client, resp)
 }
 
 func (r *ResourceServiceEndpointAzureRm) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func getAzureRmCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointAzureRmModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+func (r *ResourceServiceEndpointAzureRm) getCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointAzureRmModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
 		Description:         model.Description.ValueString(),
 		Name:                model.Name.ValueString(),
