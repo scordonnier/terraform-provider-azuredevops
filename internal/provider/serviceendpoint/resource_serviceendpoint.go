@@ -54,7 +54,7 @@ func UpdateResourceServiceEndpoint(ctx context.Context, id string, args *service
 }
 
 func DeleteResourceServiceEndpoint(ctx context.Context, id string, projectId string, client *serviceendpoint.Client, resp *resource.DeleteResponse) {
-	err := client.DeleteServiceEndpoint(ctx, id, projectId)
+	err := client.DeleteServiceEndpoint(ctx, id, []string{projectId})
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Service connection with Id '%s' failed to delete", id), err.Error())
 	}

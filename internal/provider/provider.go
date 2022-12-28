@@ -70,6 +70,7 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		serviceendpoint.NewResourceServiceEndpointAzureRm,
 		serviceendpoint.NewResourceServiceEndpointBitbucket,
+		serviceendpoint.NewResourceServiceEndpointShare,
 	}
 }
 

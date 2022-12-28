@@ -58,6 +58,10 @@ func (c *RestClient) PostJSON(ctx context.Context, pathSegments []string, queryP
 	return c.sendRequest(ctx, http.MethodPost, pathSegments, queryParams, body, apiVersion)
 }
 
+func (c *RestClient) PatchJSON(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
+	return c.sendRequest(ctx, http.MethodPatch, pathSegments, queryParams, body, apiVersion)
+}
+
 func (c *RestClient) PutJSON(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
 	return c.sendRequest(ctx, http.MethodPut, pathSegments, queryParams, body, apiVersion)
 }
@@ -130,7 +134,7 @@ func (c *RestClient) generateUrl(pathSegments []string, queryParams url.Values, 
 
 func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
 	endpointUrl := c.generateUrl(pathSegments, queryParams, apiVersion)
-	tflog.Info(ctx, "Request Url = "+endpointUrl)
+	tflog.Info(ctx, httpMethod+" "+endpointUrl)
 	var jsonReader io.Reader
 	if body != nil {
 		jsonBody, err := json.Marshal(body)
