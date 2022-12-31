@@ -2,7 +2,7 @@ package serviceendpoint
 
 import (
 	"context"
-	"github.com/google/uuid"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"net/url"
@@ -62,12 +62,11 @@ func (c *Client) GetServiceEndpoint(ctx context.Context, id string, projectId st
 func (c *Client) ShareServiceEndpoint(ctx context.Context, id string, name string, description string, projectId string, projectIds []string) error {
 	var serviceEndpointProjectReferences []ServiceEndpointProjectReference
 	for _, projectId := range projectIds {
-		projectReferenceUUID := uuid.MustParse(projectId)
 		serviceEndpointProjectReferences = append(serviceEndpointProjectReferences, ServiceEndpointProjectReference{
 			Description: &description,
 			Name:        &name,
-			ProjectReference: &ProjectReference{
-				Id: &projectReferenceUUID,
+			ProjectReference: &core.ProjectReference{
+				Id: utils.UUID(projectId),
 			},
 		})
 	}
@@ -117,7 +116,7 @@ func (c *Client) createOrUpdateServiceEndpoint(_ context.Context, serviceEndpoin
 			{
 				Description: &args.Description,
 				Name:        &args.Name,
-				ProjectReference: &ProjectReference{
+				ProjectReference: &core.ProjectReference{
 					Id: utils.UUID(projectId),
 				},
 			},

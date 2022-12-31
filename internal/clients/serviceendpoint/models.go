@@ -65,11 +65,6 @@ type EndpointAuthorization struct {
 	Scheme     *string            `json:"scheme,omitempty"`
 }
 
-type ProjectReference struct {
-	Id   *uuid.UUID `json:"id,omitempty"`
-	Name *string    `json:"name,omitempty"`
-}
-
 type ServiceEndpoint struct {
 	AdministratorsGroup              *core.IdentityRef                  `json:"administratorsGroup,omitempty"`
 	Authorization                    *EndpointAuthorization             `json:"authorization,omitempty"`
@@ -90,7 +85,7 @@ type ServiceEndpoint struct {
 }
 
 type ServiceEndpointProjectReference struct {
-	Description      *string           `json:"description,omitempty"`
-	Name             *string           `json:"name,omitempty"`
-	ProjectReference *ProjectReference `json:"projectReference,omitempty"`
+	Description      *string                `json:"description,omitempty"`
+	Name             *string                `json:"name,omitempty"`
+	ProjectReference *core.ProjectReference `json:"projectReference,omitempty"`
 }

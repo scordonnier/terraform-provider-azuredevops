@@ -21,6 +21,11 @@ type IdentityRef struct {
 	UniqueName        *string     `json:"uniqueName,omitempty"`
 }
 
+type ProjectReference struct {
+	Id   *uuid.UUID `json:"id,omitempty"`
+	Name *string    `json:"name,omitempty"`
+}
+
 type ProjectState string
 
 type ProjectVisibility string
