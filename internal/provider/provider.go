@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/distributedtask"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
 )
 
@@ -69,6 +70,7 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		distributedtask.NewResourceEnvironment,
 		serviceendpoint.NewResourceServiceEndpointAzureRm,
 		serviceendpoint.NewResourceServiceEndpointBitbucket,
 		serviceendpoint.NewResourceServiceEndpointShare,

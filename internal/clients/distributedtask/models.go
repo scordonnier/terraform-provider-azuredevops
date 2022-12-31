@@ -5,8 +5,8 @@ import (
 )
 
 type CreateOrUpdateEnvironmentArgs struct {
-	Description *string `json:"description,omitempty"`
-	Name        *string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Name        string `json:"name,omitempty"`
 }
 
 type EnvironmentInstance struct {

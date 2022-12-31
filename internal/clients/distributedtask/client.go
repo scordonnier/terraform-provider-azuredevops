@@ -25,8 +25,8 @@ func NewClient(restClient *networking.RestClient) *Client {
 func (c *Client) CreateEnvironment(ctx context.Context, projectId string, name string, description string) (*EnvironmentInstance, error) {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments}
 	body := &CreateOrUpdateEnvironmentArgs{
-		Description: &description,
-		Name:        &name,
+		Description: description,
+		Name:        name,
 	}
 	resp, err := c.restClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
 	if err != nil {
@@ -59,8 +59,8 @@ func (c *Client) GetEnvironment(ctx context.Context, projectId string, id int) (
 func (c *Client) UpdateEnvironment(ctx context.Context, projectId string, id int, name string, description string) (*EnvironmentInstance, error) {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments, strconv.Itoa(id)}
 	body := &CreateOrUpdateEnvironmentArgs{
-		Description: &description,
-		Name:        &name,
+		Description: description,
+		Name:        name,
 	}
 	resp, err := c.restClient.PatchJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
 	if err != nil {
