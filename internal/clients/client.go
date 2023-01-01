@@ -3,6 +3,7 @@ package clients
 import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/distributedtask"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 )
@@ -10,6 +11,7 @@ import (
 type AzureDevOpsClient struct {
 	CoreClient            *core.Client
 	DistributedTaskClient *distributedtask.Client
+	SecurityClient        *security.Client
 	ServiceEndpointClient *serviceendpoint.Client
 }
 
@@ -18,6 +20,7 @@ func NewAzureDevOpsClient(organizationUrl string, authorization string, provider
 	return &AzureDevOpsClient{
 		CoreClient:            core.NewClient(restClient),
 		DistributedTaskClient: distributedtask.NewClient(restClient),
+		SecurityClient:        security.NewClient(restClient),
 		ServiceEndpointClient: serviceendpoint.NewClient(restClient),
 	}
 }
