@@ -6,6 +6,8 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
+	"path"
+	"strings"
 )
 
 type AzureDevOpsClient struct {
@@ -16,11 +18,13 @@ type AzureDevOpsClient struct {
 }
 
 func NewAzureDevOpsClient(organizationUrl string, authorization string, providerVersion string) *AzureDevOpsClient {
-	restClient := networking.NewRestClient(organizationUrl, authorization, providerVersion)
+	azdoClient := networking.NewRestClient(organizationUrl, authorization, providerVersion)
+	organizationName := path.Base(strings.TrimSuffix(organizationUrl, "/"))
+	vsspsClient := networking.NewRestClient("https://vssps.dev.azure.com/"+organizationName, authorization, providerVersion)
 	return &AzureDevOpsClient{
-		CoreClient:            core.NewClient(restClient),
-		DistributedTaskClient: distributedtask.NewClient(restClient),
-		SecurityClient:        security.NewClient(restClient),
-		ServiceEndpointClient: serviceendpoint.NewClient(restClient),
+		CoreClient:            core.NewClient(azdoClient),
+		DistributedTaskClient: distributedtask.NewClient(azdoClient),
+		SecurityClient:        security.NewClient(azdoClient, vsspsClient),
+		ServiceEndpointClient: serviceendpoint.NewClient(azdoClient),
 	}
 }
