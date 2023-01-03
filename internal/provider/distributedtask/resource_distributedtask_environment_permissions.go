@@ -38,7 +38,7 @@ type ResourceEnvironmentPermissions struct {
 }
 
 type ResourceEnvironmentPermissionsModel struct {
-	Id          int                      `tfsdk:"id"`
+	Id          types.Int64              `tfsdk:"id"`
 	ProjectId   string                   `tfsdk:"project_id"`
 	Permissions []EnvironmentPermissions `tfsdk:"permissions"`
 }
@@ -65,7 +65,7 @@ func (r *ResourceEnvironmentPermissions) Schema(_ context.Context, _ resource.Sc
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				MarkdownDescription: "", // TODO: Documentation
-				Required:            true,
+				Optional:            true,
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "", // TODO: Documentation
@@ -163,7 +163,7 @@ func (r *ResourceEnvironmentPermissions) Create(ctx context.Context, req resourc
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(model.Id, model.ProjectId)
+	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
 	permissions := r.getIdentityPermissions(&model.Permissions)
 	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.client)
 	if err != nil {
@@ -184,7 +184,7 @@ func (r *ResourceEnvironmentPermissions) Read(ctx context.Context, req resource.
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(model.Id, model.ProjectId)
+	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
 	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, r.client)
 	if err != nil {
 		if permissions != nil && len(permissions) == 0 {
@@ -209,7 +209,7 @@ func (r *ResourceEnvironmentPermissions) Update(ctx context.Context, req resourc
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(model.Id, model.ProjectId)
+	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
 	permissions := r.getIdentityPermissions(&model.Permissions)
 	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.client)
 	if err != nil {
@@ -228,7 +228,7 @@ func (r *ResourceEnvironmentPermissions) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(model.Id, model.ProjectId)
+	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
 	err := r.client.RemoveAccessControlLists(ctx, clientSecurity.NamespaceIdEnvironment, token)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete environment permissions", err.Error())
