@@ -14,7 +14,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	clientSecurity "github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/security"
-	"regexp"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
 const (
@@ -71,7 +71,7 @@ func (r *ResourceEnvironmentPermissions) Schema(_ context.Context, _ resource.Sc
 				MarkdownDescription: "", // TODO: Documentation
 				Required:            true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"), "must be a valid UUID"),
+					utils.UUIDStringValidator(),
 				},
 			},
 		},

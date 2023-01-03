@@ -3,7 +3,6 @@ package distributedtask
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -14,7 +13,6 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/distributedtask"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
-	"regexp"
 )
 
 var _ resource.Resource = &ResourceEnvironment{}
@@ -62,7 +60,7 @@ func (r *ResourceEnvironment) Schema(_ context.Context, _ resource.SchemaRequest
 				MarkdownDescription: "", // TODO: Documentation
 				Required:            true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"), "must be a valid UUID"),
+					utils.UUIDStringValidator(),
 				},
 			},
 		},
