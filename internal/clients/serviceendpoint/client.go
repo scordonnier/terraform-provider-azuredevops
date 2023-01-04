@@ -26,11 +26,7 @@ func NewClient(restClient *networking.RestClient) *Client {
 
 func (c *Client) CreateServiceEndpoint(ctx context.Context, args *CreateOrUpdateServiceEndpointArgs, projectId string) (*ServiceEndpoint, error) {
 	pathSegments := []string{projectId, pathApis, pathServiceEndpoint, pathEndpoints}
-	serviceEndpoint, err := c.createOrUpdateServiceEndpoint(ctx, nil, args, projectId)
-	if err != nil {
-		return nil, err
-	}
-
+	serviceEndpoint := c.createOrUpdateServiceEndpoint(ctx, nil, args, projectId)
 	resp, err := c.restClient.PostJSON(ctx, pathSegments, nil, serviceEndpoint, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
@@ -83,7 +79,7 @@ func (c *Client) UpdateServiceEndpoint(ctx context.Context, id string, args *Cre
 		return nil, err
 	}
 
-	updatedServiceEndpoint, err := c.createOrUpdateServiceEndpoint(ctx, serviceEndpoint, args, projectId)
+	updatedServiceEndpoint := c.createOrUpdateServiceEndpoint(ctx, serviceEndpoint, args, projectId)
 	resp, err := c.restClient.PutJSON(ctx, pathSegments, nil, updatedServiceEndpoint, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
@@ -93,7 +89,7 @@ func (c *Client) UpdateServiceEndpoint(ctx context.Context, id string, args *Cre
 	return serviceEndpoint, err
 }
 
-func (c *Client) createOrUpdateServiceEndpoint(_ context.Context, serviceEndpoint *ServiceEndpoint, args *CreateOrUpdateServiceEndpointArgs, projectId string) (*ServiceEndpoint, error) {
+func (c *Client) createOrUpdateServiceEndpoint(_ context.Context, serviceEndpoint *ServiceEndpoint, args *CreateOrUpdateServiceEndpointArgs, projectId string) *ServiceEndpoint {
 	if serviceEndpoint != nil {
 		serviceEndpoint.Authorization = getServiceEndpointAuthorization(args)
 		serviceEndpoint.Data = getServiceEndpointData(args)
@@ -103,7 +99,7 @@ func (c *Client) createOrUpdateServiceEndpoint(_ context.Context, serviceEndpoin
 			*projectReference.Description = args.Description
 			*projectReference.Name = args.Name
 		}
-		return serviceEndpoint, nil
+		return serviceEndpoint
 	}
 
 	return &ServiceEndpoint{
@@ -123,7 +119,7 @@ func (c *Client) createOrUpdateServiceEndpoint(_ context.Context, serviceEndpoin
 		},
 		Type: utils.String(args.Type),
 		Url:  getServiceEndpointUrl(args),
-	}, nil
+	}
 }
 
 func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *EndpointAuthorization {
