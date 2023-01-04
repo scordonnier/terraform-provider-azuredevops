@@ -32,7 +32,7 @@ func (d *TeamProjectDataSource) Metadata(_ context.Context, req datasource.Metad
 
 func (d *TeamProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "", // TODO: Documentation
+		MarkdownDescription: "Use this data source to access information about an existing project within Azure DevOps.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Name (or ID) of the project.",

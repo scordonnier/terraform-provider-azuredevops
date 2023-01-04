@@ -39,29 +39,29 @@ func (r *ResourceServiceEndpointShare) Metadata(_ context.Context, req resource.
 
 func (r *ResourceServiceEndpointShare) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Shares a service endpoint with multiple Azure DevOps projects.",
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The description of the service endpoint.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the service endpoint.",
 				Required:            true,
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The name of the service endpoint.",
 				Required:            true,
 			},
 			"project_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the project hosting the service endpoint.",
 				Required:            true,
 				Validators: []validator.String{
 					utils.UUIDStringValidator(),
 				},
 			},
 			"project_ids": schema.ListAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The IDs of the projects to share the service endpoint.",
 				Required:            true,
 				ElementType:         types.StringType,
 				Validators: []validator.List{

@@ -9,4 +9,8 @@ description: |-
 
 {{ .Description | trimspace }}
 
+## Example Usage
+
+{{ tffile (printf "examples/resources/%s/resource.tf" .Name)}}
+
 {{ .SchemaMarkdown | trimspace }}

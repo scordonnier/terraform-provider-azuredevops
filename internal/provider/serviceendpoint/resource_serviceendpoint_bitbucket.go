@@ -40,37 +40,37 @@ func (r *ResourceServiceEndpointBitbucket) Metadata(_ context.Context, req resou
 
 func (r *ResourceServiceEndpointBitbucket) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Bitbucket service endpoint within an Azure DevOps project.",
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The description of the service endpoint.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the service endpoint.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The name of the service endpoint.",
 				Required:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "Bitbucket account password.",
 				Required:            true,
 				Sensitive:           true,
 			},
 			"project_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
 					utils.UUIDStringValidator(),
 				},
 			},
 			"username": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "Bitbucket account username.",
 				Required:            true,
 				Sensitive:           true,
 			},

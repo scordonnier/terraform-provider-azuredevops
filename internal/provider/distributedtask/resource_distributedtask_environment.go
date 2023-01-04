@@ -39,10 +39,10 @@ func (r *ResourceEnvironment) Metadata(_ context.Context, req resource.MetadataR
 
 func (r *ResourceEnvironment) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manage environments in Azure Pipelines.",
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
-				MarkdownDescription: "A description for the environment.",
+				MarkdownDescription: "The description of the environment.",
 				Optional:            true,
 			},
 			"id": schema.Int64Attribute{
