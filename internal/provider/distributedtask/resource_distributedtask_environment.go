@@ -42,22 +42,22 @@ func (r *ResourceEnvironment) Schema(_ context.Context, _ resource.SchemaRequest
 		MarkdownDescription: "",
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "A description for the environment.",
 				Optional:            true,
 			},
 			"id": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the environment.",
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The name which should be used for this environment.",
 				Required:            true,
 			},
 			"project_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the project. Changing this forces a new environment to be created.",
 				Required:            true,
 				Validators: []validator.String{
 					utils.UUIDStringValidator(),

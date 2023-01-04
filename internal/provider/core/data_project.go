@@ -35,11 +35,11 @@ func (d *TeamProjectDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 		MarkdownDescription: "", // TODO: Documentation
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "Name (or ID) of the project.",
 				Required:            true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "ID of the project.",
 				Computed:            true,
 			},
 		},
