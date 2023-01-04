@@ -3,7 +3,6 @@ package serviceendpoint
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -11,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"golang.org/x/exp/slices"
-	"regexp"
 )
 
 var _ resource.Resource = &ResourceServiceEndpointShare{}
@@ -58,7 +57,7 @@ func (r *ResourceServiceEndpointShare) Schema(_ context.Context, _ resource.Sche
 				MarkdownDescription: "", // TODO: Documentation
 				Required:            true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"), "must be a valid UUID"),
+					utils.UUIDStringValidator(),
 				},
 			},
 			"project_ids": schema.ListAttribute{
@@ -66,7 +65,7 @@ func (r *ResourceServiceEndpointShare) Schema(_ context.Context, _ resource.Sche
 				Required:            true,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"), "must be a valid UUID")),
+					listvalidator.ValueStringsAre(utils.UUIDStringValidator()),
 				},
 			},
 		},
