@@ -5,6 +5,25 @@ import (
 	"time"
 )
 
+type Identity struct {
+	CustomDisplayName   *string      `json:"customDisplayName,omitempty"`
+	Descriptor          *string      `json:"descriptor,omitempty"`
+	Id                  *uuid.UUID   `json:"id,omitempty"`
+	IsActive            *bool        `json:"isActive,omitempty"`
+	IsContainer         *bool        `json:"isContainer,omitempty"`
+	MasterId            *uuid.UUID   `json:"masterId,omitempty"`
+	MemberIds           *[]uuid.UUID `json:"memberIds,omitempty"`
+	MemberOf            *[]string    `json:"memberOf,omitempty"`
+	Members             *[]string    `json:"members,omitempty"`
+	MetaTypeId          *int         `json:"metaTypeId,omitempty"`
+	Properties          interface{}  `json:"properties,omitempty"`
+	ProviderDisplayName *string      `json:"providerDisplayName,omitempty"`
+	ResourceVersion     *int         `json:"resourceVersion,omitempty"`
+	SocialDescriptor    *string      `json:"socialDescriptor,omitempty"`
+	SubjectDescriptor   *string      `json:"subjectDescriptor,omitempty"`
+	UniqueUserId        *int         `json:"uniqueUserId,omitempty"`
+}
+
 type IdentityRef struct {
 	Links             interface{} `json:"_links,omitempty"`
 	Descriptor        *string     `json:"descriptor,omitempty"`
@@ -46,8 +65,42 @@ type TeamProject struct {
 	Visibility          *ProjectVisibility            `json:"visibility,omitempty"`
 }
 
+type TeamProjectReference struct {
+	Abbreviation        *string            `json:"abbreviation,omitempty"`
+	DefaultTeamImageUrl *string            `json:"defaultTeamImageUrl,omitempty"`
+	Description         *string            `json:"description,omitempty"`
+	Id                  *uuid.UUID         `json:"id,omitempty"`
+	LastUpdateTime      *Time              `json:"lastUpdateTime,omitempty"`
+	Name                *string            `json:"name,omitempty"`
+	Revision            *uint64            `json:"revision,omitempty"`
+	State               *ProjectState      `json:"state,omitempty"`
+	Url                 *string            `json:"url,omitempty"`
+	Visibility          *ProjectVisibility `json:"visibility,omitempty"`
+}
+
+type TeamProjectReferenceCollection struct {
+	Count *int                    `json:"count"`
+	Value *[]TeamProjectReference `json:"value"`
+}
+
 type Time struct {
 	Time time.Time
+}
+
+type WebApiTeam struct {
+	Description *string    `json:"description,omitempty"`
+	Id          *uuid.UUID `json:"id,omitempty"`
+	Identity    *Identity  `json:"identity,omitempty"`
+	IdentityUrl *string    `json:"identityUrl,omitempty"`
+	Name        *string    `json:"name,omitempty"`
+	ProjectId   *uuid.UUID `json:"projectId,omitempty"`
+	ProjectName *string    `json:"projectName,omitempty"`
+	Url         *string    `json:"url,omitempty"`
+}
+
+type WebApiTeamCollection struct {
+	Count *int          `json:"count"`
+	Value *[]WebApiTeam `json:"value"`
 }
 
 type WebApiTeamRef struct {
