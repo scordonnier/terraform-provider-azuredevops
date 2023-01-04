@@ -43,50 +43,50 @@ func (r *ResourceServiceEndpointAzureRm) Metadata(_ context.Context, req resourc
 
 func (r *ResourceServiceEndpointAzureRm) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an AzureRM service endpoint within an Azure DevOps project.",
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The description of the service endpoint.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the service connection.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The service endpoint name.",
 				Required:            true,
 			},
 			"project_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
 					utils.UUIDStringValidator(),
 				},
 			},
 			"service_principal_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the service principal.",
 				Required:            true,
 				Sensitive:           true,
 			},
 			"service_principal_key": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The secret key of the service principal.",
 				Required:            true,
 				Sensitive:           true,
 			},
 			"subscription_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the Azure subscription.",
 				Required:            true,
 			},
 			"subscription_name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The name of the Azure subscription.",
 				Required:            true,
 			},
 			"tenant_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The tenant ID of the service principal.",
 				Required:            true,
 			},
 		},

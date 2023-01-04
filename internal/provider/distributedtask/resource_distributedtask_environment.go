@@ -39,25 +39,25 @@ func (r *ResourceEnvironment) Metadata(_ context.Context, req resource.MetadataR
 
 func (r *ResourceEnvironment) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manage environments in Azure Pipelines.",
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The description of the environment.",
 				Optional:            true,
 			},
 			"id": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the environment.",
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The name which should be used for this environment.",
 				Required:            true,
 			},
 			"project_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the project. Changing this forces a new environment to be created.",
 				Required:            true,
 				Validators: []validator.String{
 					utils.UUIDStringValidator(),

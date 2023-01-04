@@ -61,14 +61,14 @@ func (r *ResourceEnvironmentPermissions) Metadata(_ context.Context, req resourc
 
 func (r *ResourceEnvironmentPermissions) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Sets permissions on environments in Azure Pipelines. All permissions that currently exists will be overwritten.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the environment. If you omit the value, the permissions are applied to the environments page and by default all environments inherit permissions from there.",
 				Optional:            true,
 			},
 			"project_id": schema.StringAttribute{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
 					utils.UUIDStringValidator(),
@@ -77,64 +77,64 @@ func (r *ResourceEnvironmentPermissions) Schema(_ context.Context, _ resource.Sc
 		},
 		Blocks: map[string]schema.Block{
 			"permissions": schema.ListNestedBlock{
-				MarkdownDescription: "", // TODO: Documentation
+				MarkdownDescription: "The permissions to assign.",
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"identity_descriptor": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"identity_name": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
-							Required:            true,
-						},
-						"identity_type": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("group", "user"),
-							},
-						},
-						"view": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
-							},
-						},
-						"manage": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
-							},
-						},
-						"manage_history": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
-							},
-						},
 						"administer": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
-							},
-						},
-						"use": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
+							MarkdownDescription: "Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
 								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
 							},
 						},
 						"create": schema.StringAttribute{
-							MarkdownDescription: "", // TODO: Documentation
+							MarkdownDescription: "Sets the `Create` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+							},
+						},
+						"identity_descriptor": schema.StringAttribute{
+							MarkdownDescription: "The identity descriptor to assign the permissions.",
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"identity_name": schema.StringAttribute{
+							MarkdownDescription: "The identity name to assign the permissions.",
+							Required:            true,
+						},
+						"identity_type": schema.StringAttribute{
+							MarkdownDescription: "The identity type to assign the permissions. Must be `group`  or `user`.",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOfCaseInsensitive("group", "user"),
+							},
+						},
+						"manage": schema.StringAttribute{
+							MarkdownDescription: "Sets the `Manage` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+							},
+						},
+						"manage_history": schema.StringAttribute{
+							MarkdownDescription: "Sets the `ManageHistory` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+							},
+						},
+						"use": schema.StringAttribute{
+							MarkdownDescription: "Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+							},
+						},
+						"view": schema.StringAttribute{
+							MarkdownDescription: "Sets the `View` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
 								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),

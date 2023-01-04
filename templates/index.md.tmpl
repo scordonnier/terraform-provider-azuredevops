@@ -1,0 +1,13 @@
+---
+page_title: "Azure DevOps provider"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# Azure DevOps provider
+
+The Azure DevOps provider can be used to configure Azure DevOps projects using [Azure DevOps Services REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/).
+
+## Example Usage
+
+{{ tffile "examples/provider/provider.tf" }}
