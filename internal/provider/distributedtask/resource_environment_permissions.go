@@ -56,7 +56,7 @@ type EnvironmentPermissions struct {
 }
 
 func (r *ResourceEnvironmentPermissions) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_distributedtask_environment_permissions"
+	resp.TypeName = req.ProviderTypeName + "_environment_permissions"
 }
 
 func (r *ResourceEnvironmentPermissions) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {

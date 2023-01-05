@@ -2,14 +2,14 @@ data "azuredevops_project" "sandbox" {
   name = "Sandbox"
 }
 
-resource "azuredevops_distributedtask_environment" "production" {
+resource "azuredevops_environment" "production" {
   name       = "Production"
   project_id = data.azuredevops_project.sandbox.id
 }
 
-resource "azuredevops_distributedtask_environment_permissions" "production" {
-  id         = azuredevops_distributedtask_environment.production.id
-  project_id = azuredevops_distributedtask_environment.production.project_id
+resource "azuredevops_environment_permissions" "production" {
+  id         = azuredevops_environment.production.id
+  project_id = azuredevops_environment.production.project_id
   permissions {
     identity_name = "[Sandbox]\\Contributors"
     identity_type = "group"

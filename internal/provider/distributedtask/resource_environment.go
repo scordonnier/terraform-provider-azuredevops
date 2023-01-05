@@ -34,7 +34,7 @@ type ResourceEnvironmentModel struct {
 }
 
 func (r *ResourceEnvironment) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_distributedtask_environment"
+	resp.TypeName = req.ProviderTypeName + "_environment"
 }
 
 func (r *ResourceEnvironment) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
