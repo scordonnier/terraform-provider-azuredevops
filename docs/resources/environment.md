@@ -1,11 +1,11 @@
 ---
-page_title: "azuredevops_distributedtask_environment Resource - azuredevops"
+page_title: "azuredevops_environment Resource - azuredevops"
 subcategory: ""
 description: |-
   Manage environments in Azure Pipelines.
 ---
 
-# azuredevops_distributedtask_environment (Resource)
+# azuredevops_environment (Resource)
 
 Manage environments in Azure Pipelines.
 
@@ -16,7 +16,7 @@ data "azuredevops_project" "sandbox" {
   name = "Sandbox"
 }
 
-resource "azuredevops_distributedtask_environment" "production" {
+resource "azuredevops_environment" "production" {
   name       = "Production"
   project_id = data.azuredevops_project.sandbox.id
 }

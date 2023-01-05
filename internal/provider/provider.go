@@ -64,12 +64,17 @@ func (p *AzureDevOpsProvider) Configure(ctx context.Context, req provider.Config
 
 func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		core.NewTeamProjectDataSource,
+		core.NewProcessDataSource,
+		core.NewProjectDataSource,
+		core.NewTeamDataSource,
+		core.NewTeamsDataSource,
 	}
 }
 
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		core.NewResourceProject,
+		core.NewResourceTeam,
 		distributedtask.NewResourceEnvironment,
 		distributedtask.NewResourceEnvironmentPermissions,
 		serviceendpoint.NewResourceServiceEndpointAzureRm,

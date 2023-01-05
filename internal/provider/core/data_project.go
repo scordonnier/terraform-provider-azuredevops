@@ -5,48 +5,52 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ datasource.DataSource = &TeamProjectDataSource{}
+var _ datasource.DataSource = &ProjectDataSource{}
 
-func NewTeamProjectDataSource() datasource.DataSource {
-	return &TeamProjectDataSource{}
+func NewProjectDataSource() datasource.DataSource {
+	return &ProjectDataSource{}
 }
 
-type TeamProjectDataSource struct {
+type ProjectDataSource struct {
 	client *core.Client
 }
 
-type TeamProjectDataSourceModel struct {
+type ProjectDataSourceModel struct {
 	Name string       `tfsdk:"name"`
 	Id   types.String `tfsdk:"id"`
 }
 
-func (d *TeamProjectDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *ProjectDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project"
 }
 
-func (d *TeamProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *ProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Use this data source to access information about an existing project within Azure DevOps.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name (or ID) of the project.",
+				MarkdownDescription: "The name (or ID) of the project.",
 				Required:            true,
+				Validators: []validator.String{
+					utils.StringNotEmptyValidator(),
+				},
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID of the project.",
+				MarkdownDescription: "The ID of the project.",
 				Computed:            true,
 			},
 		},
 	}
 }
 
-func (d *TeamProjectDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *ProjectDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -54,28 +58,22 @@ func (d *TeamProjectDataSource) Configure(_ context.Context, req datasource.Conf
 	d.client = req.ProviderData.(*clients.AzureDevOpsClient).CoreClient
 }
 
-func (d *TeamProjectDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var model TeamProjectDataSourceModel
+func (d *ProjectDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var model ProjectDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	name := model.Name
-	if name == "" {
-		resp.Diagnostics.AddError("Project name must not be empty", "")
-		return
-	}
-
-	project, err := d.client.GetProject(ctx, name)
+	project, err := d.client.GetProject(ctx, model.Name)
 	if err != nil {
 		if utils.ResponseWasNotFound(err) {
-			resp.Diagnostics.AddError(fmt.Sprintf("Project with name '%s' does not exist", name), "")
+			resp.Diagnostics.AddError(fmt.Sprintf("Project with name '%s' does not exist", model.Name), "")
 			return
 		}
 
-		resp.Diagnostics.AddError(fmt.Sprintf("Error looking up project with name '%s', %+v ", name, err), "")
+		resp.Diagnostics.AddError(fmt.Sprintf("Error looking up project with name '%s'", model.Name), err.Error())
 		return
 	}
 

@@ -1,11 +1,11 @@
 ---
-page_title: "azuredevops_distributedtask_environment_permissions Resource - azuredevops"
+page_title: "azuredevops_environment_permissions Resource - azuredevops"
 subcategory: ""
 description: |-
   Sets permissions on environments in Azure Pipelines. All permissions that currently exists will be overwritten.
 ---
 
-# azuredevops_distributedtask_environment_permissions (Resource)
+# azuredevops_environment_permissions (Resource)
 
 Sets permissions on environments in Azure Pipelines. All permissions that currently exists will be overwritten.
 
@@ -16,14 +16,14 @@ data "azuredevops_project" "sandbox" {
   name = "Sandbox"
 }
 
-resource "azuredevops_distributedtask_environment" "production" {
+resource "azuredevops_environment" "production" {
   name       = "Production"
   project_id = data.azuredevops_project.sandbox.id
 }
 
-resource "azuredevops_distributedtask_environment_permissions" "production" {
-  id         = azuredevops_distributedtask_environment.production.id
-  project_id = azuredevops_distributedtask_environment.production.project_id
+resource "azuredevops_environment_permissions" "production" {
+  id         = azuredevops_environment.production.id
+  project_id = azuredevops_environment.production.project_id
   permissions {
     identity_name = "[Sandbox]\\Contributors"
     identity_type = "group"

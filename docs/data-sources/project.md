@@ -22,8 +22,8 @@ data "azuredevops_project" "sandbox" {
 
 ### Required
 
-- `name` (String) Name (or ID) of the project.
+- `name` (String) The name (or ID) of the project.
 
 ### Read-Only
 
-- `id` (String) ID of the project.
+- `id` (String) The ID of the project.
