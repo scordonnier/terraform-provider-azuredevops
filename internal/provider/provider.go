@@ -64,7 +64,9 @@ func (p *AzureDevOpsProvider) Configure(ctx context.Context, req provider.Config
 
 func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		core.NewTeamDataSource,
 		core.NewTeamProjectDataSource,
+		core.NewTeamsDataSource,
 	}
 }
 
