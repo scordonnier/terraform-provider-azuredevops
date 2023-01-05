@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+const (
+	CapabilitiesProcessTemplate       = "processTemplate"
+	CapabilitiesProcessTemplateTypeId = "templateTypeId"
+	CapabilitiesVersionControl        = "versioncontrol"
+	CapabilitiesVersionControlType    = "sourceControlType"
+)
+
 type Identity struct {
 	CustomDisplayName   *string      `json:"customDisplayName,omitempty"`
 	Descriptor          *string      `json:"descriptor,omitempty"`
@@ -38,6 +45,28 @@ type IdentityRef struct {
 	IsDeletedInOrigin *bool       `json:"isDeletedInOrigin,omitempty"`
 	ProfileUrl        *string     `json:"profileUrl,omitempty"`
 	UniqueName        *string     `json:"uniqueName,omitempty"`
+}
+
+type Operation struct {
+	DetailedMessage *string                   `json:"detailedMessage,omitempty"`
+	Id              *uuid.UUID                `json:"id,omitempty"`
+	Links           interface{}               `json:"_links,omitempty"`
+	PluginId        *uuid.UUID                `json:"pluginId,omitempty"`
+	ResultMessage   *string                   `json:"resultMessage,omitempty"`
+	ResultUrl       *OperationResultReference `json:"resultUrl,omitempty"`
+	Status          *string                   `json:"status,omitempty"`
+	Url             *string                   `json:"url,omitempty"`
+}
+
+type OperationReference struct {
+	Id       *uuid.UUID `json:"id,omitempty"`
+	PluginId *uuid.UUID `json:"pluginId,omitempty"`
+	Status   *string    `json:"status,omitempty"`
+	Url      *string    `json:"url,omitempty"`
+}
+
+type OperationResultReference struct {
+	ResultUrl *string `json:"resultUrl,omitempty"`
 }
 
 type Process struct {
