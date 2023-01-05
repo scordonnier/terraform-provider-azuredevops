@@ -2,14 +2,20 @@ package core
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"github.com/ahmetb/go-linq/v3"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"net/url"
+	"strings"
 )
 
 const (
-	pathApis     = "_apis"
-	pathProjects = "projects"
-	pathTeams    = "teams"
+	pathApis      = "_apis"
+	pathProcess   = "process"
+	pathProcesses = "processes"
+	pathProjects  = "projects"
+	pathTeams     = "teams"
 )
 
 type Client struct {
@@ -42,6 +48,30 @@ func (c *Client) DeleteTeam(ctx context.Context, projectId string, teamId string
 	pathSegments := []string{pathApis, pathProjects, projectId, pathTeams, teamId}
 	_, err := c.restClient.DeleteJSON(ctx, pathSegments, nil, networking.ApiVersion70)
 	return err
+}
+
+func (c *Client) GetProcess(ctx context.Context, name string) (*Process, error) {
+	pathSegments := []string{pathApis, pathProcess, pathProcesses}
+	resp, err := c.restClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
+	if err != nil {
+		return nil, err
+	}
+
+	var processes *ProcessCollection
+	err = c.restClient.ParseJSON(ctx, resp, &processes)
+	if err != nil {
+		return nil, err
+	}
+
+	process := linq.From(*processes.Value).FirstWith(func(p interface{}) bool {
+		return strings.EqualFold(*p.(Process).Name, name)
+	})
+	if process == nil {
+		return nil, errors.New(fmt.Sprintf("Unable to find process with name '%s'", name))
+	}
+
+	p := process.(Process)
+	return &p, nil
 }
 
 func (c *Client) GetProject(ctx context.Context, id string) (*TeamProject, error) {

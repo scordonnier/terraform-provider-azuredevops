@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
@@ -35,11 +36,14 @@ func (d *ProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 		MarkdownDescription: "Use this data source to access information about an existing project within Azure DevOps.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name (or ID) of the project.",
+				MarkdownDescription: "The name (or ID) of the project.",
 				Required:            true,
+				Validators: []validator.String{
+					utils.StringNotEmptyValidator(),
+				},
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID of the project.",
+				MarkdownDescription: "The ID of the project.",
 				Computed:            true,
 			},
 		},
@@ -62,20 +66,14 @@ func (d *ProjectDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	name := model.Name
-	if name == "" {
-		resp.Diagnostics.AddError("Project name must not be empty", "")
-		return
-	}
-
-	project, err := d.client.GetProject(ctx, name)
+	project, err := d.client.GetProject(ctx, model.Name)
 	if err != nil {
 		if utils.ResponseWasNotFound(err) {
-			resp.Diagnostics.AddError(fmt.Sprintf("Project with name '%s' does not exist", name), "")
+			resp.Diagnostics.AddError(fmt.Sprintf("Project with name '%s' does not exist", model.Name), "")
 			return
 		}
 
-		resp.Diagnostics.AddError(fmt.Sprintf("Error looking up project with name '%s', %+v ", name, err), "")
+		resp.Diagnostics.AddError(fmt.Sprintf("Error looking up project with name '%s'", model.Name), err.Error())
 		return
 	}
 
