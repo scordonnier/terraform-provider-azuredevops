@@ -11,26 +11,26 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ datasource.DataSource = &TeamProjectDataSource{}
+var _ datasource.DataSource = &ProjectDataSource{}
 
-func NewTeamProjectDataSource() datasource.DataSource {
-	return &TeamProjectDataSource{}
+func NewProjectDataSource() datasource.DataSource {
+	return &ProjectDataSource{}
 }
 
-type TeamProjectDataSource struct {
+type ProjectDataSource struct {
 	client *core.Client
 }
 
-type TeamProjectDataSourceModel struct {
+type ProjectDataSourceModel struct {
 	Name string       `tfsdk:"name"`
 	Id   types.String `tfsdk:"id"`
 }
 
-func (d *TeamProjectDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *ProjectDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project"
 }
 
-func (d *TeamProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *ProjectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Use this data source to access information about an existing project within Azure DevOps.",
 		Attributes: map[string]schema.Attribute{
@@ -46,7 +46,7 @@ func (d *TeamProjectDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 	}
 }
 
-func (d *TeamProjectDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *ProjectDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -54,8 +54,8 @@ func (d *TeamProjectDataSource) Configure(_ context.Context, req datasource.Conf
 	d.client = req.ProviderData.(*clients.AzureDevOpsClient).CoreClient
 }
 
-func (d *TeamProjectDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var model TeamProjectDataSourceModel
+func (d *ProjectDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var model ProjectDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
