@@ -14,18 +14,18 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ resource.Resource = &ResourceServiceEndpointBitbucket{}
-var _ resource.ResourceWithImportState = &ResourceServiceEndpointBitbucket{}
+var _ resource.Resource = &ServiceEndpointBitbucketResource{}
+var _ resource.ResourceWithImportState = &ServiceEndpointBitbucketResource{}
 
-func NewResourceServiceEndpointBitbucket() resource.Resource {
-	return &ResourceServiceEndpointBitbucket{}
+func NewServiceEndpointBitbucketResource() resource.Resource {
+	return &ServiceEndpointBitbucketResource{}
 }
 
-type ResourceServiceEndpointBitbucket struct {
+type ServiceEndpointBitbucketResource struct {
 	client *serviceendpoint.Client
 }
 
-type ResourceServiceEndpointBitbucketModel struct {
+type ServiceEndpointBitbucketResourceModel struct {
 	Description string       `tfsdk:"description"`
 	Id          types.String `tfsdk:"id"`
 	Name        string       `tfsdk:"name"`
@@ -34,11 +34,11 @@ type ResourceServiceEndpointBitbucketModel struct {
 	UserName    string       `tfsdk:"username"`
 }
 
-func (r *ResourceServiceEndpointBitbucket) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *ServiceEndpointBitbucketResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_serviceendpoint_bitbucket"
 }
 
-func (r *ResourceServiceEndpointBitbucket) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ServiceEndpointBitbucketResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Bitbucket service endpoint within an Azure DevOps project.",
 		Attributes: map[string]schema.Attribute{
@@ -78,7 +78,7 @@ func (r *ResourceServiceEndpointBitbucket) Schema(_ context.Context, _ resource.
 	}
 }
 
-func (r *ResourceServiceEndpointBitbucket) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *ServiceEndpointBitbucketResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -86,8 +86,8 @@ func (r *ResourceServiceEndpointBitbucket) Configure(_ context.Context, req reso
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 
-func (r *ResourceServiceEndpointBitbucket) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceServiceEndpointBitbucketModel
+func (r *ServiceEndpointBitbucketResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *ServiceEndpointBitbucketResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -104,8 +104,8 @@ func (r *ResourceServiceEndpointBitbucket) Create(ctx context.Context, req resou
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointBitbucket) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceServiceEndpointBitbucketModel
+func (r *ServiceEndpointBitbucketResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *ServiceEndpointBitbucketResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -123,8 +123,8 @@ func (r *ResourceServiceEndpointBitbucket) Read(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointBitbucket) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceServiceEndpointBitbucketModel
+func (r *ServiceEndpointBitbucketResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *ServiceEndpointBitbucketResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -139,8 +139,8 @@ func (r *ResourceServiceEndpointBitbucket) Update(ctx context.Context, req resou
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointBitbucket) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceServiceEndpointBitbucketModel
+func (r *ServiceEndpointBitbucketResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *ServiceEndpointBitbucketResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -150,11 +150,11 @@ func (r *ResourceServiceEndpointBitbucket) Delete(ctx context.Context, req resou
 	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
 }
 
-func (r *ResourceServiceEndpointBitbucket) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ServiceEndpointBitbucketResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *ResourceServiceEndpointBitbucket) getCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointBitbucketModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+func (r *ServiceEndpointBitbucketResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointBitbucketResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
 		Description: model.Description,
 		Name:        model.Name,

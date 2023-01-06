@@ -15,29 +15,29 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ resource.Resource = &ResourceEnvironment{}
-var _ resource.ResourceWithImportState = &ResourceEnvironment{}
+var _ resource.Resource = &EnvironmentResource{}
+var _ resource.ResourceWithImportState = &EnvironmentResource{}
 
-func NewResourceEnvironment() resource.Resource {
-	return &ResourceEnvironment{}
+func NewEnvironmentResource() resource.Resource {
+	return &EnvironmentResource{}
 }
 
-type ResourceEnvironment struct {
+type EnvironmentResource struct {
 	client *distributedtask.Client
 }
 
-type ResourceEnvironmentModel struct {
+type EnvironmentResourceModel struct {
 	Description string      `tfsdk:"description"`
 	Id          types.Int64 `tfsdk:"id"`
 	Name        string      `tfsdk:"name"`
 	ProjectId   string      `tfsdk:"project_id"`
 }
 
-func (r *ResourceEnvironment) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *EnvironmentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_environment"
 }
 
-func (r *ResourceEnvironment) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *EnvironmentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manage environments in Azure Pipelines.",
 		Attributes: map[string]schema.Attribute{
@@ -67,7 +67,7 @@ func (r *ResourceEnvironment) Schema(_ context.Context, _ resource.SchemaRequest
 	}
 }
 
-func (r *ResourceEnvironment) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *EnvironmentResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -75,8 +75,8 @@ func (r *ResourceEnvironment) Configure(_ context.Context, req resource.Configur
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).DistributedTaskClient
 }
 
-func (r *ResourceEnvironment) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceEnvironmentModel
+func (r *EnvironmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *EnvironmentResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -94,8 +94,8 @@ func (r *ResourceEnvironment) Create(ctx context.Context, req resource.CreateReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceEnvironment) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceEnvironmentModel
+func (r *EnvironmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *EnvironmentResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -119,8 +119,8 @@ func (r *ResourceEnvironment) Read(ctx context.Context, req resource.ReadRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceEnvironment) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceEnvironmentModel
+func (r *EnvironmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *EnvironmentResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -136,8 +136,8 @@ func (r *ResourceEnvironment) Update(ctx context.Context, req resource.UpdateReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceEnvironment) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceEnvironmentModel
+func (r *EnvironmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *EnvironmentResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -150,6 +150,6 @@ func (r *ResourceEnvironment) Delete(ctx context.Context, req resource.DeleteReq
 	}
 }
 
-func (r *ResourceEnvironment) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *EnvironmentResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

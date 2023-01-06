@@ -14,18 +14,18 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ resource.Resource = &ResourceServiceEndpointAzureRm{}
-var _ resource.ResourceWithImportState = &ResourceServiceEndpointAzureRm{}
+var _ resource.Resource = &ServiceEndpointAzureRmResource{}
+var _ resource.ResourceWithImportState = &ServiceEndpointAzureRmResource{}
 
-func NewResourceServiceEndpointAzureRm() resource.Resource {
-	return &ResourceServiceEndpointAzureRm{}
+func NewServiceEndpointAzureRmResource() resource.Resource {
+	return &ServiceEndpointAzureRmResource{}
 }
 
-type ResourceServiceEndpointAzureRm struct {
+type ServiceEndpointAzureRmResource struct {
 	client *serviceendpoint.Client
 }
 
-type ResourceServiceEndpointAzureRmModel struct {
+type ServiceEndpointAzureRmResourceModel struct {
 	Description         string       `tfsdk:"description"`
 	Id                  types.String `tfsdk:"id"`
 	Name                string       `tfsdk:"name"`
@@ -37,11 +37,11 @@ type ResourceServiceEndpointAzureRmModel struct {
 	TenantId            string       `tfsdk:"tenant_id"`
 }
 
-func (r *ResourceServiceEndpointAzureRm) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *ServiceEndpointAzureRmResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_serviceendpoint_azurerm"
 }
 
-func (r *ResourceServiceEndpointAzureRm) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ServiceEndpointAzureRmResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages an AzureRM service endpoint within an Azure DevOps project.",
 		Attributes: map[string]schema.Attribute{
@@ -93,7 +93,7 @@ func (r *ResourceServiceEndpointAzureRm) Schema(_ context.Context, _ resource.Sc
 	}
 }
 
-func (r *ResourceServiceEndpointAzureRm) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *ServiceEndpointAzureRmResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -101,8 +101,8 @@ func (r *ResourceServiceEndpointAzureRm) Configure(_ context.Context, req resour
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 
-func (r *ResourceServiceEndpointAzureRm) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ServiceEndpointAzureRmResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *ServiceEndpointAzureRmResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -119,8 +119,8 @@ func (r *ResourceServiceEndpointAzureRm) Create(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointAzureRm) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ServiceEndpointAzureRmResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *ServiceEndpointAzureRmResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -142,8 +142,8 @@ func (r *ResourceServiceEndpointAzureRm) Read(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointAzureRm) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ServiceEndpointAzureRmResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *ServiceEndpointAzureRmResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -158,8 +158,8 @@ func (r *ResourceServiceEndpointAzureRm) Update(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointAzureRm) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceServiceEndpointAzureRmModel
+func (r *ServiceEndpointAzureRmResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *ServiceEndpointAzureRmResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -169,11 +169,11 @@ func (r *ResourceServiceEndpointAzureRm) Delete(ctx context.Context, req resourc
 	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
 }
 
-func (r *ResourceServiceEndpointAzureRm) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ServiceEndpointAzureRmResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *ResourceServiceEndpointAzureRm) getCreateOrUpdateServiceEndpointArgs(model *ResourceServiceEndpointAzureRmModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+func (r *ServiceEndpointAzureRmResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointAzureRmResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
 		Description:         model.Description,
 		Name:                model.Name,

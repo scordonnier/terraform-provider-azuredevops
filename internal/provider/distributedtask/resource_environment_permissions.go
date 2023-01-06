@@ -26,18 +26,18 @@ const (
 	permissionNameView          = "View"
 )
 
-var _ resource.Resource = &ResourceEnvironmentPermissions{}
-var _ resource.ResourceWithImportState = &ResourceEnvironmentPermissions{}
+var _ resource.Resource = &EnvironmentPermissionsResource{}
+var _ resource.ResourceWithImportState = &EnvironmentPermissionsResource{}
 
-func NewResourceEnvironmentPermissions() resource.Resource {
-	return &ResourceEnvironmentPermissions{}
+func NewEnvironmentPermissionsResource() resource.Resource {
+	return &EnvironmentPermissionsResource{}
 }
 
-type ResourceEnvironmentPermissions struct {
+type EnvironmentPermissionsResource struct {
 	client *clientSecurity.Client
 }
 
-type ResourceEnvironmentPermissionsModel struct {
+type EnvironmentPermissionsResourceModel struct {
 	Id          types.Int64              `tfsdk:"id"`
 	ProjectId   string                   `tfsdk:"project_id"`
 	Permissions []EnvironmentPermissions `tfsdk:"permissions"`
@@ -55,11 +55,11 @@ type EnvironmentPermissions struct {
 	Create             string       `tfsdk:"create"`
 }
 
-func (r *ResourceEnvironmentPermissions) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *EnvironmentPermissionsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_environment_permissions"
 }
 
-func (r *ResourceEnvironmentPermissions) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Sets permissions on environments in Azure Pipelines. All permissions that currently exists will be overwritten.",
 		Attributes: map[string]schema.Attribute{
@@ -147,7 +147,7 @@ func (r *ResourceEnvironmentPermissions) Schema(_ context.Context, _ resource.Sc
 	}
 }
 
-func (r *ResourceEnvironmentPermissions) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *EnvironmentPermissionsResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -155,8 +155,8 @@ func (r *ResourceEnvironmentPermissions) Configure(_ context.Context, req resour
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).SecurityClient
 }
 
-func (r *ResourceEnvironmentPermissions) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceEnvironmentPermissionsModel
+func (r *EnvironmentPermissionsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *EnvironmentPermissionsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -176,8 +176,8 @@ func (r *ResourceEnvironmentPermissions) Create(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceEnvironmentPermissions) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceEnvironmentPermissionsModel
+func (r *EnvironmentPermissionsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *EnvironmentPermissionsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -201,8 +201,8 @@ func (r *ResourceEnvironmentPermissions) Read(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceEnvironmentPermissions) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceEnvironmentPermissionsModel
+func (r *EnvironmentPermissionsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *EnvironmentPermissionsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -220,8 +220,8 @@ func (r *ResourceEnvironmentPermissions) Update(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceEnvironmentPermissions) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceEnvironmentPermissionsModel
+func (r *EnvironmentPermissionsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *EnvironmentPermissionsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -235,11 +235,11 @@ func (r *ResourceEnvironmentPermissions) Delete(ctx context.Context, req resourc
 	}
 }
 
-func (r *ResourceEnvironmentPermissions) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *EnvironmentPermissionsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *ResourceEnvironmentPermissions) getIdentityPermissions(p *[]EnvironmentPermissions) []*security.IdentityPermissions {
+func (r *EnvironmentPermissionsResource) getIdentityPermissions(p *[]EnvironmentPermissions) []*security.IdentityPermissions {
 	var permissions []*security.IdentityPermissions
 	for _, permission := range *p {
 		permissions = append(permissions, &security.IdentityPermissions{
@@ -259,7 +259,7 @@ func (r *ResourceEnvironmentPermissions) getIdentityPermissions(p *[]Environment
 	return permissions
 }
 
-func (r *ResourceEnvironmentPermissions) updateEnvironmentPermissions(p1 *[]EnvironmentPermissions, p2 []*security.IdentityPermissions) {
+func (r *EnvironmentPermissionsResource) updateEnvironmentPermissions(p1 *[]EnvironmentPermissions, p2 []*security.IdentityPermissions) {
 	for index := range *p1 {
 		permission := &(*p1)[index]
 		identityPermissions := linq.From(p2).FirstWith(func(p interface{}) bool {
