@@ -47,6 +47,13 @@ type IdentityRef struct {
 	UniqueName        *string     `json:"uniqueName,omitempty"`
 }
 
+type JsonPatchOperation struct {
+	From  string      `json:"from,omitempty"`
+	Op    string      `json:"op,omitempty"`
+	Path  string      `json:"path,omitempty"`
+	Value interface{} `json:"value,omitempty"`
+}
+
 type Operation struct {
 	DetailedMessage *string                   `json:"detailedMessage,omitempty"`
 	Id              *uuid.UUID                `json:"id,omitempty"`

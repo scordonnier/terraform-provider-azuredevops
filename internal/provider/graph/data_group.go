@@ -89,13 +89,7 @@ func (d *GroupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	descriptor, err := d.client.GetDescriptor(ctx, model.ProjectId)
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to retrieve project descriptor", err.Error())
-		return
-	}
-
-	groups, err := d.client.GetGroups(ctx, *descriptor, "")
+	groups, err := d.client.GetGroups(ctx, model.ProjectId, "")
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to retrieve groups", err.Error())
 		return

@@ -80,6 +80,7 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		core.NewResourceTeam,
 		distributedtask.NewResourceEnvironment,
 		distributedtask.NewResourceEnvironmentPermissions,
+		graph.NewGroupResource,
 		serviceendpoint.NewResourceServiceEndpointAzureRm,
 		serviceendpoint.NewResourceServiceEndpointBitbucket,
 		serviceendpoint.NewResourceServiceEndpointShare,
