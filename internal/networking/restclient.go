@@ -27,11 +27,13 @@ func NewRestClient(baseUrl string, authorization string, providerVersion string)
 }
 
 func (c *RestClient) GetJSON(ctx context.Context, pathSegments []string, queryParams url.Values, apiVersion string) (*http.Response, error) {
-	return c.sendRequest(ctx, http.MethodGet, pathSegments, queryParams, nil, apiVersion)
+	headers := c.buildRequestHeaders()
+	return c.sendRequest(ctx, http.MethodGet, pathSegments, queryParams, headers, nil, apiVersion)
 }
 
 func (c *RestClient) DeleteJSON(ctx context.Context, pathSegments []string, queryParams url.Values, apiVersion string) (*http.Response, error) {
-	return c.sendRequest(ctx, http.MethodDelete, pathSegments, queryParams, nil, apiVersion)
+	headers := c.buildRequestHeaders()
+	return c.sendRequest(ctx, http.MethodDelete, pathSegments, queryParams, headers, nil, apiVersion)
 }
 
 func (c *RestClient) ParseJSON(ctx context.Context, response *http.Response, v any) error {
@@ -55,15 +57,24 @@ func (c *RestClient) ParseJSON(ctx context.Context, response *http.Response, v a
 }
 
 func (c *RestClient) PostJSON(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
-	return c.sendRequest(ctx, http.MethodPost, pathSegments, queryParams, body, apiVersion)
+	headers := c.buildRequestHeaders()
+	return c.sendRequest(ctx, http.MethodPost, pathSegments, queryParams, headers, body, apiVersion)
 }
 
 func (c *RestClient) PatchJSON(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
-	return c.sendRequest(ctx, http.MethodPatch, pathSegments, queryParams, body, apiVersion)
+	headers := c.buildRequestHeaders()
+	return c.sendRequest(ctx, http.MethodPatch, pathSegments, queryParams, headers, body, apiVersion)
+}
+
+func (c *RestClient) PatchJSONSpecialContentType(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
+	headers := c.buildRequestHeaders()
+	headers[headerKeyContentType] = mediaTypeApplicationJsonPatch
+	return c.sendRequest(ctx, http.MethodPatch, pathSegments, queryParams, headers, body, apiVersion)
 }
 
 func (c *RestClient) PutJSON(ctx context.Context, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
-	return c.sendRequest(ctx, http.MethodPut, pathSegments, queryParams, body, apiVersion)
+	headers := c.buildRequestHeaders()
+	return c.sendRequest(ctx, http.MethodPut, pathSegments, queryParams, headers, body, apiVersion)
 }
 
 func (c *RestClient) UnwrapError(response *http.Response) (err error) {
@@ -116,6 +127,15 @@ func (c *RestClient) UnwrapError(response *http.Response) (err error) {
 	return wrappedError
 }
 
+func (c *RestClient) buildRequestHeaders() map[string]string {
+	return map[string]string{
+		headerKeyAccept:        mediaTypeApplicationJson,
+		headerKeyAuthorization: c.authorization,
+		headerKeyContentType:   mediaTypeApplicationJson,
+		headerKeyUserAgent:     "go/" + runtime.Version() + " (" + runtime.GOOS + " " + runtime.GOARCH + ") terraform-provider-azuredevops/" + c.providerVersion,
+	}
+}
+
 func (c *RestClient) generateUrl(pathSegments []string, queryParams url.Values, apiVersion string) string {
 	var builder strings.Builder
 	builder.WriteString(strings.TrimSuffix(c.baseUrl, "/"))
@@ -132,7 +152,7 @@ func (c *RestClient) generateUrl(pathSegments []string, queryParams url.Values, 
 	return builder.String()
 }
 
-func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSegments []string, queryParams url.Values, body any, apiVersion string) (*http.Response, error) {
+func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSegments []string, queryParams url.Values, headers map[string]string, body any, apiVersion string) (*http.Response, error) {
 	endpointUrl := c.generateUrl(pathSegments, queryParams, apiVersion)
 	tflog.Info(ctx, httpMethod+" "+endpointUrl)
 	var jsonReader io.Reader
@@ -149,10 +169,9 @@ func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSeg
 		return nil, err
 	}
 
-	req.Header.Add(headerKeyAccept, mediaTypeApplicationJson)
-	req.Header.Add(headerKeyAuthorization, c.authorization)
-	req.Header.Add(headerKeyContentType, mediaTypeApplicationJson)
-	req.Header.Add(headerKeyUserAgent, "go/"+runtime.Version()+" ("+runtime.GOOS+" "+runtime.GOARCH+") terraform-provider-azuredevops/"+c.providerVersion)
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if resp != nil && (resp.StatusCode < 200 || resp.StatusCode >= 300) {

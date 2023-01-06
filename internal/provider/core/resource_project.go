@@ -16,18 +16,18 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ resource.Resource = &ResourceProject{}
-var _ resource.ResourceWithImportState = &ResourceProject{}
+var _ resource.Resource = &ProjectResource{}
+var _ resource.ResourceWithImportState = &ProjectResource{}
 
-func NewResourceProject() resource.Resource {
-	return &ResourceProject{}
+func NewProjectResource() resource.Resource {
+	return &ProjectResource{}
 }
 
-type ResourceProject struct {
+type ProjectResource struct {
 	client *core.Client
 }
 
-type ResourceProjectModel struct {
+type ProjectResourceModel struct {
 	Description       *string      `tfsdk:"description"`
 	Id                types.String `tfsdk:"id"`
 	Name              string       `tfsdk:"name"`
@@ -36,11 +36,11 @@ type ResourceProjectModel struct {
 	Visibility        string       `tfsdk:"visibility"`
 }
 
-func (r *ResourceProject) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *ProjectResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project"
 }
 
-func (r *ResourceProject) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ProjectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manage a project within Azure DevOps.",
 		Attributes: map[string]schema.Attribute{
@@ -84,7 +84,7 @@ func (r *ResourceProject) Schema(_ context.Context, _ resource.SchemaRequest, re
 	}
 }
 
-func (r *ResourceProject) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *ProjectResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -92,8 +92,8 @@ func (r *ResourceProject) Configure(_ context.Context, req resource.ConfigureReq
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).CoreClient
 }
 
-func (r *ResourceProject) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceProjectModel
+func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *ProjectResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -123,8 +123,8 @@ func (r *ResourceProject) Create(ctx context.Context, req resource.CreateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceProject) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceProjectModel
+func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *ProjectResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -151,8 +151,8 @@ func (r *ResourceProject) Read(ctx context.Context, req resource.ReadRequest, re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceProject) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceProjectModel
+func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *ProjectResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -174,8 +174,8 @@ func (r *ResourceProject) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceProject) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceProjectModel
+func (r *ProjectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *ProjectResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -195,6 +195,6 @@ func (r *ResourceProject) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 }
 
-func (r *ResourceProject) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ProjectResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

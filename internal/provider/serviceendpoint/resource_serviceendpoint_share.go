@@ -14,18 +14,18 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var _ resource.Resource = &ResourceServiceEndpointShare{}
-var _ resource.ResourceWithImportState = &ResourceServiceEndpointShare{}
+var _ resource.Resource = &ServiceEndpointShareResource{}
+var _ resource.ResourceWithImportState = &ServiceEndpointShareResource{}
 
-func NewResourceServiceEndpointShare() resource.Resource {
-	return &ResourceServiceEndpointShare{}
+func NewServiceEndpointShareResource() resource.Resource {
+	return &ServiceEndpointShareResource{}
 }
 
-type ResourceServiceEndpointShare struct {
+type ServiceEndpointShareResource struct {
 	client *serviceendpoint.Client
 }
 
-type ResourceServiceEndpointShareModel struct {
+type ServiceEndpointShareResourceModel struct {
 	Description string       `tfsdk:"description"`
 	Id          types.String `tfsdk:"id"`
 	Name        string       `tfsdk:"name"`
@@ -33,11 +33,11 @@ type ResourceServiceEndpointShareModel struct {
 	ProjectIds  []string     `tfsdk:"project_ids"`
 }
 
-func (r *ResourceServiceEndpointShare) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *ServiceEndpointShareResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_serviceendpoint_share"
 }
 
-func (r *ResourceServiceEndpointShare) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ServiceEndpointShareResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Shares a service endpoint with multiple Azure DevOps projects.",
 		Attributes: map[string]schema.Attribute{
@@ -72,7 +72,7 @@ func (r *ResourceServiceEndpointShare) Schema(_ context.Context, _ resource.Sche
 	}
 }
 
-func (r *ResourceServiceEndpointShare) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *ServiceEndpointShareResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -80,8 +80,8 @@ func (r *ResourceServiceEndpointShare) Configure(_ context.Context, req resource
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 
-func (r *ResourceServiceEndpointShare) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceServiceEndpointShareModel
+func (r *ServiceEndpointShareResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *ServiceEndpointShareResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -97,8 +97,8 @@ func (r *ResourceServiceEndpointShare) Create(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointShare) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceServiceEndpointShareModel
+func (r *ServiceEndpointShareResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *ServiceEndpointShareResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -121,8 +121,8 @@ func (r *ResourceServiceEndpointShare) Read(ctx context.Context, req resource.Re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointShare) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceServiceEndpointShareModel
+func (r *ServiceEndpointShareResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *ServiceEndpointShareResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -138,8 +138,8 @@ func (r *ResourceServiceEndpointShare) Update(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceServiceEndpointShare) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceServiceEndpointShareModel
+func (r *ServiceEndpointShareResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *ServiceEndpointShareResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -159,11 +159,11 @@ func (r *ResourceServiceEndpointShare) Delete(ctx context.Context, req resource.
 	}
 }
 
-func (r *ResourceServiceEndpointShare) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ServiceEndpointShareResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *ResourceServiceEndpointShare) createOrUpdateServiceEndpointShare(ctx context.Context, model *ResourceServiceEndpointShareModel) error {
+func (r *ServiceEndpointShareResource) createOrUpdateServiceEndpointShare(ctx context.Context, model *ServiceEndpointShareResourceModel) error {
 	id := model.Id.ValueString()
 	projectId := model.ProjectId
 

@@ -10,6 +10,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/distributedtask"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
 )
 
@@ -68,18 +69,23 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 		core.NewProjectDataSource,
 		core.NewTeamDataSource,
 		core.NewTeamsDataSource,
+		graph.NewGroupDataSource,
+		graph.NewGroupsDataSource,
+		graph.NewUserDataSource,
+		graph.NewUsersDataSource,
 	}
 }
 
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		core.NewResourceProject,
-		core.NewResourceTeam,
-		distributedtask.NewResourceEnvironment,
-		distributedtask.NewResourceEnvironmentPermissions,
-		serviceendpoint.NewResourceServiceEndpointAzureRm,
-		serviceendpoint.NewResourceServiceEndpointBitbucket,
-		serviceendpoint.NewResourceServiceEndpointShare,
+		core.NewProjectResource,
+		core.NewTeamResource,
+		distributedtask.NewEnvironmentResource,
+		distributedtask.NewEnvironmentPermissionsResource,
+		graph.NewGroupResource,
+		serviceendpoint.NewServiceEndpointAzureRmResource,
+		serviceendpoint.NewServiceEndpointBitbucketResource,
+		serviceendpoint.NewServiceEndpointShareResource,
 	}
 }
 

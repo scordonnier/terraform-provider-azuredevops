@@ -15,29 +15,29 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ resource.Resource = &ResourceTeam{}
-var _ resource.ResourceWithImportState = &ResourceTeam{}
+var _ resource.Resource = &TeamResource{}
+var _ resource.ResourceWithImportState = &TeamResource{}
 
-func NewResourceTeam() resource.Resource {
-	return &ResourceTeam{}
+func NewTeamResource() resource.Resource {
+	return &TeamResource{}
 }
 
-type ResourceTeam struct {
+type TeamResource struct {
 	client *core.Client
 }
 
-type ResourceTeamModel struct {
+type TeamResourceModel struct {
 	Description types.String `tfsdk:"description"`
 	Id          types.String `tfsdk:"id"`
 	Name        string       `tfsdk:"name"`
 	ProjectId   string       `tfsdk:"project_id"`
 }
 
-func (r *ResourceTeam) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *TeamResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_team"
 }
 
-func (r *ResourceTeam) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TeamResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manage a team within an Azure DevOps project.",
 		Attributes: map[string]schema.Attribute{
@@ -67,7 +67,7 @@ func (r *ResourceTeam) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 	}
 }
 
-func (r *ResourceTeam) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *TeamResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -75,8 +75,8 @@ func (r *ResourceTeam) Configure(_ context.Context, req resource.ConfigureReques
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).CoreClient
 }
 
-func (r *ResourceTeam) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *ResourceTeamModel
+func (r *TeamResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *TeamResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -95,8 +95,8 @@ func (r *ResourceTeam) Create(ctx context.Context, req resource.CreateRequest, r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceTeam) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *ResourceTeamModel
+func (r *TeamResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *TeamResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -120,8 +120,8 @@ func (r *ResourceTeam) Read(ctx context.Context, req resource.ReadRequest, resp 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceTeam) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ResourceTeamModel
+func (r *TeamResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *TeamResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -137,8 +137,8 @@ func (r *ResourceTeam) Update(ctx context.Context, req resource.UpdateRequest, r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *ResourceTeam) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *ResourceTeamModel
+func (r *TeamResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *TeamResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -151,6 +151,6 @@ func (r *ResourceTeam) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 }
 
-func (r *ResourceTeam) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TeamResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
