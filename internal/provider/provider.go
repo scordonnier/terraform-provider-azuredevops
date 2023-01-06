@@ -10,6 +10,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/distributedtask"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
 )
 
@@ -68,6 +69,8 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 		core.NewProjectDataSource,
 		core.NewTeamDataSource,
 		core.NewTeamsDataSource,
+		graph.NewGroupDataSource,
+		graph.NewGroupsDataSource,
 	}
 }
 

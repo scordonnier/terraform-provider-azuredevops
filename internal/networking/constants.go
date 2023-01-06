@@ -9,5 +9,6 @@ const (
 	mediaTypeApplicationJson   = "application/json"
 	mediaTypeTextPlain         = "text/plain"
 
-	ApiVersion70 = "7.0"
+	ApiVersion70         = "7.0"
+	ApiVersion70Preview1 = "7.0-preview.1"
 )
