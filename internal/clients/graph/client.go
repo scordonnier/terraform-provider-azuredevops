@@ -8,10 +8,14 @@ import (
 )
 
 const (
+	queryContinuationToken = "continuationToken"
+	queryScopeDescriptor   = "scopeDescriptor"
+
 	pathApis        = "_apis"
 	pathDescriptors = "descriptors"
 	pathGraph       = "graph"
 	pathGroups      = "groups"
+	pathUsers       = "users"
 )
 
 type Client struct {
@@ -83,9 +87,9 @@ func (c *Client) GetGroups(ctx context.Context, projectId string, continuationTo
 	}
 
 	pathSegments := []string{pathApis, pathGraph, pathGroups}
-	queryParams := url.Values{"scopeDescriptor": []string{*descriptor}}
+	queryParams := url.Values{queryScopeDescriptor: []string{*descriptor}}
 	if continuationToken != "" {
-		queryParams.Add("continuationToken", continuationToken)
+		queryParams.Add(queryContinuationToken, continuationToken)
 	}
 
 	var groups []GraphGroup
@@ -111,6 +115,55 @@ func (c *Client) GetGroups(ctx context.Context, projectId string, continuationTo
 	}
 
 	return &groups, nil
+}
+
+func (c *Client) GetUser(ctx context.Context, descriptor string) (*GraphUser, error) {
+	pathSegments := []string{pathApis, pathGraph, pathUsers, descriptor}
+	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70Preview1)
+	if err != nil {
+		return nil, err
+	}
+
+	var user *GraphUser
+	err = c.vsspsClient.ParseJSON(ctx, resp, &user)
+	return user, err
+}
+
+func (c *Client) GetUsers(ctx context.Context, projectId string, continuationToken string) (*[]GraphUser, error) {
+	descriptor, err := c.GetDescriptor(ctx, projectId)
+	if err != nil {
+		return nil, err
+	}
+
+	pathSegments := []string{pathApis, pathGraph, pathUsers}
+	queryParams := url.Values{queryScopeDescriptor: []string{*descriptor}}
+	if continuationToken != "" {
+		queryParams.Add(queryContinuationToken, continuationToken)
+	}
+
+	var users []GraphUser
+	hasMore := true
+	for hasMore {
+		resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70Preview1)
+		if err != nil {
+			return nil, err
+		}
+
+		var collection *GraphUserCollection
+		err = c.vsspsClient.ParseJSON(ctx, resp, &collection)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, user := range *collection.Value {
+			users = append(users, user)
+		}
+
+		continuationToken = resp.Header.Get(networking.HeaderKeyContinuationToken)
+		hasMore = continuationToken != ""
+	}
+
+	return &users, nil
 }
 
 func (c *Client) UpdateGroup(ctx context.Context, descriptor string, displayName string, description string) (*GraphGroup, error) {

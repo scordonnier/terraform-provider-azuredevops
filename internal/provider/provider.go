@@ -71,6 +71,8 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 		core.NewTeamsDataSource,
 		graph.NewGroupDataSource,
 		graph.NewGroupsDataSource,
+		graph.NewUserDataSource,
+		graph.NewUsersDataSource,
 	}
 }
 

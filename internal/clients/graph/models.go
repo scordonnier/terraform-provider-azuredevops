@@ -36,3 +36,25 @@ type GraphGroupVstsCreationContext struct {
 	SpecialGroupType     *string    `json:"specialGroupType,omitempty"`
 	StorageKey           *uuid.UUID `json:"storageKey,omitempty"`
 }
+
+type GraphUser struct {
+	Descriptor        *string     `json:"descriptor,omitempty"`
+	DisplayName       *string     `json:"displayName,omitempty"`
+	DirectoryAlias    *string     `json:"directoryAlias,omitempty"`
+	Domain            *string     `json:"domain,omitempty"`
+	IsDeletedInOrigin *bool       `json:"isDeletedInOrigin,omitempty"`
+	LegacyDescriptor  *string     `json:"legacyDescriptor,omitempty"`
+	Links             interface{} `json:"_links,omitempty"`
+	MailAddress       *string     `json:"mailAddress,omitempty"`
+	MetaType          *string     `json:"metaType,omitempty"`
+	Origin            *string     `json:"origin,omitempty"`
+	OriginId          *string     `json:"originId,omitempty"`
+	PrincipalName     *string     `json:"principalName,omitempty"`
+	SubjectKind       *string     `json:"subjectKind,omitempty"`
+	Url               *string     `json:"url,omitempty"`
+}
+
+type GraphUserCollection struct {
+	Count *int         `json:"count"`
+	Value *[]GraphUser `json:"value"`
+}
