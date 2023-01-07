@@ -53,6 +53,7 @@ func (c *RestClient) ParseJSON(ctx context.Context, response *http.Response, v a
 		return err
 	}
 	body = c.trimByteOrderMark(body)
+	tflog.Debug(ctx, string(body))
 	return json.Unmarshal(body, &v)
 }
 
@@ -162,6 +163,7 @@ func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSeg
 			return nil, err
 		}
 
+		tflog.Debug(ctx, string(jsonBody))
 		jsonReader = bytes.NewReader(jsonBody)
 	}
 	req, err := http.NewRequest(httpMethod, endpointUrl, jsonReader)

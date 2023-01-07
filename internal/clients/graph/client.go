@@ -2,6 +2,7 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"net/url"
@@ -11,11 +12,13 @@ const (
 	queryContinuationToken = "continuationToken"
 	queryScopeDescriptor   = "scopeDescriptor"
 
-	pathApis        = "_apis"
-	pathDescriptors = "descriptors"
-	pathGraph       = "graph"
-	pathGroups      = "groups"
-	pathUsers       = "users"
+	pathApis           = "_apis"
+	pathDescriptors    = "descriptors"
+	pathGraph          = "graph"
+	pathGroups         = "groups"
+	pathIdentityPicker = "identitypicker"
+	pathIdentities     = "identities"
+	pathUsers          = "users"
 )
 
 type Client struct {
@@ -29,7 +32,7 @@ func NewClient(vsspsClient *networking.RestClient) *Client {
 }
 
 func (c *Client) CreateGroup(ctx context.Context, projectId string, name string, description string) (*GraphGroup, error) {
-	descriptor, err := c.GetDescriptor(ctx, projectId)
+	descriptor, err := c.getDescriptor(ctx, projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -56,18 +59,6 @@ func (c *Client) DeleteGroup(ctx context.Context, descriptor string) error {
 	return err
 }
 
-func (c *Client) GetDescriptor(ctx context.Context, storageKey string) (*string, error) {
-	pathSegments := []string{pathApis, pathGraph, pathDescriptors, storageKey}
-	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var descriptor *GraphDescriptorResult
-	err = c.vsspsClient.ParseJSON(ctx, resp, &descriptor)
-	return descriptor.Value, err
-}
-
 func (c *Client) GetGroup(ctx context.Context, descriptor string) (*GraphGroup, error) {
 	pathSegments := []string{pathApis, pathGraph, pathGroups, descriptor}
 	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70Preview1)
@@ -81,7 +72,7 @@ func (c *Client) GetGroup(ctx context.Context, descriptor string) (*GraphGroup, 
 }
 
 func (c *Client) GetGroups(ctx context.Context, projectId string, continuationToken string) (*[]GraphGroup, error) {
-	descriptor, err := c.GetDescriptor(ctx, projectId)
+	descriptor, err := c.getDescriptor(ctx, projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +121,7 @@ func (c *Client) GetUser(ctx context.Context, descriptor string) (*GraphUser, er
 }
 
 func (c *Client) GetUsers(ctx context.Context, projectId string, continuationToken string) (*[]GraphUser, error) {
-	descriptor, err := c.GetDescriptor(ctx, projectId)
+	descriptor, err := c.getDescriptor(ctx, projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -166,6 +157,42 @@ func (c *Client) GetUsers(ctx context.Context, projectId string, continuationTok
 	return &users, nil
 }
 
+func (c *Client) SearchGroup(ctx context.Context, query string) (*GraphGroup, error) {
+	response, err := c.getIdentityPickerResponse(ctx, query, "group")
+	if err != nil {
+		return nil, err
+	}
+
+	identity := (*(*response.Results)[0].Identities)[0]
+	group := &GraphGroup{
+		Descriptor:    identity.SubjectDescriptor,
+		DisplayName:   identity.DisplayName,
+		MailAddress:   identity.Mail,
+		Origin:        identity.OriginDirectory,
+		OriginId:      identity.OriginId,
+		PrincipalName: identity.SamAccountName,
+	}
+	return group, nil
+}
+
+func (c *Client) SearchUser(ctx context.Context, query string) (*GraphUser, error) {
+	response, err := c.getIdentityPickerResponse(ctx, query, "user")
+	if err != nil {
+		return nil, err
+	}
+
+	identity := (*(*response.Results)[0].Identities)[0]
+	user := &GraphUser{
+		Descriptor:    identity.SubjectDescriptor,
+		DisplayName:   identity.DisplayName,
+		MailAddress:   identity.Mail,
+		Origin:        identity.OriginDirectory,
+		OriginId:      identity.OriginId,
+		PrincipalName: identity.SamAccountName,
+	}
+	return user, nil
+}
+
 func (c *Client) UpdateGroup(ctx context.Context, descriptor string, displayName string, description string) (*GraphGroup, error) {
 	pathSegments := []string{pathApis, pathGraph, pathGroups, descriptor}
 	body := []core.JsonPatchOperation{
@@ -180,4 +207,54 @@ func (c *Client) UpdateGroup(ctx context.Context, descriptor string, displayName
 	var group *GraphGroup
 	err = c.vsspsClient.ParseJSON(ctx, resp, &group)
 	return group, err
+}
+
+// Private Methods
+
+func (c *Client) getDescriptor(ctx context.Context, storageKey string) (*string, error) {
+	pathSegments := []string{pathApis, pathGraph, pathDescriptors, storageKey}
+	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
+	if err != nil {
+		return nil, err
+	}
+
+	var descriptor *GraphDescriptorResult
+	err = c.vsspsClient.ParseJSON(ctx, resp, &descriptor)
+	return descriptor.Value, err
+}
+
+func (c *Client) getIdentityPickerResponse(ctx context.Context, query string, identityType string) (*IdentityPickerResponse, error) {
+	pathSegments := []string{pathApis, pathIdentityPicker, pathIdentities}
+	body := IdentityPickerRequest{
+		IdentityTypes:   &[]string{identityType},
+		OperationScopes: &[]string{"ims", "source"},
+		Options: &IdentityPickerOptions{
+			MaxResults: 1,
+			MinResults: 1,
+		},
+		Properties: &[]string{
+			"DisplayName",
+			"Mail",
+			"SamAccountName",
+			"SubjectDescriptor",
+		},
+		Query: &query,
+	}
+	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
+	if err != nil {
+		return nil, err
+	}
+
+	var response *IdentityPickerResponse
+	err = c.vsspsClient.ParseJSON(ctx, resp, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	result := (*response.Results)[0]
+	if len(*result.Identities) == 0 || len(*result.Identities) > 1 {
+		return nil, errors.New("identity not found or more than one identity found")
+	}
+
+	return response, nil
 }
