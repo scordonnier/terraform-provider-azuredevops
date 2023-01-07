@@ -12,6 +12,7 @@ const (
 	ServiceEndpointDataSubscriptionId   = "subscriptionId"
 	ServiceEndpointDataSubscriptionName = "subscriptionName"
 
+	ServiceEndpointAuthorizationParamsAccessToken         = "AccessToken"
 	ServiceEndpointAuthorizationParamsAuthenticationType  = "authenticationType"
 	ServiceEndpointAuthorizationParamsPassword            = "password"
 	ServiceEndpointAuthorizationParamsServicePrincipalId  = "serviceprincipalid"
@@ -56,6 +57,7 @@ type CreateOrUpdateServiceEndpointArgs struct {
 	SubscriptionId      string
 	SubscriptionName    string
 	TenantId            string
+	Token               string
 	Type                string
 	UserName            string
 }

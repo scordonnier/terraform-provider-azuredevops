@@ -142,6 +142,13 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
 		}
+	case ServiceEndpointTypeGitHub:
+		return &EndpointAuthorization{
+			Parameters: &map[string]string{
+				ServiceEndpointAuthorizationParamsAccessToken: args.Token,
+			},
+			Scheme: utils.String(ServiceEndpointAuthorizationSchemeToken),
+		}
 	default:
 		return nil
 	}
@@ -168,6 +175,8 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 		return utils.String("https://management.azure.com/")
 	case ServiceEndpointTypeBitbucket:
 		return utils.String("https://api.bitbucket.org/")
+	case ServiceEndpointTypeGitHub:
+		return utils.String("https://github.com/")
 	default:
 		return nil
 	}
