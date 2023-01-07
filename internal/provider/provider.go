@@ -85,7 +85,9 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		graph.NewGroupResource,
 		serviceendpoint.NewServiceEndpointAzureRmResource,
 		serviceendpoint.NewServiceEndpointBitbucketResource,
+		serviceendpoint.NewServiceEndpointGitHubResource,
 		serviceendpoint.NewServiceEndpointShareResource,
+		serviceendpoint.NewServiceEndpointVsAppCenterResource,
 	}
 }
 

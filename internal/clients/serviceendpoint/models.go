@@ -12,6 +12,8 @@ const (
 	ServiceEndpointDataSubscriptionId   = "subscriptionId"
 	ServiceEndpointDataSubscriptionName = "subscriptionName"
 
+	ServiceEndpointAuthorizationParamsAccessToken         = "AccessToken"
+	ServiceEndpointAuthorizationParamsApiToken            = "apitoken"
 	ServiceEndpointAuthorizationParamsAuthenticationType  = "authenticationType"
 	ServiceEndpointAuthorizationParamsPassword            = "password"
 	ServiceEndpointAuthorizationParamsServicePrincipalId  = "serviceprincipalid"
@@ -45,6 +47,7 @@ const (
 	ServiceEndpointTypeGitHubEnterprise = "GitHubEnterprise"
 	ServiceEndpointTypekubernetes       = "kubernetes"
 	ServiceEndpointTypeSSH              = "SSH"
+	ServiceEndpointTypeVsAppCenter      = "vsmobilecenter"
 )
 
 type CreateOrUpdateServiceEndpointArgs struct {
@@ -56,6 +59,7 @@ type CreateOrUpdateServiceEndpointArgs struct {
 	SubscriptionId      string
 	SubscriptionName    string
 	TenantId            string
+	Token               string
 	Type                string
 	UserName            string
 }
