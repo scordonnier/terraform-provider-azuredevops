@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/logger"
 	"io"
 	"net/http"
 	"net/url"
@@ -53,7 +53,7 @@ func (c *RestClient) ParseJSON(ctx context.Context, response *http.Response, v a
 		return err
 	}
 	body = c.trimByteOrderMark(body)
-	tflog.Debug(ctx, string(body))
+	logger.Debug(ctx, string(body))
 	return json.Unmarshal(body, &v)
 }
 
@@ -155,7 +155,7 @@ func (c *RestClient) generateUrl(pathSegments []string, queryParams url.Values, 
 
 func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSegments []string, queryParams url.Values, headers map[string]string, body any, apiVersion string) (*http.Response, error) {
 	endpointUrl := c.generateUrl(pathSegments, queryParams, apiVersion)
-	tflog.Info(ctx, httpMethod+" "+endpointUrl)
+	logger.Info(ctx, httpMethod+" "+endpointUrl)
 	var jsonReader io.Reader
 	if body != nil {
 		jsonBody, err := json.Marshal(body)
@@ -163,7 +163,7 @@ func (c *RestClient) sendRequest(ctx context.Context, httpMethod string, pathSeg
 			return nil, err
 		}
 
-		tflog.Debug(ctx, string(jsonBody))
+		logger.Debug(ctx, string(jsonBody))
 		jsonReader = bytes.NewReader(jsonBody)
 	}
 	req, err := http.NewRequest(httpMethod, endpointUrl, jsonReader)

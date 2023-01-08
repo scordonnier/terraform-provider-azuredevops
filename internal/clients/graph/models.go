@@ -27,6 +27,11 @@ type GraphGroupCollection struct {
 	Value *[]GraphGroup `json:"value"`
 }
 
+type GraphGroupOriginIdCreationContext struct {
+	StorageKey *uuid.UUID `json:"storageKey,omitempty"`
+	OriginId   *string    `json:"originId,omitempty"`
+}
+
 type GraphGroupVstsCreationContext struct {
 	CrossProject         *bool      `json:"crossProject,omitempty"`
 	Description          *string    `json:"description,omitempty"`
@@ -35,6 +40,17 @@ type GraphGroupVstsCreationContext struct {
 	RestrictedVisibility *bool      `json:"restrictedVisibility,omitempty"`
 	SpecialGroupType     *string    `json:"specialGroupType,omitempty"`
 	StorageKey           *uuid.UUID `json:"storageKey,omitempty"`
+}
+
+type GraphMembership struct {
+	ContainerDescriptor *string     `json:"containerDescriptor,omitempty"`
+	Links               interface{} `json:"_links,omitempty"`
+	MemberDescriptor    *string     `json:"memberDescriptor,omitempty"`
+}
+
+type GraphMembershipCollection struct {
+	Count *int               `json:"count"`
+	Value *[]GraphMembership `json:"value"`
 }
 
 type GraphUser struct {
