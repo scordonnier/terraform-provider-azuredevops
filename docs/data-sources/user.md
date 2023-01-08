@@ -35,3 +35,4 @@ data "azuredevops_user" "someone" {
 - `descriptor` (String) The descriptor of the user.
 - `display_name` (String) The display name of the user.
 - `origin` (String) The type of source provider for the user (eg. AD, AAD, MSA).
+- `origin_id` (String) The unique identifier from the system of origin.

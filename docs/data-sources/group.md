@@ -36,3 +36,4 @@ data "azuredevops_group" "contributors" {
 - `descriptor` (String) The descriptor of the group.
 - `name` (String) The name of the group.
 - `origin` (String) The type of source provider for the group (eg. AD, AAD, MSA).
+- `origin_id` (String) The unique identifier from the system of origin.

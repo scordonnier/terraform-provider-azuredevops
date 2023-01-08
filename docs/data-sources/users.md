@@ -41,4 +41,5 @@ Read-Only:
 - `display_name` (String) The display name of the user.
 - `mail_address` (String) The mail address of the user.
 - `origin` (String) The type of source provider for the user (eg. AD, AAD, MSA).
+- `origin_id` (String) The unique identifier from the system of origin.
 - `project_id` (String) The project ID of the user.
