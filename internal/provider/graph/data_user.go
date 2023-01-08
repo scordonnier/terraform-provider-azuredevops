@@ -27,6 +27,7 @@ type UserDataSourceModel struct {
 	DisplayName *string `tfsdk:"display_name"`
 	MailAddress string  `tfsdk:"mail_address"`
 	Origin      *string `tfsdk:"origin"`
+	OriginId    *string `tfsdk:"origin_id"`
 	ProjectId   string  `tfsdk:"project_id"`
 }
 
@@ -55,6 +56,10 @@ func (d *UserDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			},
 			"origin": schema.StringAttribute{
 				MarkdownDescription: "The type of source provider for the user (eg. AD, AAD, MSA).",
+				Computed:            true,
+			},
+			"origin_id": schema.StringAttribute{
+				MarkdownDescription: "The unique identifier from the system of origin.",
 				Computed:            true,
 			},
 			"project_id": schema.StringAttribute{
@@ -106,6 +111,7 @@ func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	model.Descriptor = user.Descriptor
 	model.DisplayName = user.DisplayName
 	model.Origin = user.Origin
+	model.OriginId = user.OriginId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }

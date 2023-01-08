@@ -42,4 +42,5 @@ Read-Only:
 - `display_name` (String) The display name of the group.
 - `name` (String) The name of the group.
 - `origin` (String) The type of source provider for the group (eg. AD, AAD, MSA).
+- `origin_id` (String) The unique identifier from the system of origin.
 - `project_id` (String) The project ID of the group.

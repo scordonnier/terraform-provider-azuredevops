@@ -61,6 +61,10 @@ func (d *UsersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 							MarkdownDescription: "The type of source provider for the user (eg. AD, AAD, MSA).",
 							Computed:            true,
 						},
+						"origin_id": schema.StringAttribute{
+							MarkdownDescription: "The unique identifier from the system of origin.",
+							Computed:            true,
+						},
 						"project_id": schema.StringAttribute{
 							MarkdownDescription: "The project ID of the user.",
 							Computed:            true,
@@ -101,6 +105,7 @@ func (d *UsersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			DisplayName: user.DisplayName,
 			MailAddress: *user.MailAddress,
 			Origin:      user.Origin,
+			OriginId:    user.OriginId,
 			ProjectId:   model.ProjectId,
 		})
 	}

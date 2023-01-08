@@ -27,6 +27,11 @@ type GraphGroupCollection struct {
 	Value *[]GraphGroup `json:"value"`
 }
 
+type GraphGroupOriginIdCreationContext struct {
+	StorageKey *uuid.UUID `json:"storageKey,omitempty"`
+	OriginId   *string    `json:"originId,omitempty"`
+}
+
 type GraphGroupVstsCreationContext struct {
 	CrossProject         *bool      `json:"crossProject,omitempty"`
 	Description          *string    `json:"description,omitempty"`
@@ -35,6 +40,17 @@ type GraphGroupVstsCreationContext struct {
 	RestrictedVisibility *bool      `json:"restrictedVisibility,omitempty"`
 	SpecialGroupType     *string    `json:"specialGroupType,omitempty"`
 	StorageKey           *uuid.UUID `json:"storageKey,omitempty"`
+}
+
+type GraphMembership struct {
+	ContainerDescriptor *string     `json:"containerDescriptor,omitempty"`
+	Links               interface{} `json:"_links,omitempty"`
+	MemberDescriptor    *string     `json:"memberDescriptor,omitempty"`
+}
+
+type GraphMembershipCollection struct {
+	Count *int               `json:"count"`
+	Value *[]GraphMembership `json:"value"`
 }
 
 type GraphUser struct {
@@ -57,4 +73,52 @@ type GraphUser struct {
 type GraphUserCollection struct {
 	Count *int         `json:"count"`
 	Value *[]GraphUser `json:"value"`
+}
+
+type IdentityPickerIdentity struct {
+	Active                     *bool   `json:"active,omitempty"`
+	Department                 *string `json:"department,omitempty"`
+	Description                *string `json:"description,omitempty"`
+	DisplayName                *string `json:"displayName,omitempty"`
+	EntityId                   *string `json:"entityId,omitempty"`
+	EntityType                 *string `json:"entityType,omitempty"`
+	Guest                      *bool   `json:"guest,omitempty"`
+	IsMru                      *bool   `json:"isMru,omitempty"`
+	JobTitle                   *string `json:"jobTitle,omitempty"`
+	LocalDirectory             *string `json:"localDirectory,omitempty"`
+	LocalId                    *string `json:"localId,omitempty"`
+	Mail                       *string `json:"mail,omitempty"`
+	MailNickname               *string `json:"mailNickname,omitempty"`
+	OriginDirectory            *string `json:"originDirectory,omitempty"`
+	OriginId                   *string `json:"originId,omitempty"`
+	PhysicalDeliveryOfficeName *string `json:"physicalDeliveryOfficeName,omitempty"`
+	SamAccountName             *string `json:"samAccountName,omitempty"`
+	ScopeName                  *string `json:"scopeName,omitempty"`
+	SignInAddress              *string `json:"signInAddress,omitempty"`
+	SubjectDescriptor          *string `json:"subjectDescriptor,omitempty"`
+	Surname                    *string `json:"surname,omitempty"`
+	TelephoneNumber            *string `json:"telephoneNumber,omitempty"`
+}
+
+type IdentityPickerOptions struct {
+	MaxResults int `json:"MaxResults,omitempty"`
+	MinResults int `json:"MinResults,omitempty"`
+}
+
+type IdentityPickerRequest struct {
+	IdentityTypes   *[]string              `json:"identityTypes,omitempty"`
+	OperationScopes *[]string              `json:"operationScopes,omitempty"`
+	Options         *IdentityPickerOptions `json:"options,omitempty"`
+	Properties      *[]string              `json:"properties,omitempty"`
+	Query           *string                `json:"query,omitempty"`
+}
+
+type IdentityPickerResponse struct {
+	Results *[]IdentityPickerResult `json:"results,omitempty"`
+}
+
+type IdentityPickerResult struct {
+	Identities  *[]IdentityPickerIdentity `json:"identities,omitempty"`
+	PagingToken *string                   `json:"pagingToken,omitempty"`
+	QueryToken  *string                   `json:"queryToken,omitempty"`
 }

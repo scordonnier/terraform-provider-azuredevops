@@ -65,6 +65,10 @@ func (d *GroupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 							MarkdownDescription: "The type of source provider for the group (eg. AD, AAD, MSA).",
 							Computed:            true,
 						},
+						"origin_id": schema.StringAttribute{
+							MarkdownDescription: "The unique identifier from the system of origin.",
+							Computed:            true,
+						},
 						"project_id": schema.StringAttribute{
 							MarkdownDescription: "The project ID of the group.",
 							Computed:            true,
@@ -106,6 +110,7 @@ func (d *GroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			DisplayName: *group.DisplayName,
 			Name:        group.PrincipalName,
 			Origin:      group.Origin,
+			OriginId:    group.OriginId,
 			ProjectId:   model.ProjectId,
 		})
 	}

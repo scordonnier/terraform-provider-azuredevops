@@ -32,6 +32,7 @@ type GroupResourceModel struct {
 	DisplayName string       `tfsdk:"display_name"`
 	Name        types.String `tfsdk:"name"`
 	Origin      types.String `tfsdk:"origin"`
+	OriginId    types.String `tfsdk:"origin_id"`
 	ProjectId   string       `tfsdk:"project_id"`
 }
 
@@ -75,6 +76,13 @@ func (r *GroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"origin_id": schema.StringAttribute{
+				MarkdownDescription: "The unique identifier from the system of origin.",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project. Changing this forces a new group to be created.",
 				Required:            true,
@@ -111,6 +119,7 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	model.Descriptor = types.StringValue(*group.Descriptor)
 	model.Name = types.StringValue(*group.PrincipalName)
 	model.Origin = types.StringValue(*group.Origin)
+	model.OriginId = types.StringValue(*group.OriginId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -138,6 +147,7 @@ func (r *GroupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	model.DisplayName = *group.DisplayName
 	model.Name = types.StringValue(*group.PrincipalName)
 	model.Origin = types.StringValue(*group.Origin)
+	model.OriginId = types.StringValue(*group.OriginId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }

@@ -28,6 +28,7 @@ type GroupDataSourceModel struct {
 	DisplayName string  `tfsdk:"display_name"`
 	Name        *string `tfsdk:"name"`
 	Origin      *string `tfsdk:"origin"`
+	OriginId    *string `tfsdk:"origin_id"`
 	ProjectId   string  `tfsdk:"project_id"`
 }
 
@@ -60,6 +61,10 @@ func (d *GroupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 			},
 			"origin": schema.StringAttribute{
 				MarkdownDescription: "The type of source provider for the group (eg. AD, AAD, MSA).",
+				Computed:            true,
+			},
+			"origin_id": schema.StringAttribute{
+				MarkdownDescription: "The unique identifier from the system of origin.",
 				Computed:            true,
 			},
 			"project_id": schema.StringAttribute{
@@ -112,6 +117,7 @@ func (d *GroupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	model.Descriptor = group.Descriptor
 	model.Name = group.PrincipalName
 	model.Origin = group.Origin
+	model.OriginId = group.OriginId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
