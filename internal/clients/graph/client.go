@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/patrickmn/go-cache"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
@@ -27,11 +28,13 @@ const (
 )
 
 type Client struct {
+	cache       *cache.Cache
 	vsspsClient *networking.RestClient
 }
 
 func NewClient(vsspsClient *networking.RestClient) *Client {
 	return &Client{
+		cache:       cache.New(cache.NoExpiration, 0),
 		vsspsClient: vsspsClient,
 	}
 }
@@ -228,12 +231,11 @@ func (c *Client) GetUsers(ctx context.Context, projectId string, continuationTok
 }
 
 func (c *Client) SearchGroup(ctx context.Context, query string) (*GraphGroup, error) {
-	response, err := c.getIdentityPickerResponse(ctx, query, []string{"group"})
+	identity, err := c.getIdentityPickerIdentity(ctx, query, []string{"group"})
 	if err != nil {
 		return nil, err
 	}
 
-	identity := (*(*response.Results)[0].Identities)[0]
 	group := &GraphGroup{
 		Descriptor:    identity.SubjectDescriptor,
 		DisplayName:   identity.DisplayName,
@@ -246,12 +248,11 @@ func (c *Client) SearchGroup(ctx context.Context, query string) (*GraphGroup, er
 }
 
 func (c *Client) SearchUser(ctx context.Context, query string) (*GraphUser, error) {
-	response, err := c.getIdentityPickerResponse(ctx, query, []string{"user"})
+	identity, err := c.getIdentityPickerIdentity(ctx, query, []string{"user"})
 	if err != nil {
 		return nil, err
 	}
 
-	identity := (*(*response.Results)[0].Identities)[0]
 	user := &GraphUser{
 		Descriptor:    identity.SubjectDescriptor,
 		DisplayName:   identity.DisplayName,
@@ -366,7 +367,16 @@ func (c *Client) deleteGroupMembership(ctx context.Context, memberDescriptor str
 	return err
 }
 
+func getCacheKey(params ...string) string {
+	return strings.Join(params, "***")
+}
+
 func (c *Client) getGroupDescriptor(ctx context.Context, projectId string, name string) (*string, error) {
+	cacheKey := getCacheKey("Group", projectId, name)
+	if p, ok := c.cache.Get(cacheKey); ok {
+		return p.(*string), nil
+	}
+
 	groups, err := c.GetGroups(ctx, projectId, "")
 	if err != nil {
 		return nil, err
@@ -384,10 +394,16 @@ func (c *Client) getGroupDescriptor(ctx context.Context, projectId string, name 
 		return nil, errors.New(fmt.Sprintf("Group with name '%s' in project '%s' not found", name, projectId))
 	}
 
+	c.cache.Set(cacheKey, descriptor, cache.NoExpiration)
 	return descriptor, nil
 }
 
-func (c *Client) getIdentityPickerResponse(ctx context.Context, query string, identityTypes []string) (*IdentityPickerResponse, error) {
+func (c *Client) getIdentityPickerIdentity(ctx context.Context, query string, identityTypes []string) (*IdentityPickerIdentity, error) {
+	cacheKey := getCacheKey("IdentityPicker", query)
+	if p, ok := c.cache.Get(cacheKey); ok {
+		return p.(*IdentityPickerIdentity), nil
+	}
+
 	pathSegments := []string{pathApis, pathIdentityPicker, pathIdentities}
 	body := IdentityPickerRequest{
 		IdentityTypes:   &identityTypes,
@@ -420,18 +436,19 @@ func (c *Client) getIdentityPickerResponse(ctx context.Context, query string, id
 		return nil, errors.New("identity not found or more than one identity found")
 	}
 
-	return response, nil
+	identity := (*result.Identities)[0]
+	c.cache.Set(cacheKey, identity, cache.NoExpiration)
+	return &identity, nil
 }
 
 func (c *Client) getMemberDescriptors(ctx context.Context, projectId string, groupName string, members []string) (*[]string, error) {
 	var memberDescriptors []string
 	for _, member := range members {
-		identityResponse, err := c.getIdentityPickerResponse(ctx, member, []string{"user", "group"})
+		identity, err := c.getIdentityPickerIdentity(ctx, member, []string{"user", "group"})
 		if err != nil {
 			return nil, err
 		}
 
-		identity := (*(*identityResponse.Results)[0].Identities)[0]
 		memberDescriptor := identity.SubjectDescriptor
 		if memberDescriptor == nil {
 			group, err := c.createGroupByOriginId(ctx, projectId, groupName, *identity.OriginId)
@@ -461,6 +478,11 @@ func (c *Client) getMembershipDescriptors(memberships *[]GraphMembership) *[]str
 }
 
 func (c *Client) getProjectDescriptor(ctx context.Context, projectId string) (*string, error) {
+	cacheKey := getCacheKey("Project", projectId)
+	if p, ok := c.cache.Get(cacheKey); ok {
+		return p.(*string), nil
+	}
+
 	pathSegments := []string{pathApis, pathGraph, pathDescriptors, projectId}
 	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
 	if err != nil {
@@ -469,7 +491,12 @@ func (c *Client) getProjectDescriptor(ctx context.Context, projectId string) (*s
 
 	var result *GraphDescriptorResult
 	err = c.vsspsClient.ParseJSON(ctx, resp, &result)
-	return result.Value, err
+	if err != nil {
+		return nil, err
+	}
+
+	c.cache.Set(cacheKey, result.Value, cache.NoExpiration)
+	return result.Value, nil
 }
 
 func (c *Client) membershipsStateChangeConf(ctx context.Context, projectId string, groupName string, members *[]string) *utils.StateChangeConf {
