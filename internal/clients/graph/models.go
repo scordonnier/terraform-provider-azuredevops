@@ -75,6 +75,12 @@ type GraphUserCollection struct {
 	Value *[]GraphUser `json:"value"`
 }
 
+type GraphUserOriginIdCreationContext struct {
+	Origin     *string    `json:"origin,omitempty"`
+	OriginId   *string    `json:"originId,omitempty"`
+	StorageKey *uuid.UUID `json:"storageKey,omitempty"`
+}
+
 type IdentityPickerIdentity struct {
 	Active                     *bool   `json:"active,omitempty"`
 	Department                 *string `json:"department,omitempty"`
