@@ -3,7 +3,9 @@ package security
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/ahmetb/go-linq/v3"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"strings"
 )
@@ -11,12 +13,11 @@ import (
 type IdentityPermissions struct {
 	IdentityDescriptor string
 	IdentityName       string
-	IdentityType       string
 	Permissions        map[string]string
 }
 
-func CreateOrUpdateIdentityPermissions(ctx context.Context, namespaceId string, token string, permissions []*IdentityPermissions, client *security.Client) error {
-	namespaces, namespacesErr := client.GetSecurityNamespaces(ctx)
+func CreateOrUpdateIdentityPermissions(ctx context.Context, namespaceId string, token string, permissions []*IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) error {
+	namespaces, namespacesErr := securityClient.GetSecurityNamespaces(ctx)
 	if namespacesErr != nil {
 		return namespacesErr
 	}
@@ -31,12 +32,39 @@ func CreateOrUpdateIdentityPermissions(ctx context.Context, namespaceId string, 
 
 	for _, permission := range permissions {
 		if permission.IdentityDescriptor == "" {
-			identity, identityErr := client.GetIdentity(ctx, permission.IdentityName, permission.IdentityType)
+			identity, identityErr := graphClient.GetIdentityPickerIdentity(ctx, permission.IdentityName)
 			if identityErr != nil {
 				return identityErr
 			}
 
-			permission.IdentityDescriptor = *identity.Descriptor
+			subjectDescriptor := identity.SubjectDescriptor
+			if subjectDescriptor == nil {
+				switch *identity.EntityType {
+				case "Group":
+					group, err := graphClient.CreateGroupByOriginId(ctx, *identity.OriginId)
+					if err != nil {
+						return err
+					}
+
+					subjectDescriptor = group.Descriptor
+				case "User":
+					user, err := graphClient.CreateUserByOriginId(ctx, *identity.OriginId)
+					if err != nil {
+						return err
+					}
+
+					subjectDescriptor = user.Descriptor
+				default:
+					return errors.New(fmt.Sprintf("Unknown entity type '%s'", *identity.EntityType))
+				}
+			}
+
+			identity2, err := securityClient.GetIdentityBySubjectDescriptor(ctx, *subjectDescriptor)
+			if err != nil {
+				return err
+			}
+
+			permission.IdentityDescriptor = *identity2.Descriptor
 		}
 
 		allow := 0
@@ -66,7 +94,7 @@ func CreateOrUpdateIdentityPermissions(ctx context.Context, namespaceId string, 
 		}
 	}
 
-	aclErr := client.SetAccessControlLists(ctx, namespaceId, &[]security.AccessControlList{*accessControlList})
+	aclErr := securityClient.SetAccessControlLists(ctx, namespaceId, &[]security.AccessControlList{*accessControlList})
 	if aclErr != nil {
 		return aclErr
 	}
@@ -74,8 +102,8 @@ func CreateOrUpdateIdentityPermissions(ctx context.Context, namespaceId string, 
 	return nil
 }
 
-func ReadIdentityPermissions(ctx context.Context, namespaceId string, token string, client *security.Client) ([]*IdentityPermissions, error) {
-	accessControlLists, err := client.GetAccessControlLists(ctx, namespaceId, token)
+func ReadIdentityPermissions(ctx context.Context, namespaceId string, token string, securityClient *security.Client) ([]*IdentityPermissions, error) {
+	accessControlLists, err := securityClient.GetAccessControlLists(ctx, namespaceId, token)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +112,7 @@ func ReadIdentityPermissions(ctx context.Context, namespaceId string, token stri
 		return []*IdentityPermissions{}, errors.New("access control lists are empty")
 	}
 
-	namespaces, namespacesErr := client.GetSecurityNamespaces(ctx)
+	namespaces, namespacesErr := securityClient.GetSecurityNamespaces(ctx)
 	if namespacesErr != nil {
 		return nil, namespacesErr
 	}
@@ -96,34 +124,45 @@ func ReadIdentityPermissions(ctx context.Context, namespaceId string, token stri
 	var identityPermissions []*IdentityPermissions
 	accessControlList := (*accessControlLists.Value)[0]
 
-	for _, value := range *accessControlList.AcesDictionary {
-		identity, identityErr := client.GetIdentityByDescriptor(ctx, *value.Descriptor)
+	for _, ace := range *accessControlList.AcesDictionary {
+		identity, identityErr := securityClient.GetIdentityByDescriptor(ctx, *ace.Descriptor)
 		if identityErr != nil {
 			return nil, identityErr
 		}
 
 		permissions := map[string]string{}
 		for _, action := range *namespace.Actions {
-			if (*value.Allow)&(*action.Bit) != 0 {
+			if (*ace.Allow)&(*action.Bit) != 0 {
 				permissions[*action.Name] = "allow"
-			} else if (*value.Deny)&(*action.Bit) != 0 {
+			} else if (*ace.Deny)&(*action.Bit) != 0 {
 				permissions[*action.Name] = "deny"
 			} else {
 				permissions[*action.Name] = "notset"
 			}
 		}
 
-		identityName := *identity.ProviderDisplayName
-		identityType := "group"
-		if strings.HasPrefix(*value.Descriptor, "Microsoft.IdentityModel.Claims.ClaimsIdentity") {
-			identityName = identity.Properties.(map[string]interface{})["Account"].(map[string]interface{})["$value"].(string)
-			identityType = "user"
+		identityName := identity.ProviderDisplayName
+		properties := identity.Properties.(map[string]interface{})
+		schemaClassName := properties["SchemaClassName"].(map[string]interface{})["$value"].(string)
+		switch schemaClassName {
+		case "Group":
+			if strings.HasPrefix(*identity.SubjectDescriptor, "aadgp") {
+				name := properties["Account"].(map[string]interface{})["$value"].(string)
+				if mail, ok := properties["Mail"]; ok {
+					name = mail.(map[string]interface{})["$value"].(string)
+				}
+				identityName = &name
+			}
+		case "User":
+			account := properties["Account"].(map[string]interface{})["$value"].(string)
+			identityName = &account
+		default:
+			return nil, errors.New(fmt.Sprintf("Unknown schema class name '%s'.", schemaClassName))
 		}
 
 		identityPermissions = append(identityPermissions, &IdentityPermissions{
-			IdentityDescriptor: *value.Descriptor,
-			IdentityName:       identityName,
-			IdentityType:       identityType,
+			IdentityDescriptor: *ace.Descriptor,
+			IdentityName:       *identityName,
 			Permissions:        permissions,
 		})
 	}

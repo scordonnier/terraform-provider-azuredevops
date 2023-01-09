@@ -54,7 +54,7 @@ type Identity struct {
 	UniqueUserId        *int         `json:"uniqueUserId,omitempty"`
 }
 
-type IdentityReadResult struct {
+type IdentityCollection struct {
 	Count *int        `json:"count"`
 	Value *[]Identity `json:"value"`
 }
@@ -76,7 +76,7 @@ type SecurityNamespaceDescription struct {
 	WritePermission    *int                `json:"writePermission,omitempty"`
 }
 
-type SecurityNamespacesResult struct {
+type SecurityNamespacesCollection struct {
 	Count *int                            `json:"count"`
 	Value *[]SecurityNamespaceDescription `json:"value"`
 }

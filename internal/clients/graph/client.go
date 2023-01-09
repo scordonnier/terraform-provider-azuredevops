@@ -61,13 +61,28 @@ func (c *Client) CreateGroup(ctx context.Context, projectId string, name string,
 	return group, err
 }
 
+func (c *Client) CreateGroupByOriginId(ctx context.Context, originId string) (*GraphGroup, error) {
+	body := GraphGroupOriginIdCreationContext{
+		OriginId: &originId,
+	}
+	pathSegments := []string{pathApis, pathGraph, pathGroups}
+	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
+	if err != nil {
+		return nil, err
+	}
+
+	var group *GraphGroup
+	err = c.vsspsClient.ParseJSON(ctx, resp, &group)
+	return group, err
+}
+
 func (c *Client) CreateGroupMemberships(ctx context.Context, projectId string, groupName string, members []string) (*[]GraphMembership, error) {
 	groupDescriptor, err := c.getGroupDescriptor(ctx, projectId, groupName)
 	if err != nil {
 		return nil, err
 	}
 
-	memberDescriptors, err := c.getMemberDescriptors(ctx, projectId, groupName, members)
+	memberDescriptors, err := c.getMemberDescriptors(ctx, members)
 	if err != nil {
 		return nil, err
 	}
@@ -181,9 +196,67 @@ func (c *Client) GetGroups(ctx context.Context, projectId string, continuationTo
 	return &groups, nil
 }
 
+func (c *Client) GetIdentityPickerIdentity(ctx context.Context, query string) (*IdentityPickerIdentity, error) {
+	cacheKey := utils.GetCacheKey("IdentityPicker", query)
+	if i, ok := c.cache.Get(cacheKey); ok {
+		return i.(*IdentityPickerIdentity), nil
+	}
+
+	pathSegments := []string{pathApis, pathIdentityPicker, pathIdentities}
+	body := IdentityPickerRequest{
+		IdentityTypes:   &[]string{"user", "group"},
+		OperationScopes: &[]string{"ims", "source"},
+		Options: &IdentityPickerOptions{
+			MaxResults: 1,
+			MinResults: 1,
+		},
+		Properties: &[]string{
+			"DisplayName",
+			"Mail",
+			"SamAccountName",
+			"SubjectDescriptor",
+		},
+		Query: &query,
+	}
+	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
+	if err != nil {
+		return nil, err
+	}
+
+	var response *IdentityPickerResponse
+	err = c.vsspsClient.ParseJSON(ctx, resp, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	result := (*response.Results)[0]
+	if len(*result.Identities) == 0 || len(*result.Identities) > 1 {
+		return nil, errors.New(fmt.Sprintf("Identity not found or more than one identity found : '%s'", query))
+	}
+
+	identity := (*result.Identities)[0]
+	c.cache.Set(cacheKey, identity, cache.NoExpiration)
+	return &identity, nil
+}
+
 func (c *Client) GetUser(ctx context.Context, descriptor string) (*GraphUser, error) {
 	pathSegments := []string{pathApis, pathGraph, pathUsers, descriptor}
 	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70Preview1)
+	if err != nil {
+		return nil, err
+	}
+
+	var user *GraphUser
+	err = c.vsspsClient.ParseJSON(ctx, resp, &user)
+	return user, err
+}
+
+func (c *Client) CreateUserByOriginId(ctx context.Context, originId string) (*GraphUser, error) {
+	body := GraphUserOriginIdCreationContext{
+		OriginId: &originId,
+	}
+	pathSegments := []string{pathApis, pathGraph, pathUsers}
+	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	if err != nil {
 		return nil, err
 	}
@@ -230,40 +303,6 @@ func (c *Client) GetUsers(ctx context.Context, projectId string, continuationTok
 	return &users, nil
 }
 
-func (c *Client) SearchGroup(ctx context.Context, query string) (*GraphGroup, error) {
-	identity, err := c.getIdentityPickerIdentity(ctx, query, []string{"group"})
-	if err != nil {
-		return nil, err
-	}
-
-	group := &GraphGroup{
-		Descriptor:    identity.SubjectDescriptor,
-		DisplayName:   identity.DisplayName,
-		MailAddress:   identity.Mail,
-		Origin:        identity.OriginDirectory,
-		OriginId:      identity.OriginId,
-		PrincipalName: identity.SamAccountName,
-	}
-	return group, nil
-}
-
-func (c *Client) SearchUser(ctx context.Context, query string) (*GraphUser, error) {
-	identity, err := c.getIdentityPickerIdentity(ctx, query, []string{"user"})
-	if err != nil {
-		return nil, err
-	}
-
-	user := &GraphUser{
-		Descriptor:    identity.SubjectDescriptor,
-		DisplayName:   identity.DisplayName,
-		MailAddress:   identity.Mail,
-		Origin:        identity.OriginDirectory,
-		OriginId:      identity.OriginId,
-		PrincipalName: identity.SamAccountName,
-	}
-	return user, nil
-}
-
 func (c *Client) UpdateGroup(ctx context.Context, descriptor string, displayName string, description string) (*GraphGroup, error) {
 	pathSegments := []string{pathApis, pathGraph, pathGroups, descriptor}
 	body := []core.JsonPatchOperation{
@@ -296,7 +335,7 @@ func (c *Client) UpdateGroupMemberships(ctx context.Context, projectId string, g
 		currentDescriptors = append(currentDescriptors, *membership.MemberDescriptor)
 	}
 
-	membersDescriptors, err := c.getMemberDescriptors(ctx, projectId, groupName, members)
+	membersDescriptors, err := c.getMemberDescriptors(ctx, members)
 	if err != nil {
 		return nil, err
 	}
@@ -328,27 +367,6 @@ func (c *Client) UpdateGroupMemberships(ctx context.Context, projectId string, g
 
 // Private Methods
 
-func (c *Client) createGroupByOriginId(ctx context.Context, projectId string, groupName string, originId string) (*GraphGroup, error) {
-	groupDescriptor, err := c.getGroupDescriptor(ctx, projectId, groupName)
-	if err != nil {
-		return nil, err
-	}
-
-	body := GraphGroupOriginIdCreationContext{
-		OriginId: &originId,
-	}
-	pathSegments := []string{pathApis, pathGraph, pathGroups}
-	queryParams := url.Values{"groupDescriptors": []string{*groupDescriptor}}
-	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, queryParams, body, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var group *GraphGroup
-	err = c.vsspsClient.ParseJSON(ctx, resp, &group)
-	return group, err
-}
-
 func (c *Client) createGroupMembership(ctx context.Context, memberDescriptor string, containerDescriptor string) (*GraphMembership, error) {
 	pathSegments := []string{pathApis, pathGraph, pathMemberships, memberDescriptor, containerDescriptor}
 	resp, err := c.vsspsClient.PutJSON(ctx, pathSegments, nil, nil, networking.ApiVersion70Preview1)
@@ -367,12 +385,8 @@ func (c *Client) deleteGroupMembership(ctx context.Context, memberDescriptor str
 	return err
 }
 
-func getCacheKey(params ...string) string {
-	return strings.Join(params, "***")
-}
-
 func (c *Client) getGroupDescriptor(ctx context.Context, projectId string, name string) (*string, error) {
-	cacheKey := getCacheKey("Group", projectId, name)
+	cacheKey := utils.GetCacheKey("Group", projectId, name)
 	if p, ok := c.cache.Get(cacheKey); ok {
 		return p.(*string), nil
 	}
@@ -398,69 +412,42 @@ func (c *Client) getGroupDescriptor(ctx context.Context, projectId string, name 
 	return descriptor, nil
 }
 
-func (c *Client) getIdentityPickerIdentity(ctx context.Context, query string, identityTypes []string) (*IdentityPickerIdentity, error) {
-	cacheKey := getCacheKey("IdentityPicker", query)
-	if p, ok := c.cache.Get(cacheKey); ok {
-		return p.(*IdentityPickerIdentity), nil
-	}
-
-	pathSegments := []string{pathApis, pathIdentityPicker, pathIdentities}
-	body := IdentityPickerRequest{
-		IdentityTypes:   &identityTypes,
-		OperationScopes: &[]string{"ims", "source"},
-		Options: &IdentityPickerOptions{
-			MaxResults: 1,
-			MinResults: 1,
-		},
-		Properties: &[]string{
-			"DisplayName",
-			"Mail",
-			"SamAccountName",
-			"SubjectDescriptor",
-		},
-		Query: &query,
-	}
-	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var response *IdentityPickerResponse
-	err = c.vsspsClient.ParseJSON(ctx, resp, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	result := (*response.Results)[0]
-	if len(*result.Identities) == 0 || len(*result.Identities) > 1 {
-		return nil, errors.New("identity not found or more than one identity found")
-	}
-
-	identity := (*result.Identities)[0]
-	c.cache.Set(cacheKey, identity, cache.NoExpiration)
-	return &identity, nil
-}
-
-func (c *Client) getMemberDescriptors(ctx context.Context, projectId string, groupName string, members []string) (*[]string, error) {
+func (c *Client) getMemberDescriptors(ctx context.Context, members []string) (*[]string, error) {
 	var memberDescriptors []string
 	for _, member := range members {
-		identity, err := c.getIdentityPickerIdentity(ctx, member, []string{"user", "group"})
+		identity, err := c.GetIdentityPickerIdentity(ctx, member)
 		if err != nil {
 			return nil, err
 		}
 
 		memberDescriptor := identity.SubjectDescriptor
 		if memberDescriptor == nil {
-			group, err := c.createGroupByOriginId(ctx, projectId, groupName, *identity.OriginId)
-			if err != nil {
-				return nil, err
-			}
+			switch strings.ToLower(*identity.EntityType) {
+			case "group":
+				group, err := c.CreateGroupByOriginId(ctx, *identity.OriginId)
+				if err != nil {
+					return nil, err
+				}
 
-			if group.Descriptor == nil {
-				return nil, errors.New("unable to determine identity descriptor")
-			}
+				if group.Descriptor == nil {
+					return nil, errors.New(fmt.Sprintf("Unable to find identity descriptor for '%s'", member))
+				}
 
-			memberDescriptor = group.Descriptor
+				memberDescriptor = group.Descriptor
+			case "user":
+				user, err := c.CreateUserByOriginId(ctx, *identity.OriginId)
+				if err != nil {
+					return nil, err
+				}
+
+				if user.Descriptor == nil {
+					return nil, errors.New(fmt.Sprintf("Unable to find identity descriptor for '%s'", member))
+				}
+
+				memberDescriptor = user.Descriptor
+			default:
+				return nil, errors.New(fmt.Sprintf("Unknown entity type '%s'", *identity.EntityType))
+			}
 		}
 
 		memberDescriptors = append(memberDescriptors, *memberDescriptor)
@@ -478,7 +465,7 @@ func (c *Client) getMembershipDescriptors(memberships *[]GraphMembership) *[]str
 }
 
 func (c *Client) getProjectDescriptor(ctx context.Context, projectId string) (*string, error) {
-	cacheKey := getCacheKey("Project", projectId)
+	cacheKey := utils.GetCacheKey("Project", projectId)
 	if p, ok := c.cache.Get(cacheKey); ok {
 		return p.(*string), nil
 	}

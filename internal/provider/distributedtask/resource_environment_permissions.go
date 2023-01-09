@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/graph"
 	clientSecurity "github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
@@ -34,7 +35,8 @@ func NewEnvironmentPermissionsResource() resource.Resource {
 }
 
 type EnvironmentPermissionsResource struct {
-	client *clientSecurity.Client
+	graphClient    *graph.Client
+	securityClient *clientSecurity.Client
 }
 
 type EnvironmentPermissionsResourceModel struct {
@@ -46,7 +48,6 @@ type EnvironmentPermissionsResourceModel struct {
 type EnvironmentPermissions struct {
 	IdentityDescriptor types.String `tfsdk:"identity_descriptor"`
 	IdentityName       string       `tfsdk:"identity_name"`
-	IdentityType       string       `tfsdk:"identity_type"`
 	View               string       `tfsdk:"view"`
 	Manage             string       `tfsdk:"manage"`
 	ManageHistory      string       `tfsdk:"manage_history"`
@@ -105,13 +106,6 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 							MarkdownDescription: "The identity name to assign the permissions.",
 							Required:            true,
 						},
-						"identity_type": schema.StringAttribute{
-							MarkdownDescription: "The identity type to assign the permissions. Must be `group`  or `user`.",
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("group", "user"),
-							},
-						},
 						"manage": schema.StringAttribute{
 							MarkdownDescription: "Sets the `Manage` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
@@ -152,7 +146,8 @@ func (r *EnvironmentPermissionsResource) Configure(_ context.Context, req resour
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).SecurityClient
+	r.graphClient = req.ProviderData.(*clients.AzureDevOpsClient).GraphClient
+	r.securityClient = req.ProviderData.(*clients.AzureDevOpsClient).SecurityClient
 }
 
 func (r *EnvironmentPermissionsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -163,9 +158,9 @@ func (r *EnvironmentPermissionsResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
+	token := r.securityClient.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
 	permissions := r.getIdentityPermissions(&model.Permissions)
-	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.client)
+	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
@@ -184,8 +179,8 @@ func (r *EnvironmentPermissionsResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
-	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, r.client)
+	token := r.securityClient.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
+	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, r.securityClient)
 	if err != nil {
 		if permissions != nil && len(permissions) == 0 {
 			resp.State.RemoveResource(ctx)
@@ -209,13 +204,15 @@ func (r *EnvironmentPermissionsResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
+	token := r.securityClient.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
 	permissions := r.getIdentityPermissions(&model.Permissions)
-	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.client)
+	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update permissions", err.Error())
 		return
 	}
+
+	r.updateEnvironmentPermissions(&model.Permissions, permissions)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -228,8 +225,8 @@ func (r *EnvironmentPermissionsResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	token := r.client.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
-	err := r.client.RemoveAccessControlLists(ctx, clientSecurity.NamespaceIdEnvironment, token)
+	token := r.securityClient.GetEnvironmentToken(int(model.Id.ValueInt64()), model.ProjectId)
+	err := r.securityClient.RemoveAccessControlLists(ctx, clientSecurity.NamespaceIdEnvironment, token)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete environment permissions", err.Error())
 	}
@@ -245,7 +242,6 @@ func (r *EnvironmentPermissionsResource) getIdentityPermissions(p *[]Environment
 		permissions = append(permissions, &security.IdentityPermissions{
 			IdentityDescriptor: permission.IdentityDescriptor.ValueString(),
 			IdentityName:       permission.IdentityName,
-			IdentityType:       permission.IdentityType,
 			Permissions: map[string]string{
 				permissionNameAdminister:    permission.Administer,
 				permissionNameCreate:        permission.Create,
@@ -267,7 +263,6 @@ func (r *EnvironmentPermissionsResource) updateEnvironmentPermissions(p1 *[]Envi
 		}).(*security.IdentityPermissions)
 		permission.IdentityDescriptor = types.StringValue(identityPermissions.IdentityDescriptor)
 		permission.IdentityName = identityPermissions.IdentityName
-		permission.IdentityType = identityPermissions.IdentityType
 		permission.Administer = identityPermissions.Permissions[permissionNameAdminister]
 		permission.Create = identityPermissions.Permissions[permissionNameCreate]
 		permission.Manage = identityPermissions.Permissions[permissionNameManage]
