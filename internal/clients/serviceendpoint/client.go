@@ -27,31 +27,23 @@ func NewClient(restClient *networking.RestClient) *Client {
 func (c *Client) CreateServiceEndpoint(ctx context.Context, args *CreateOrUpdateServiceEndpointArgs, projectId string) (*ServiceEndpoint, error) {
 	pathSegments := []string{projectId, pathApis, pathServiceEndpoint, pathEndpoints}
 	serviceEndpoint := c.createOrUpdateServiceEndpoint(ctx, nil, args, projectId)
-	resp, err := c.restClient.PostJSON(ctx, pathSegments, nil, serviceEndpoint, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	err = c.restClient.ParseJSON(ctx, resp, &serviceEndpoint)
+	serviceEndpoint, _, err := networking.PostJSON[ServiceEndpoint](c.restClient, ctx, pathSegments, nil, serviceEndpoint, networking.ApiVersion70)
 	return serviceEndpoint, err
 }
 
 func (c *Client) DeleteServiceEndpoint(ctx context.Context, id string, projectIds []string) error {
 	pathSegments := []string{pathApis, pathServiceEndpoint, pathEndpoints, id}
 	queryParams := url.Values{"projectIds": projectIds}
-	_, err := c.restClient.DeleteJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	return err
 }
 
 func (c *Client) GetServiceEndpoint(ctx context.Context, id string, projectId string) (*ServiceEndpoint, error) {
 	pathSegments := []string{projectId, pathApis, pathServiceEndpoint, pathEndpoints, id}
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
+	serviceEndpoint, _, err := networking.GetJSON[ServiceEndpoint](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
 	}
-
-	var serviceEndpoint *ServiceEndpoint
-	err = c.restClient.ParseJSON(ctx, resp, &serviceEndpoint)
 	return serviceEndpoint, err
 }
 
@@ -68,7 +60,7 @@ func (c *Client) ShareServiceEndpoint(ctx context.Context, id string, name strin
 	}
 
 	pathSegments := []string{projectId, pathApis, pathServiceEndpoint, pathEndpoints, id}
-	_, err := c.restClient.PatchJSON(ctx, pathSegments, nil, serviceEndpointProjectReferences, networking.ApiVersion70)
+	_, _, err := networking.PatchJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, serviceEndpointProjectReferences, networking.ApiVersion70)
 	return err
 }
 
@@ -80,14 +72,11 @@ func (c *Client) UpdateServiceEndpoint(ctx context.Context, id string, args *Cre
 	}
 
 	updatedServiceEndpoint := c.createOrUpdateServiceEndpoint(ctx, serviceEndpoint, args, projectId)
-	resp, err := c.restClient.PutJSON(ctx, pathSegments, nil, updatedServiceEndpoint, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	err = c.restClient.ParseJSON(ctx, resp, &updatedServiceEndpoint)
-	return serviceEndpoint, err
+	updatedServiceEndpoint, _, err = networking.PutJSON[ServiceEndpoint](c.restClient, ctx, pathSegments, nil, updatedServiceEndpoint, networking.ApiVersion70)
+	return updatedServiceEndpoint, err
 }
+
+// Private Methods
 
 func (c *Client) createOrUpdateServiceEndpoint(_ context.Context, serviceEndpoint *ServiceEndpoint, args *CreateOrUpdateServiceEndpointArgs, projectId string) *ServiceEndpoint {
 	if serviceEndpoint != nil {

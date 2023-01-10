@@ -51,13 +51,7 @@ func (c *Client) CreateGroup(ctx context.Context, projectId string, name string,
 	}
 	pathSegments := []string{pathApis, pathGraph, pathGroups}
 	queryParams := url.Values{queryScopeDescriptor: []string{*descriptor}}
-	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, queryParams, body, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var group *GraphGroup
-	err = c.vsspsClient.ParseJSON(ctx, resp, &group)
+	group, _, err := networking.PostJSON[GraphGroup](c.vsspsClient, ctx, pathSegments, queryParams, body, networking.ApiVersion70Preview1)
 	return group, err
 }
 
@@ -66,13 +60,7 @@ func (c *Client) CreateGroupByOriginId(ctx context.Context, originId string) (*G
 		OriginId: &originId,
 	}
 	pathSegments := []string{pathApis, pathGraph, pathGroups}
-	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var group *GraphGroup
-	err = c.vsspsClient.ParseJSON(ctx, resp, &group)
+	group, _, err := networking.PostJSON[GraphGroup](c.vsspsClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	return group, err
 }
 
@@ -105,7 +93,7 @@ func (c *Client) CreateGroupMemberships(ctx context.Context, projectId string, g
 
 func (c *Client) DeleteGroup(ctx context.Context, descriptor string) error {
 	pathSegments := []string{pathApis, pathGraph, pathGroups, descriptor}
-	_, err := c.vsspsClient.DeleteJSON(ctx, pathSegments, nil, networking.ApiVersion70Preview1)
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.vsspsClient, ctx, pathSegments, nil, networking.ApiVersion70Preview1)
 	return err
 }
 
@@ -127,13 +115,7 @@ func (c *Client) DeleteGroupMemberships(ctx context.Context, projectId string, g
 
 func (c *Client) GetGroup(ctx context.Context, descriptor string) (*GraphGroup, error) {
 	pathSegments := []string{pathApis, pathGraph, pathGroups, descriptor}
-	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var group *GraphGroup
-	err = c.vsspsClient.ParseJSON(ctx, resp, &group)
+	group, _, err := networking.GetJSON[GraphGroup](c.vsspsClient, ctx, pathSegments, nil, networking.ApiVersion70Preview1)
 	return group, err
 }
 
@@ -145,13 +127,7 @@ func (c *Client) GetGroupMemberships(ctx context.Context, projectId string, name
 
 	pathSegments := []string{pathApis, pathGraph, pathMemberships, *groupDescriptor}
 	queryParams := url.Values{"direction": []string{"down"}}
-	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var memberships *GraphMembershipCollection
-	err = c.vsspsClient.ParseJSON(ctx, resp, &memberships)
+	memberships, _, err := networking.GetJSON[GraphMembershipCollection](c.vsspsClient, ctx, pathSegments, queryParams, networking.ApiVersion70Preview1)
 	if err != nil {
 		return nil, err
 	}
@@ -174,13 +150,7 @@ func (c *Client) GetGroups(ctx context.Context, projectId string, continuationTo
 	var groups []GraphGroup
 	hasMore := true
 	for hasMore {
-		resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70Preview1)
-		if err != nil {
-			return nil, err
-		}
-
-		var collection *GraphGroupCollection
-		err = c.vsspsClient.ParseJSON(ctx, resp, &collection)
+		collection, resp, err := networking.GetJSON[GraphGroupCollection](c.vsspsClient, ctx, pathSegments, queryParams, networking.ApiVersion70Preview1)
 		if err != nil {
 			return nil, err
 		}
@@ -218,13 +188,7 @@ func (c *Client) GetIdentityPickerIdentity(ctx context.Context, query string) (*
 		},
 		Query: &query,
 	}
-	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var response *IdentityPickerResponse
-	err = c.vsspsClient.ParseJSON(ctx, resp, &response)
+	response, _, err := networking.PostJSON[IdentityPickerResponse](c.vsspsClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	if err != nil {
 		return nil, err
 	}
@@ -235,19 +199,13 @@ func (c *Client) GetIdentityPickerIdentity(ctx context.Context, query string) (*
 	}
 
 	identity := (*result.Identities)[0]
-	c.cache.Set(cacheKey, identity, cache.NoExpiration)
+	c.cache.Set(cacheKey, &identity, cache.NoExpiration)
 	return &identity, nil
 }
 
 func (c *Client) GetUser(ctx context.Context, descriptor string) (*GraphUser, error) {
 	pathSegments := []string{pathApis, pathGraph, pathUsers, descriptor}
-	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var user *GraphUser
-	err = c.vsspsClient.ParseJSON(ctx, resp, &user)
+	user, _, err := networking.GetJSON[GraphUser](c.vsspsClient, ctx, pathSegments, nil, networking.ApiVersion70Preview1)
 	return user, err
 }
 
@@ -256,13 +214,7 @@ func (c *Client) CreateUserByOriginId(ctx context.Context, originId string) (*Gr
 		OriginId: &originId,
 	}
 	pathSegments := []string{pathApis, pathGraph, pathUsers}
-	resp, err := c.vsspsClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var user *GraphUser
-	err = c.vsspsClient.ParseJSON(ctx, resp, &user)
+	user, _, err := networking.PostJSON[GraphUser](c.vsspsClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	return user, err
 }
 
@@ -281,13 +233,7 @@ func (c *Client) GetUsers(ctx context.Context, projectId string, continuationTok
 	var users []GraphUser
 	hasMore := true
 	for hasMore {
-		resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70Preview1)
-		if err != nil {
-			return nil, err
-		}
-
-		var collection *GraphUserCollection
-		err = c.vsspsClient.ParseJSON(ctx, resp, &collection)
+		collection, resp, err := networking.GetJSON[GraphUserCollection](c.vsspsClient, ctx, pathSegments, queryParams, networking.ApiVersion70Preview1)
 		if err != nil {
 			return nil, err
 		}
@@ -309,13 +255,7 @@ func (c *Client) UpdateGroup(ctx context.Context, descriptor string, displayName
 		{Op: "replace", Path: "/description", Value: description},
 		{Op: "replace", Path: "/displayName", Value: displayName},
 	}
-	resp, err := c.vsspsClient.PatchJSONSpecialContentType(ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var group *GraphGroup
-	err = c.vsspsClient.ParseJSON(ctx, resp, &group)
+	group, _, err := networking.PatchJSONSpecialContentType[GraphGroup](c.vsspsClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	return group, err
 }
 
@@ -369,19 +309,13 @@ func (c *Client) UpdateGroupMemberships(ctx context.Context, projectId string, g
 
 func (c *Client) createGroupMembership(ctx context.Context, memberDescriptor string, containerDescriptor string) (*GraphMembership, error) {
 	pathSegments := []string{pathApis, pathGraph, pathMemberships, memberDescriptor, containerDescriptor}
-	resp, err := c.vsspsClient.PutJSON(ctx, pathSegments, nil, nil, networking.ApiVersion70Preview1)
-	if err != nil {
-		return nil, err
-	}
-
-	var membership *GraphMembership
-	err = c.vsspsClient.ParseJSON(ctx, resp, &membership)
+	membership, _, err := networking.PutJSON[GraphMembership](c.vsspsClient, ctx, pathSegments, nil, nil, networking.ApiVersion70Preview1)
 	return membership, err
 }
 
 func (c *Client) deleteGroupMembership(ctx context.Context, memberDescriptor string, containerDescriptor string) error {
 	pathSegments := []string{pathApis, pathGraph, pathMemberships, memberDescriptor, containerDescriptor}
-	_, err := c.vsspsClient.DeleteJSON(ctx, pathSegments, nil, networking.ApiVersion70Preview1)
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.vsspsClient, ctx, pathSegments, nil, networking.ApiVersion70Preview1)
 	return err
 }
 
@@ -471,13 +405,7 @@ func (c *Client) getProjectDescriptor(ctx context.Context, projectId string) (*s
 	}
 
 	pathSegments := []string{pathApis, pathGraph, pathDescriptors, projectId}
-	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var result *GraphDescriptorResult
-	err = c.vsspsClient.ParseJSON(ctx, resp, &result)
+	result, _, err := networking.GetJSON[GraphDescriptorResult](c.vsspsClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
 	}

@@ -35,14 +35,8 @@ func NewClient(restClient *networking.RestClient, vsspsClient *networking.RestCl
 func (c *Client) GetAccessControlLists(ctx context.Context, namespaceId string, token string) (*AccessControlListCollection, error) {
 	pathSegments := []string{pathApis, pathAccessControlLists, namespaceId}
 	queryParams := url.Values{"token": []string{token}, "includeExtendedInfo": []string{"true"}}
-	resp, err := c.azdoClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var accessControlLists *AccessControlListCollection
-	err = c.azdoClient.ParseJSON(ctx, resp, &accessControlLists)
-	return accessControlLists, err
+	acls, _, err := networking.GetJSON[AccessControlListCollection](c.azdoClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
+	return acls, err
 }
 
 func (c *Client) GetEnvironmentToken(environmentId int, projectId string) string {
@@ -70,21 +64,19 @@ func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespaces
 	}
 
 	pathSegments := []string{pathApis, pathSecurityNamespaces}
-	resp, err := c.azdoClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
+	namespaces, _, err := networking.GetJSON[SecurityNamespacesCollection](c.azdoClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
 	}
 
-	var securityNamespaces *SecurityNamespacesCollection
-	err = c.azdoClient.ParseJSON(ctx, resp, &securityNamespaces)
-	c.cache.Set(cacheKey, securityNamespaces, cache.NoExpiration)
-	return securityNamespaces, err
+	c.cache.Set(cacheKey, namespaces, cache.NoExpiration)
+	return namespaces, err
 }
 
 func (c *Client) RemoveAccessControlLists(ctx context.Context, namespaceId string, token string) error {
 	pathSegments := []string{pathApis, pathAccessControlLists, namespaceId}
 	queryParams := url.Values{"tokens": []string{token}}
-	_, err := c.azdoClient.DeleteJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.azdoClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	return err
 }
 
@@ -93,7 +85,7 @@ func (c *Client) SetAccessControlLists(ctx context.Context, namespaceId string, 
 	body := AccessControlListCollection{
 		Value: accessControlList,
 	}
-	_, err := c.azdoClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
+	_, _, err := networking.PostJSON[networking.NoJSON](c.azdoClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return err
 }
 
@@ -106,13 +98,7 @@ func (c *Client) getIdentity(ctx context.Context, queryParams url.Values, descri
 	}
 
 	pathSegments := []string{pathApis, pathIdentities}
-	resp, err := c.vsspsClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var identityResult *IdentityCollection
-	err = c.azdoClient.ParseJSON(ctx, resp, &identityResult)
+	identityResult, _, err := networking.GetJSON[IdentityCollection](c.vsspsClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
 	}
