@@ -28,31 +28,19 @@ func (c *Client) CreateEnvironment(ctx context.Context, projectId string, name s
 		Description: description,
 		Name:        name,
 	}
-	resp, err := c.restClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var environment *EnvironmentInstance
-	err = c.restClient.ParseJSON(ctx, resp, &environment)
+	environment, _, err := networking.PostJSON[EnvironmentInstance](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return environment, err
 }
 
 func (c *Client) DeleteEnvironment(ctx context.Context, projectId string, id int) error {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments, strconv.Itoa(id)}
-	_, err := c.restClient.DeleteJSON(ctx, pathSegments, nil, networking.ApiVersion70)
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return err
 }
 
 func (c *Client) GetEnvironment(ctx context.Context, projectId string, id int) (*EnvironmentInstance, error) {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments, strconv.Itoa(id)}
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var environment *EnvironmentInstance
-	err = c.restClient.ParseJSON(ctx, resp, &environment)
+	environment, _, err := networking.GetJSON[EnvironmentInstance](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return environment, err
 }
 
@@ -62,12 +50,6 @@ func (c *Client) UpdateEnvironment(ctx context.Context, projectId string, id int
 		Description: description,
 		Name:        name,
 	}
-	resp, err := c.restClient.PatchJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var environment *EnvironmentInstance
-	err = c.restClient.ParseJSON(ctx, resp, &environment)
+	environment, _, err := networking.PatchJSON[EnvironmentInstance](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return environment, err
 }

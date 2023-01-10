@@ -47,13 +47,7 @@ func (c *Client) CreateProject(ctx context.Context, name string, description *st
 		Name:        &name,
 		Visibility:  &visibility,
 	}
-	resp, err := c.restClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var operation *OperationReference
-	err = c.restClient.ParseJSON(ctx, resp, &operation)
+	operation, _, err := networking.PostJSON[OperationReference](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return operation, err
 }
 
@@ -63,31 +57,19 @@ func (c *Client) CreateTeam(ctx context.Context, projectId string, name string, 
 		Description: &description,
 		Name:        &name,
 	}
-	resp, err := c.restClient.PostJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var team *WebApiTeam
-	err = c.restClient.ParseJSON(ctx, resp, &team)
+	team, _, err := networking.PostJSON[WebApiTeam](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return team, err
 }
 
 func (c *Client) DeleteProject(ctx context.Context, projectId string) (*OperationReference, error) {
 	pathSegments := []string{pathApis, pathProjects, projectId}
-	resp, err := c.restClient.DeleteJSON(ctx, pathSegments, nil, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var operation *OperationReference
-	err = c.restClient.ParseJSON(ctx, resp, &operation)
+	operation, _, err := networking.DeleteJSON[OperationReference](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return operation, err
 }
 
 func (c *Client) DeleteTeam(ctx context.Context, projectId string, teamId string) error {
 	pathSegments := []string{pathApis, pathProjects, projectId, pathTeams, teamId}
-	_, err := c.restClient.DeleteJSON(ctx, pathSegments, nil, networking.ApiVersion70)
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return err
 }
 
@@ -97,26 +79,13 @@ func (c *Client) GetOperation(ctx context.Context, id string, pluginId *uuid.UUI
 	if pluginId != nil {
 		queryParams.Add("pluginId", pluginId.String())
 	}
-
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var operation *Operation
-	err = c.restClient.ParseJSON(ctx, resp, &operation)
+	operation, _, err := networking.GetJSON[Operation](c.restClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	return operation, err
 }
 
 func (c *Client) GetProcess(ctx context.Context, name string) (*Process, error) {
 	pathSegments := []string{pathApis, pathProcess, pathProcesses}
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var processes *ProcessCollection
-	err = c.restClient.ParseJSON(ctx, resp, &processes)
+	processes, _, err := networking.GetJSON[ProcessCollection](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
 	}
@@ -135,13 +104,7 @@ func (c *Client) GetProcess(ctx context.Context, name string) (*Process, error) 
 func (c *Client) GetProject(ctx context.Context, id string) (*TeamProject, error) {
 	pathSegments := []string{pathApis, pathProjects, id}
 	queryParams := url.Values{"includeCapabilities": []string{"true"}}
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var project *TeamProject
-	err = c.restClient.ParseJSON(ctx, resp, &project)
+	project, _, err := networking.GetJSON[TeamProject](c.restClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	return project, err
 }
 
@@ -154,39 +117,28 @@ func (c *Client) GetProjects(ctx context.Context, state string, continuationToke
 	if continuationToken != "" {
 		queryParams.Add("continuationToken", continuationToken)
 	}
-
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, queryParams, networking.ApiVersion70)
+	projects, resp, err := networking.GetJSON[TeamProjectReferenceCollection](c.restClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	if err != nil {
 		return nil, "", err
 	}
 
-	var project *TeamProjectReferenceCollection
-	err = c.restClient.ParseJSON(ctx, resp, &project)
 	continuationToken = resp.Header.Get(networking.HeaderKeyContinuationToken)
-	return project.Value, continuationToken, err
+	return projects.Value, continuationToken, err
 }
 
 func (c *Client) GetTeam(ctx context.Context, projectId string, id string) (*WebApiTeam, error) {
 	pathSegments := []string{pathApis, pathProjects, projectId, pathTeams, id}
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var teams *WebApiTeam
-	err = c.restClient.ParseJSON(ctx, resp, &teams)
-	return teams, err
+	team, _, err := networking.GetJSON[WebApiTeam](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
+	return team, err
 }
 
 func (c *Client) GetTeams(ctx context.Context, projectId string) (*[]WebApiTeam, error) {
 	pathSegments := []string{pathApis, pathProjects, projectId, pathTeams}
-	resp, err := c.restClient.GetJSON(ctx, pathSegments, nil, networking.ApiVersion70)
+	teams, _, err := networking.GetJSON[WebApiTeamCollection](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	if err != nil {
 		return nil, err
 	}
 
-	var teams *WebApiTeamCollection
-	err = c.restClient.ParseJSON(ctx, resp, &teams)
 	return teams.Value, err
 }
 
@@ -207,13 +159,7 @@ func (c *Client) UpdateProject(ctx context.Context, projectId string, name strin
 		Description: description,
 		Name:        &name,
 	}
-	resp, err := c.restClient.PatchJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var operation *OperationReference
-	err = c.restClient.ParseJSON(ctx, resp, &operation)
+	operation, _, err := networking.PatchJSON[OperationReference](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return operation, err
 }
 
@@ -223,15 +169,11 @@ func (c *Client) UpdateTeam(ctx context.Context, projectId string, teamId string
 		Description: &description,
 		Name:        &name,
 	}
-	resp, err := c.restClient.PatchJSON(ctx, pathSegments, nil, body, networking.ApiVersion70)
-	if err != nil {
-		return nil, err
-	}
-
-	var team *WebApiTeam
-	err = c.restClient.ParseJSON(ctx, resp, &team)
+	team, _, err := networking.PatchJSON[WebApiTeam](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return team, err
 }
+
+// Private Methods
 
 func (c *Client) operationStatusRefreshFunc(ctx context.Context, client *Client, operation *OperationReference) utils.StateRefreshFunc {
 	return func() (interface{}, string, error) {
