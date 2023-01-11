@@ -69,7 +69,6 @@ Required:
 - `administer` (String) Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `create` (String) Sets the `Create` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `identity_name` (String) The identity name to assign the permissions.
-- `identity_type` (String) The identity type to assign the permissions. Must be `group`  or `user`.
 - `manage` (String) Sets the `Manage` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `manage_history` (String) Sets the `ManageHistory` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `use` (String) Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.

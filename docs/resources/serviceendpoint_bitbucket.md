@@ -17,11 +17,12 @@ data "azuredevops_project" "sandbox" {
 }
 
 resource "azuredevops_serviceendpoint_bitbucket" "private" {
-  description = "Managed by Terraform"
-  name        = "Bitbucket-Private"
-  password    = "GTu62azpC#qA2K*X"
-  project_id  = data.azuredevops_project.sandbox.id
-  username    = "username"
+  description         = "Managed by Terraform"
+  grant_all_pipelines = true
+  name                = "Bitbucket-Private"
+  password            = "GTu62azpC#qA2K*X"
+  project_id          = data.azuredevops_project.sandbox.id
+  username            = "username"
 }
 ```
 
@@ -30,6 +31,7 @@ resource "azuredevops_serviceendpoint_bitbucket" "private" {
 
 ### Required
 
+- `grant_all_pipelines` (Boolean) Set to true to grant access to all pipelines in the project.
 - `name` (String) The name of the service endpoint.
 - `password` (String, Sensitive) Bitbucket account password.
 - `project_id` (String) The ID of the project.

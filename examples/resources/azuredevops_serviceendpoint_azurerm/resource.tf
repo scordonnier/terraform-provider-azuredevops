@@ -5,6 +5,7 @@ data "azuredevops_project" "sandbox" {
 resource "azuredevops_serviceendpoint_azurerm" "production" {
   description           = "Managed by Terraform"
   name                  = "AzureRM-Production"
+  grant_all_pipelines   = true
   project_id            = data.azuredevops_project.sandbox.id
   service_principal_id  = "00000000-0000-0000-0000-000000000000"
   service_principal_key = "GTu62azpC#qA2K*X"
