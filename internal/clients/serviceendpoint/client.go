@@ -2,6 +2,7 @@ package serviceendpoint
 
 import (
 	"context"
+	"fmt"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
@@ -138,6 +139,14 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeToken),
 		}
+	case ServiceEndpointTypekubernetes:
+		return &EndpointAuthorization{
+			Parameters: &map[string]string{
+				ServiceEndpointAuthorizationParamsClusterContext: args.ClusterContext,
+				ServiceEndpointAuthorizationParamsKubeconfig:     args.Kubeconfig,
+			},
+			Scheme: utils.String(ServiceEndpointAuthorizationSchemeKubernetes),
+		}
 	case ServiceEndpointTypeVsAppCenter:
 		return &EndpointAuthorization{
 			Parameters: &map[string]string{
@@ -160,6 +169,11 @@ func getServiceEndpointData(args *CreateOrUpdateServiceEndpointArgs) *map[string
 			ServiceEndpointDataSubscriptionId:   args.SubscriptionId,
 			ServiceEndpointDataSubscriptionName: args.SubscriptionName,
 		}
+	case ServiceEndpointTypekubernetes:
+		return &map[string]string{
+			ServiceEndpointDataAuthorizationType:           "Kubeconfig",
+			ServiceEndpointDataAcceptUntrustedCertificates: fmt.Sprintf("%v", args.AcceptUntrustedCertificates),
+		}
 	default:
 		return nil
 	}
@@ -173,6 +187,8 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 		return utils.String("https://api.bitbucket.org/")
 	case ServiceEndpointTypeGitHub:
 		return utils.String("https://github.com/")
+	case ServiceEndpointTypekubernetes:
+		return utils.String(args.Url)
 	case ServiceEndpointTypeVsAppCenter:
 		return utils.String("https://api.appcenter.ms/v0.1")
 	default:

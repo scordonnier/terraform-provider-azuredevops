@@ -6,15 +6,19 @@ import (
 )
 
 const (
-	ServiceEndpointDataCreationMode     = "creationMode"
-	ServiceEndpointDataEnvironment      = "environment"
-	ServiceEndpointDataScopeLevel       = "scopeLevel"
-	ServiceEndpointDataSubscriptionId   = "subscriptionId"
-	ServiceEndpointDataSubscriptionName = "subscriptionName"
+	ServiceEndpointDataAcceptUntrustedCertificates = "acceptUntrustedCerts"
+	ServiceEndpointDataAuthorizationType           = "authorizationType"
+	ServiceEndpointDataCreationMode                = "creationMode"
+	ServiceEndpointDataEnvironment                 = "environment"
+	ServiceEndpointDataScopeLevel                  = "scopeLevel"
+	ServiceEndpointDataSubscriptionId              = "subscriptionId"
+	ServiceEndpointDataSubscriptionName            = "subscriptionName"
 
 	ServiceEndpointAuthorizationParamsAccessToken         = "AccessToken"
 	ServiceEndpointAuthorizationParamsApiToken            = "apitoken"
 	ServiceEndpointAuthorizationParamsAuthenticationType  = "authenticationType"
+	ServiceEndpointAuthorizationParamsClusterContext      = "clusterContext"
+	ServiceEndpointAuthorizationParamsKubeconfig          = "kubeconfig"
 	ServiceEndpointAuthorizationParamsPassword            = "password"
 	ServiceEndpointAuthorizationParamsServicePrincipalId  = "serviceprincipalid"
 	ServiceEndpointAuthorizationParamsServicePrincipalKey = "serviceprincipalkey"
@@ -51,17 +55,21 @@ const (
 )
 
 type CreateOrUpdateServiceEndpointArgs struct {
-	Description         string
-	Name                string
-	Password            string
-	ServicePrincipalId  string
-	ServicePrincipalKey string
-	SubscriptionId      string
-	SubscriptionName    string
-	TenantId            string
-	Token               string
-	Type                string
-	UserName            string
+	AcceptUntrustedCertificates bool
+	ClusterContext              string
+	Description                 string
+	Kubeconfig                  string
+	Name                        string
+	Password                    string
+	ServicePrincipalId          string
+	ServicePrincipalKey         string
+	SubscriptionId              string
+	SubscriptionName            string
+	TenantId                    string
+	Token                       string
+	Type                        string
+	Url                         string
+	UserName                    string
 }
 
 type EndpointAuthorization struct {
