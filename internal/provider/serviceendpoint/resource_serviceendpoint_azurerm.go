@@ -5,13 +5,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
 var _ resource.Resource = &ServiceEndpointAzureRmResource{}
@@ -22,12 +19,14 @@ func NewServiceEndpointAzureRmResource() resource.Resource {
 }
 
 type ServiceEndpointAzureRmResource struct {
-	client *serviceendpoint.Client
+	pipelineClient        *pipelines.Client
+	serviceEndpointClient *serviceendpoint.Client
 }
 
 type ServiceEndpointAzureRmResourceModel struct {
 	Description         string       `tfsdk:"description"`
 	Id                  types.String `tfsdk:"id"`
+	GrantAllPipelines   bool         `tfsdk:"grant_all_pipelines"`
 	Name                string       `tfsdk:"name"`
 	ProjectId           string       `tfsdk:"project_id"`
 	ServicePrincipalId  string       `tfsdk:"service_principal_id"`
@@ -42,55 +41,30 @@ func (r *ServiceEndpointAzureRmResource) Metadata(_ context.Context, req resourc
 }
 
 func (r *ServiceEndpointAzureRmResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an AzureRM service endpoint within an Azure DevOps project.",
-		Attributes: map[string]schema.Attribute{
-			"description": schema.StringAttribute{
-				MarkdownDescription: "The description of the service endpoint.",
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "The ID of the service connection.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"name": schema.StringAttribute{
-				MarkdownDescription: "The service endpoint name.",
-				Required:            true,
-			},
-			"project_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the project.",
-				Required:            true,
-				Validators: []validator.String{
-					utils.UUIDStringValidator(),
-				},
-			},
-			"service_principal_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the service principal.",
-				Required:            true,
-				Sensitive:           true,
-			},
-			"service_principal_key": schema.StringAttribute{
-				MarkdownDescription: "The secret key of the service principal.",
-				Required:            true,
-				Sensitive:           true,
-			},
-			"subscription_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the Azure subscription.",
-				Required:            true,
-			},
-			"subscription_name": schema.StringAttribute{
-				MarkdownDescription: "The name of the Azure subscription.",
-				Required:            true,
-			},
-			"tenant_id": schema.StringAttribute{
-				MarkdownDescription: "The tenant ID of the service principal.",
-				Required:            true,
-			},
-		},
+	resourceShema := GetServiceEndpointResourceSchemaBase("Manages an AzureRM service endpoint within an Azure DevOps project.")
+	resourceShema.Attributes["service_principal_id"] = schema.StringAttribute{
+		MarkdownDescription: "The ID of the service principal.",
+		Required:            true,
+		Sensitive:           true,
 	}
+	resourceShema.Attributes["service_principal_key"] = schema.StringAttribute{
+		MarkdownDescription: "The secret key of the service principal.",
+		Required:            true,
+		Sensitive:           true,
+	}
+	resourceShema.Attributes["subscription_id"] = schema.StringAttribute{
+		MarkdownDescription: "The ID of the Azure subscription.",
+		Required:            true,
+	}
+	resourceShema.Attributes["subscription_name"] = schema.StringAttribute{
+		MarkdownDescription: "The name of the Azure subscription.",
+		Required:            true,
+	}
+	resourceShema.Attributes["tenant_id"] = schema.StringAttribute{
+		MarkdownDescription: "The tenant ID of the service principal.",
+		Required:            true,
+	}
+	resp.Schema = resourceShema
 }
 
 func (r *ServiceEndpointAzureRmResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
@@ -98,7 +72,8 @@ func (r *ServiceEndpointAzureRmResource) Configure(_ context.Context, req resour
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
+	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelineClient
+	r.serviceEndpointClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 
 func (r *ServiceEndpointAzureRmResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -109,7 +84,7 @@ func (r *ServiceEndpointAzureRmResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
@@ -127,12 +102,13 @@ func (r *ServiceEndpointAzureRmResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
+	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
 
 	model.Description = *serviceEndpoint.Description
+	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
 	model.ServicePrincipalId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServicePrincipalId]
 	model.SubscriptionId = (*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionId]
@@ -150,7 +126,7 @@ func (r *ServiceEndpointAzureRmResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
+	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
@@ -166,7 +142,7 @@ func (r *ServiceEndpointAzureRmResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
 }
 
 func (r *ServiceEndpointAzureRmResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -176,6 +152,7 @@ func (r *ServiceEndpointAzureRmResource) ImportState(ctx context.Context, req re
 func (r *ServiceEndpointAzureRmResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointAzureRmResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
 		Description:         model.Description,
+		GrantAllPipelines:   model.GrantAllPipelines,
 		Name:                model.Name,
 		ServicePrincipalId:  model.ServicePrincipalId,
 		ServicePrincipalKey: model.ServicePrincipalKey,

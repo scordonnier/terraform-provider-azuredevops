@@ -4,6 +4,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/distributedtask"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/graph"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
@@ -15,6 +16,7 @@ type AzureDevOpsClient struct {
 	CoreClient            *core.Client
 	DistributedTaskClient *distributedtask.Client
 	GraphClient           *graph.Client
+	PipelineClient        *pipelines.Client
 	SecurityClient        *security.Client
 	ServiceEndpointClient *serviceendpoint.Client
 }
@@ -27,6 +29,7 @@ func NewAzureDevOpsClient(organizationUrl string, authorization string, provider
 		CoreClient:            core.NewClient(azdoClient),
 		DistributedTaskClient: distributedtask.NewClient(azdoClient),
 		GraphClient:           graph.NewClient(vsspsClient),
+		PipelineClient:        pipelines.NewClient(azdoClient),
 		SecurityClient:        security.NewClient(azdoClient, vsspsClient),
 		ServiceEndpointClient: serviceendpoint.NewClient(azdoClient),
 	}

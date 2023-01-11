@@ -58,6 +58,7 @@ type CreateOrUpdateServiceEndpointArgs struct {
 	AcceptUntrustedCertificates bool
 	ClusterContext              string
 	Description                 string
+	GrantAllPipelines           bool
 	Kubeconfig                  string
 	Name                        string
 	Password                    string

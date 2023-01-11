@@ -5,11 +5,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
@@ -22,15 +21,17 @@ func NewServiceEndpointGitHubResource() resource.Resource {
 }
 
 type ServiceEndpointGitHubResource struct {
-	client *serviceendpoint.Client
+	pipelineClient        *pipelines.Client
+	serviceEndpointClient *serviceendpoint.Client
 }
 
 type ServiceEndpointGitHubResourceModel struct {
-	AccessToken string       `tfsdk:"access_token"`
-	Description string       `tfsdk:"description"`
-	Id          types.String `tfsdk:"id"`
-	Name        string       `tfsdk:"name"`
-	ProjectId   string       `tfsdk:"project_id"`
+	AccessToken       string       `tfsdk:"access_token"`
+	Description       string       `tfsdk:"description"`
+	GrantAllPipelines bool         `tfsdk:"grant_all_pipelines"`
+	Id                types.String `tfsdk:"id"`
+	Name              string       `tfsdk:"name"`
+	ProjectId         string       `tfsdk:"project_id"`
 }
 
 func (r *ServiceEndpointGitHubResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -38,44 +39,16 @@ func (r *ServiceEndpointGitHubResource) Metadata(_ context.Context, req resource
 }
 
 func (r *ServiceEndpointGitHubResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a GitHub service endpoint within an Azure DevOps project.",
-		Attributes: map[string]schema.Attribute{
-			"access_token": schema.StringAttribute{
-				MarkdownDescription: "GitHub personal access token.",
-				Required:            true,
-				Sensitive:           true,
-				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
-				},
-			},
-			"description": schema.StringAttribute{
-				MarkdownDescription: "The description of the service endpoint.",
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "The ID of the service endpoint.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the service endpoint.",
-				Required:            true,
-				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
-				},
-			},
-			"project_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the project.",
-				Required:            true,
-				Validators: []validator.String{
-					utils.UUIDStringValidator(),
-				},
-			},
+	resourceShema := GetServiceEndpointResourceSchemaBase("Manages a GitHub service endpoint within an Azure DevOps project.")
+	resourceShema.Attributes["access_token"] = schema.StringAttribute{
+		MarkdownDescription: "GitHub personal access token.",
+		Required:            true,
+		Sensitive:           true,
+		Validators: []validator.String{
+			utils.StringNotEmptyValidator(),
 		},
 	}
+	resp.Schema = resourceShema
 }
 
 func (r *ServiceEndpointGitHubResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
@@ -83,7 +56,8 @@ func (r *ServiceEndpointGitHubResource) Configure(_ context.Context, req resourc
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
+	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelineClient
+	r.serviceEndpointClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 
 func (r *ServiceEndpointGitHubResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -94,7 +68,7 @@ func (r *ServiceEndpointGitHubResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
@@ -112,12 +86,13 @@ func (r *ServiceEndpointGitHubResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
+	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
 
 	model.Description = *serviceEndpoint.Description
+	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
@@ -131,7 +106,7 @@ func (r *ServiceEndpointGitHubResource) Update(ctx context.Context, req resource
 		return
 	}
 
-	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), r.getCreateOrUpdateServiceEndpointArgs(model), model.ProjectId, r.client, resp)
+	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
@@ -147,18 +122,21 @@ func (r *ServiceEndpointGitHubResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
 }
 
 func (r *ServiceEndpointGitHubResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
+// Private Methods
+
 func (r *ServiceEndpointGitHubResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointGitHubResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
-		Description: model.Description,
-		Name:        model.Name,
-		Type:        serviceendpoint.ServiceEndpointTypeGitHub,
-		Token:       model.AccessToken,
+		Description:       model.Description,
+		GrantAllPipelines: model.GrantAllPipelines,
+		Name:              model.Name,
+		Type:              serviceendpoint.ServiceEndpointTypeGitHub,
+		Token:             model.AccessToken,
 	}
 }

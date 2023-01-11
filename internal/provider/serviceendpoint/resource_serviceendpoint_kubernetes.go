@@ -7,13 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -25,20 +22,22 @@ func NewServiceEndpointKubernetesResource() resource.Resource {
 }
 
 type ServiceEndpointKubernetesResource struct {
-	client *serviceendpoint.Client
+	pipelineClient        *pipelines.Client
+	serviceEndpointClient *serviceendpoint.Client
 }
 
 type ServiceEndpointKubernetesResourceModel struct {
-	Description string                    `tfsdk:"description"`
-	Id          types.String              `tfsdk:"id"`
-	Kubeconfig  ServiceEndpointKubeconfig `tfsdk:"kubeconfig"`
-	Name        string                    `tfsdk:"name"`
-	ProjectId   string                    `tfsdk:"project_id"`
+	Description       string                    `tfsdk:"description"`
+	GrantAllPipelines bool                      `tfsdk:"grant_all_pipelines"`
+	Id                types.String              `tfsdk:"id"`
+	Kubeconfig        ServiceEndpointKubeconfig `tfsdk:"kubeconfig"`
+	Name              string                    `tfsdk:"name"`
+	ProjectId         string                    `tfsdk:"project_id"`
 }
 
 type ServiceEndpointKubeconfig struct {
 	AcceptUntrustedCertificates bool   `tfsdk:"accept_untrusted_certs"`
-	Yaml                        string `tfsdk:"yaml"`
+	YamlContent                 string `tfsdk:"yaml_content"`
 }
 
 func (r *ServiceEndpointKubernetesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -46,55 +45,23 @@ func (r *ServiceEndpointKubernetesResource) Metadata(_ context.Context, req reso
 }
 
 func (r *ServiceEndpointKubernetesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Kubernetes service endpoint within an Azure DevOps project.",
+	resourceShema := GetServiceEndpointResourceSchemaBase("Manages a Kubernetes service endpoint within an Azure DevOps project.")
+	resourceShema.Attributes["kubeconfig"] = schema.SingleNestedAttribute{
+		MarkdownDescription: "The information required to connect a cluster with a kubeconfig.",
+		Required:            true,
 		Attributes: map[string]schema.Attribute{
-			"description": schema.StringAttribute{
-				MarkdownDescription: "The description of the service endpoint.",
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "The ID of the service endpoint.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the service endpoint.",
+			"accept_untrusted_certs": schema.BoolAttribute{
+				MarkdownDescription: "Set to true to allow clients to accept a self-signed certificate.",
 				Required:            true,
-				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
-				},
 			},
-			"project_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the project.",
+			"yaml_content": schema.StringAttribute{
+				MarkdownDescription: "The content of the kubeconfig in YAML notation to be used to communicate with the API-Server of Kubernetes. The kubeconfig MUST contains only 1 cluster.",
 				Required:            true,
-				Validators: []validator.String{
-					utils.UUIDStringValidator(),
-				},
-			},
-		},
-		Blocks: map[string]schema.Block{
-			"kubeconfig": schema.SingleNestedBlock{
-				MarkdownDescription: "The information required to connect a cluster with a kubeconfig file.",
-				Attributes: map[string]schema.Attribute{
-					"accept_untrusted_certs": schema.BoolAttribute{
-						MarkdownDescription: "Set this option to allow clients to accept a self-signed certificate.",
-						Required:            true,
-					},
-					"yaml": schema.StringAttribute{
-						MarkdownDescription: "The content of the kubeconfig in YAML notation to be used to communicate with the API-Server of Kubernetes. The kubeconfig MUST contains only 1 cluster.",
-						Required:            true,
-						Sensitive:           true,
-						Validators: []validator.String{
-							utils.StringNotEmptyValidator(),
-						},
-					},
-				},
+				Sensitive:           true,
 			},
 		},
 	}
+	resp.Schema = resourceShema
 }
 
 func (r *ServiceEndpointKubernetesResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
@@ -102,7 +69,8 @@ func (r *ServiceEndpointKubernetesResource) Configure(_ context.Context, req res
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
+	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelineClient
+	r.serviceEndpointClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 
 func (r *ServiceEndpointKubernetesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -115,11 +83,11 @@ func (r *ServiceEndpointKubernetesResource) Create(ctx context.Context, req reso
 
 	args, err := r.getCreateOrUpdateServiceEndpointArgs(model)
 	if err != nil {
-		resp.Diagnostics.AddError("", err.Error())
+		resp.Diagnostics.AddError("Unable to build service endpoint arguments.", err.Error())
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, args, model.ProjectId, r.client, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, args, r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
@@ -137,12 +105,13 @@ func (r *ServiceEndpointKubernetesResource) Read(ctx context.Context, req resour
 		return
 	}
 
-	serviceEndpoint, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
+	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
 
 	model.Description = *serviceEndpoint.Description
+	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
@@ -158,11 +127,11 @@ func (r *ServiceEndpointKubernetesResource) Update(ctx context.Context, req reso
 
 	args, err := r.getCreateOrUpdateServiceEndpointArgs(model)
 	if err != nil {
-		resp.Diagnostics.AddError("", err.Error())
+		resp.Diagnostics.AddError("Unable to build service endpoint arguments.", err.Error())
 		return
 	}
 
-	_, err = UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), args, model.ProjectId, r.client, resp)
+	_, err = UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, args, r.serviceEndpointClient, r.pipelineClient, resp)
 	if err != nil {
 		return
 	}
@@ -178,7 +147,7 @@ func (r *ServiceEndpointKubernetesResource) Delete(ctx context.Context, req reso
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.client, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
 }
 
 func (r *ServiceEndpointKubernetesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -189,7 +158,7 @@ func (r *ServiceEndpointKubernetesResource) ImportState(ctx context.Context, req
 
 func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointKubernetesResourceModel) (*serviceendpoint.CreateOrUpdateServiceEndpointArgs, error) {
 	var yamlKubeconfig map[string]interface{}
-	err := yaml.Unmarshal([]byte(model.Kubeconfig.Yaml), &yamlKubeconfig)
+	err := yaml.Unmarshal([]byte(model.Kubeconfig.YamlContent), &yamlKubeconfig)
 	if err != nil {
 		return nil, fmt.Errorf("kubeconfig contains an invalid YAML : %s", err)
 	}
@@ -197,7 +166,7 @@ func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs
 	clusters := yamlKubeconfig["clusters"].([]interface{})
 	contexts := yamlKubeconfig["contexts"].([]interface{})
 	if len(clusters) == 0 || len(clusters) > 1 || len(contexts) == 0 || len(contexts) > 1 {
-		return nil, errors.New("kubeconfig contains no clusters/contexts or more than one clusters/contexts")
+		return nil, errors.New("kubeconfig contains no or more than one cluster/context")
 	}
 
 	server := clusters[0].(map[string]interface{})["cluster"].(map[string]interface{})["server"].(string)
@@ -205,8 +174,9 @@ func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
 		AcceptUntrustedCertificates: model.Kubeconfig.AcceptUntrustedCertificates,
 		ClusterContext:              clusterContext,
+		GrantAllPipelines:           model.GrantAllPipelines,
 		Description:                 model.Description,
-		Kubeconfig:                  model.Kubeconfig.Yaml,
+		Kubeconfig:                  model.Kubeconfig.YamlContent,
 		Name:                        model.Name,
 		Type:                        serviceendpoint.ServiceEndpointTypekubernetes,
 		Url:                         server,
