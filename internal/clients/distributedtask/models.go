@@ -21,6 +21,26 @@ type EnvironmentInstance struct {
 	Resources      *[]EnvironmentResourceReference `json:"resources,omitempty"`
 }
 
+type EnvironmentReference struct {
+	Id   *int    `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
+type EnvironmentResourceKubernetes struct {
+	ClusterName          *string               `json:"clusterName,omitempty"`
+	CreatedBy            *core.IdentityRef     `json:"createdBy,omitempty"`
+	CreatedOn            *core.Time            `json:"createdOn,omitempty"`
+	EnvironmentReference *EnvironmentReference `json:"environmentReference,omitempty"`
+	Id                   *int                  `json:"id,omitempty"`
+	LastModifiedBy       *core.IdentityRef     `json:"lastModifiedBy,omitempty"`
+	LastModifiedOn       *core.Time            `json:"lastModifiedOn,omitempty"`
+	Name                 *string               `json:"name,omitempty"`
+	Namespace            *string               `json:"namespace,omitempty"`
+	ServiceEndpointId    *string               `json:"serviceEndpointId,omitempty"`
+	Type                 *string               `json:"type,omitempty"`
+	Tags                 *[]string             `json:"tags,omitempty"`
+}
+
 type EnvironmentResourceReference struct {
 	Id   *int                     `json:"id,omitempty"`
 	Name *string                  `json:"name,omitempty"`
