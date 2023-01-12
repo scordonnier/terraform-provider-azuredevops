@@ -81,6 +81,7 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		core.NewProjectResource,
 		core.NewTeamResource,
 		distributedtask.NewEnvironmentResource,
+		distributedtask.NewEnvironmentKubernetesResource,
 		distributedtask.NewEnvironmentPermissionsResource,
 		graph.NewGroupResource,
 		graph.NewGroupMembershipResource,
