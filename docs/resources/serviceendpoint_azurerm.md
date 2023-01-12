@@ -19,6 +19,7 @@ data "azuredevops_project" "sandbox" {
 resource "azuredevops_serviceendpoint_azurerm" "production" {
   description           = "Managed by Terraform"
   name                  = "AzureRM-Production"
+  grant_all_pipelines   = true
   project_id            = data.azuredevops_project.sandbox.id
   service_principal_id  = "00000000-0000-0000-0000-000000000000"
   service_principal_key = "GTu62azpC#qA2K*X"
@@ -33,7 +34,8 @@ resource "azuredevops_serviceendpoint_azurerm" "production" {
 
 ### Required
 
-- `name` (String) The service endpoint name.
+- `grant_all_pipelines` (Boolean) Set to true to grant access to all pipelines in the project.
+- `name` (String) The name of the service endpoint.
 - `project_id` (String) The ID of the project.
 - `service_principal_id` (String, Sensitive) The ID of the service principal.
 - `service_principal_key` (String, Sensitive) The secret key of the service principal.
@@ -47,4 +49,4 @@ resource "azuredevops_serviceendpoint_azurerm" "production" {
 
 ### Read-Only
 
-- `id` (String) The ID of the service connection.
+- `id` (String) The ID of the service endpoint.

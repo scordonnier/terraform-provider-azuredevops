@@ -17,10 +17,11 @@ data "azuredevops_project" "sandbox" {
 }
 
 resource "azuredevops_serviceendpoint_github" "private" {
-  access_token = "GTu62azpC#qA2K*X"
-  description  = "Managed by Terraform"
-  name         = "GitHub-Private"
-  project_id   = data.azuredevops_project.sandbox.id
+  access_token        = "GTu62azpC#qA2K*X"
+  grant_all_pipelines = true
+  description         = "Managed by Terraform"
+  name                = "GitHub-Private"
+  project_id          = data.azuredevops_project.sandbox.id
 }
 ```
 
@@ -30,6 +31,7 @@ resource "azuredevops_serviceendpoint_github" "private" {
 ### Required
 
 - `access_token` (String, Sensitive) GitHub personal access token.
+- `grant_all_pipelines` (Boolean) Set to true to grant access to all pipelines in the project.
 - `name` (String) The name of the service endpoint.
 - `project_id` (String) The ID of the project.
 
