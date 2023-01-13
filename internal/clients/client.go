@@ -7,6 +7,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/workitems"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"path"
 	"strings"
@@ -19,6 +20,7 @@ type AzureDevOpsClient struct {
 	PipelineClient        *pipelines.Client
 	SecurityClient        *security.Client
 	ServiceEndpointClient *serviceendpoint.Client
+	WorkItemClient        *workitems.Client
 }
 
 func NewAzureDevOpsClient(organizationUrl string, authorization string, providerVersion string) *AzureDevOpsClient {
@@ -32,5 +34,6 @@ func NewAzureDevOpsClient(organizationUrl string, authorization string, provider
 		PipelineClient:        pipelines.NewClient(azdoClient),
 		SecurityClient:        security.NewClient(azdoClient, vsspsClient),
 		ServiceEndpointClient: serviceendpoint.NewClient(azdoClient),
+		WorkItemClient:        workitems.NewClient(azdoClient),
 	}
 }
