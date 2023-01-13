@@ -23,14 +23,14 @@ func NewClient(restClient *networking.RestClient) *Client {
 	}
 }
 
-func (c *Client) GetArea(ctx context.Context, path string) (*WorkItemClassificationNode, error) {
-	pathSegments := []string{pathApis, pathWit, pathClassificationNodes, pathClassificationNodeAreas, path}
+func (c *Client) GetArea(ctx context.Context, projectId string, path string) (*WorkItemClassificationNode, error) {
+	pathSegments := []string{projectId, pathApis, pathWit, pathClassificationNodes, pathClassificationNodeAreas, path}
 	area, _, err := networking.GetJSON[WorkItemClassificationNode](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return area, err
 }
 
-func (c *Client) GetIteration(ctx context.Context, path string) (*WorkItemClassificationNode, error) {
-	pathSegments := []string{pathApis, pathWit, pathClassificationNodes, pathClassificationNodeIterations, path}
+func (c *Client) GetIteration(ctx context.Context, projectId string, path string) (*WorkItemClassificationNode, error) {
+	pathSegments := []string{projectId, pathApis, pathWit, pathClassificationNodes, pathClassificationNodeIterations, path}
 	iteration, _, err := networking.GetJSON[WorkItemClassificationNode](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return iteration, err
 }
