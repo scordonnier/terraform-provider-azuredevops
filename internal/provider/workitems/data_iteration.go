@@ -11,41 +11,41 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ datasource.DataSource = &AreaDataSource{}
+var _ datasource.DataSource = &IterationDataSource{}
 
-func NewAreaDataSource() datasource.DataSource {
-	return &AreaDataSource{}
+func NewIterationDataSource() datasource.DataSource {
+	return &IterationDataSource{}
 }
 
-type AreaDataSource struct {
+type IterationDataSource struct {
 	client *workitems.Client
 }
 
-type AreaDataSourceModel struct {
+type IterationDataSourceModel struct {
 	HasChildren *bool   `tfsdk:"has_children"`
 	Name        *string `tfsdk:"name"`
 	Path        string  `tfsdk:"path"`
 	ProjectId   string  `tfsdk:"project_id"`
 }
 
-func (d *AreaDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_area"
+func (d *IterationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_iteration"
 }
 
-func (d *AreaDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *IterationDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Use this data source to access information about an existing area within an Azure DevOps project.",
+		MarkdownDescription: "Use this data source to access information about an existing iteration within an Azure DevOps project.",
 		Attributes: map[string]schema.Attribute{
 			"has_children": schema.BoolAttribute{
-				MarkdownDescription: "Indicates if the area has any child areas.",
+				MarkdownDescription: "Indicates if the iteration has any child iterations.",
 				Computed:            true,
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the area.",
+				MarkdownDescription: "The name of the iteration.",
 				Computed:            true,
 			},
 			"path": schema.StringAttribute{
-				MarkdownDescription: "The path of the area.",
+				MarkdownDescription: "The path of the iteration.",
 				Required:            true,
 			},
 			"project_id": schema.StringAttribute{
@@ -59,7 +59,7 @@ func (d *AreaDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 	}
 }
 
-func (d *AreaDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *IterationDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -67,27 +67,27 @@ func (d *AreaDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 	d.client = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemClient
 }
 
-func (d *AreaDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var model AreaDataSourceModel
+func (d *IterationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var model IterationDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	area, err := d.client.GetArea(ctx, model.ProjectId, model.Path)
+	iteration, err := d.client.GetIteration(ctx, model.ProjectId, model.Path)
 	if err != nil {
 		if utils.ResponseWasNotFound(err) {
-			resp.Diagnostics.AddError(fmt.Sprintf("Area at path '%s' does not exist", model.Path), err.Error())
+			resp.Diagnostics.AddError(fmt.Sprintf("Iteration at path '%s' does not exist", model.Path), err.Error())
 			return
 		}
 
-		resp.Diagnostics.AddError(fmt.Sprintf("Unable to find area ath path '%s'", model.Path), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Unable to find iteration ath path '%s'", model.Path), err.Error())
 		return
 	}
 
-	model.HasChildren = area.HasChildren
-	model.Name = area.Name
+	model.HasChildren = iteration.HasChildren
+	model.Name = iteration.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }

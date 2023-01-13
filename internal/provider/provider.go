@@ -75,6 +75,7 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 		graph.NewUserDataSource,
 		graph.NewUsersDataSource,
 		workitems.NewAreaDataSource,
+		workitems.NewIterationDataSource,
 	}
 }
 

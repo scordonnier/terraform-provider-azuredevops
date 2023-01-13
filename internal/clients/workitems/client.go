@@ -3,6 +3,7 @@ package workitems
 import (
 	"context"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
+	"strings"
 )
 
 const (
@@ -24,13 +25,13 @@ func NewClient(restClient *networking.RestClient) *Client {
 }
 
 func (c *Client) GetArea(ctx context.Context, projectId string, path string) (*WorkItemClassificationNode, error) {
-	pathSegments := []string{projectId, pathApis, pathWit, pathClassificationNodes, pathClassificationNodeAreas, path}
+	pathSegments := []string{projectId, pathApis, pathWit, pathClassificationNodes, pathClassificationNodeAreas, strings.TrimPrefix(path, "/")}
 	area, _, err := networking.GetJSON[WorkItemClassificationNode](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return area, err
 }
 
 func (c *Client) GetIteration(ctx context.Context, projectId string, path string) (*WorkItemClassificationNode, error) {
-	pathSegments := []string{projectId, pathApis, pathWit, pathClassificationNodes, pathClassificationNodeIterations, path}
+	pathSegments := []string{projectId, pathApis, pathWit, pathClassificationNodes, pathClassificationNodeIterations, strings.TrimPrefix(path, "/")}
 	iteration, _, err := networking.GetJSON[WorkItemClassificationNode](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return iteration, err
 }
