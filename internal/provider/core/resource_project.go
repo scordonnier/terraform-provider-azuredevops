@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -14,10 +13,10 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"strings"
 )
 
 var _ resource.Resource = &ProjectResource{}
-var _ resource.ResourceWithImportState = &ProjectResource{}
 
 func NewProjectResource() resource.Resource {
 	return &ProjectResource{}
@@ -100,9 +99,10 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	operation, err := r.client.CreateProject(ctx, model.Name, model.Description, model.Visibility, model.ProcessTemplateId, model.VersionControl)
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
+	operation, err := r.client.CreateProject(ctx, model.Name, *description, model.Visibility, model.ProcessTemplateId, model.VersionControl)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create project", err.Error())
+		resp.Diagnostics.AddError("Failed to create project", err.Error())
 		return
 	}
 
@@ -138,7 +138,7 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 			return
 		}
 
-		resp.Diagnostics.AddError(fmt.Sprintf("Project with Id '%s' not found", model.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError("Failed to retrieve Project", err.Error())
 		return
 	}
 
@@ -152,16 +152,21 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *ProjectResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
+	var currentModel *ProjectResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &currentModel)...)
+
+	var newModel *ProjectResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &newModel)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	operation, err := r.client.UpdateProject(ctx, model.Id.ValueString(), model.Name, model.Description)
+	name := utils.IfThenElse[string](strings.EqualFold(currentModel.Name, newModel.Name), "", newModel.Name)
+	description := utils.IfThenElse[*string](newModel.Description != nil, newModel.Description, utils.EmptyString)
+	operation, err := r.client.UpdateProject(ctx, newModel.Id.ValueString(), name, *description)
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Project with Id '%s' failed to update", model.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError("Failed to update Project", err.Error())
 		return
 	}
 
@@ -171,7 +176,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &newModel)...)
 }
 
 func (r *ProjectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -193,8 +198,4 @@ func (r *ProjectResource) Delete(ctx context.Context, req resource.DeleteRequest
 		resp.Diagnostics.AddError("Waiting for project delete", err.Error())
 		return
 	}
-}
-
-func (r *ProjectResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

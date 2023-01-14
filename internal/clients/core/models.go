@@ -103,7 +103,7 @@ type TeamProject struct {
 	Capabilities        *map[string]map[string]string `json:"capabilities,omitempty"`
 	DefaultTeam         *WebApiTeamRef                `json:"defaultTeam,omitempty"`
 	DefaultTeamImageUrl *string                       `json:"defaultTeamImageUrl,omitempty"`
-	Description         *string                       `json:"description,omitempty"`
+	Description         *string                       `json:"description"`
 	Id                  *uuid.UUID                    `json:"id,omitempty"`
 	LastUpdateTime      *Time                         `json:"lastUpdateTime,omitempty"`
 	Links               *interface{}                  `json:"_links,omitempty"`

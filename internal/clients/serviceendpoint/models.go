@@ -83,7 +83,7 @@ type ServiceEndpoint struct {
 	Authorization                    *EndpointAuthorization             `json:"authorization,omitempty"`
 	CreatedBy                        *core.IdentityRef                  `json:"createdBy,omitempty"`
 	Data                             *map[string]string                 `json:"data,omitempty"`
-	Description                      *string                            `json:"description,omitempty"`
+	Description                      *string                            `json:"description"`
 	GroupScopeId                     *uuid.UUID                         `json:"groupScopeId,omitempty"`
 	Id                               *uuid.UUID                         `json:"id,omitempty"`
 	IsReady                          *bool                              `json:"isReady,omitempty"`

@@ -2,7 +2,6 @@ package serviceendpoint
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -14,7 +13,6 @@ import (
 )
 
 var _ resource.Resource = &ServiceEndpointGitHubResource{}
-var _ resource.ResourceWithImportState = &ServiceEndpointGitHubResource{}
 
 func NewServiceEndpointGitHubResource() resource.Resource {
 	return &ServiceEndpointGitHubResource{}
@@ -27,7 +25,7 @@ type ServiceEndpointGitHubResource struct {
 
 type ServiceEndpointGitHubResourceModel struct {
 	AccessToken       string       `tfsdk:"access_token"`
-	Description       string       `tfsdk:"description"`
+	Description       *string      `tfsdk:"description"`
 	GrantAllPipelines bool         `tfsdk:"grant_all_pipelines"`
 	Id                types.String `tfsdk:"id"`
 	Name              string       `tfsdk:"name"`
@@ -91,7 +89,7 @@ func (r *ServiceEndpointGitHubResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	model.Description = *serviceEndpoint.Description
+	model.Description = utils.IfThenElse[*string](serviceEndpoint.Description != nil, model.Description, utils.EmptyString)
 	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
 
@@ -125,15 +123,12 @@ func (r *ServiceEndpointGitHubResource) Delete(ctx context.Context, req resource
 	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
 }
 
-func (r *ServiceEndpointGitHubResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
 // Private Methods
 
 func (r *ServiceEndpointGitHubResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointGitHubResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
-		Description:       model.Description,
+		Description:       *description,
 		GrantAllPipelines: model.GrantAllPipelines,
 		Name:              model.Name,
 		Type:              serviceendpoint.ServiceEndpointTypeGitHub,

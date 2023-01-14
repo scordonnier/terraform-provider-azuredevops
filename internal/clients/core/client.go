@@ -32,7 +32,7 @@ func NewClient(restClient *networking.RestClient) *Client {
 	}
 }
 
-func (c *Client) CreateProject(ctx context.Context, name string, description *string, visibility string, processTemplateId string, versionControl string) (*OperationReference, error) {
+func (c *Client) CreateProject(ctx context.Context, name string, description string, visibility string, processTemplateId string, versionControl string) (*OperationReference, error) {
 	pathSegments := []string{pathApis, pathProjects}
 	body := TeamProject{
 		Capabilities: &map[string]map[string]string{
@@ -43,7 +43,7 @@ func (c *Client) CreateProject(ctx context.Context, name string, description *st
 				CapabilitiesVersionControlType: versionControl,
 			},
 		},
-		Description: description,
+		Description: &description,
 		Name:        &name,
 		Visibility:  &visibility,
 	}
@@ -153,13 +153,13 @@ func (c *Client) OperationStateChangeConf(ctx context.Context, client *Client, o
 	}
 }
 
-func (c *Client) UpdateProject(ctx context.Context, projectId string, name string, description *string) (*OperationReference, error) {
+func (c *Client) UpdateProject(ctx context.Context, projectId string, name string, description string) (*OperationReference, error) {
 	pathSegments := []string{pathApis, pathProjects, projectId}
-	body := TeamProject{
-		Description: description,
-		Name:        &name,
+	project := TeamProject{Description: &description}
+	if name != "" {
+		project.Name = &name
 	}
-	operation, _, err := networking.PatchJSON[OperationReference](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
+	operation, _, err := networking.PatchJSON[OperationReference](c.restClient, ctx, pathSegments, nil, project, networking.ApiVersion70)
 	return operation, err
 }
 
