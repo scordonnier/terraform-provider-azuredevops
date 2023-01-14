@@ -6,6 +6,10 @@ import (
 	"regexp"
 )
 
+func DateTimeValidator() validator.String {
+	return stringvalidator.RegexMatches(regexp.MustCompile("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"), "must not be valid date (eg. 2000-12-25T00:00:00Z)")
+}
+
 func StringNotEmptyValidator() validator.String {
 	return stringvalidator.RegexMatches(regexp.MustCompile("^.*\\S.*$"), "must not be empty")
 }

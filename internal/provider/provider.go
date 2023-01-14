@@ -12,6 +12,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/distributedtask"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/workitems"
 )
 
 var _ provider.Provider = &AzureDevOpsProvider{}
@@ -73,6 +74,8 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 		graph.NewGroupsDataSource,
 		graph.NewUserDataSource,
 		graph.NewUsersDataSource,
+		workitems.NewAreaDataSource,
+		workitems.NewIterationDataSource,
 	}
 }
 
@@ -91,6 +94,8 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		serviceendpoint.NewServiceEndpointKubernetesResource,
 		serviceendpoint.NewServiceEndpointShareResource,
 		serviceendpoint.NewServiceEndpointVsAppCenterResource,
+		workitems.NewAreaResource,
+		workitems.NewIterationResource,
 	}
 }
 
