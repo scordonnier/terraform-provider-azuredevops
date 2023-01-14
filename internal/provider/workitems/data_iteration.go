@@ -2,7 +2,6 @@ package workitems
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -23,6 +22,7 @@ type IterationDataSource struct {
 
 type IterationDataSourceModel struct {
 	HasChildren *bool   `tfsdk:"has_children"`
+	Id          *int    `tfsdk:"id"`
 	Name        *string `tfsdk:"name"`
 	Path        string  `tfsdk:"path"`
 	ProjectId   string  `tfsdk:"project_id"`
@@ -38,6 +38,10 @@ func (d *IterationDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"has_children": schema.BoolAttribute{
 				MarkdownDescription: "Indicates if the iteration has any child iterations.",
+				Computed:            true,
+			},
+			"id": schema.Int64Attribute{
+				MarkdownDescription: "The ID of the iteration.",
 				Computed:            true,
 			},
 			"name": schema.StringAttribute{
@@ -78,15 +82,16 @@ func (d *IterationDataSource) Read(ctx context.Context, req datasource.ReadReque
 	iteration, err := d.client.GetIteration(ctx, model.ProjectId, model.Path)
 	if err != nil {
 		if utils.ResponseWasNotFound(err) {
-			resp.Diagnostics.AddError(fmt.Sprintf("Iteration at path '%s' does not exist", model.Path), err.Error())
+			resp.Diagnostics.AddError("Iteration not found", err.Error())
 			return
 		}
 
-		resp.Diagnostics.AddError(fmt.Sprintf("Unable to find iteration ath path '%s'", model.Path), err.Error())
+		resp.Diagnostics.AddError("Unable to retrieve iteration", err.Error())
 		return
 	}
 
 	model.HasChildren = iteration.HasChildren
+	model.Id = iteration.Id
 	model.Name = iteration.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
