@@ -2,8 +2,6 @@ package core
 
 import (
 	"context"
-	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -16,7 +14,6 @@ import (
 )
 
 var _ resource.Resource = &TeamResource{}
-var _ resource.ResourceWithImportState = &TeamResource{}
 
 func NewTeamResource() resource.Resource {
 	return &TeamResource{}
@@ -27,7 +24,7 @@ type TeamResource struct {
 }
 
 type TeamResourceModel struct {
-	Description types.String `tfsdk:"description"`
+	Description *string      `tfsdk:"description"`
 	Id          types.String `tfsdk:"id"`
 	Name        string       `tfsdk:"name"`
 	ProjectId   string       `tfsdk:"project_id"`
@@ -83,13 +80,13 @@ func (r *TeamResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	team, err := r.client.CreateTeam(ctx, model.ProjectId, model.Name, model.Description.ValueString())
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
+	team, err := r.client.CreateTeam(ctx, model.ProjectId, model.Name, *description)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create team", err.Error())
+		resp.Diagnostics.AddError("Failed to create Team", err.Error())
 		return
 	}
 
-	model.Description = types.StringValue(*team.Description)
 	model.Id = types.StringValue(team.Id.String())
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
@@ -110,11 +107,11 @@ func (r *TeamResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			return
 		}
 
-		resp.Diagnostics.AddError(fmt.Sprintf("Team with Id '%s' not found", model.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError("Unable to retrieve the team", err.Error())
 		return
 	}
 
-	model.Description = types.StringValue(*team.Description)
+	model.Description = utils.IfThenElse[*string](team.Description != nil, model.Description, utils.EmptyString)
 	model.Name = *team.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
@@ -128,9 +125,10 @@ func (r *TeamResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	_, err := r.client.UpdateTeam(ctx, model.ProjectId, model.Id.ValueString(), model.Name, model.Description.ValueString())
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
+	_, err := r.client.UpdateTeam(ctx, model.ProjectId, model.Id.ValueString(), model.Name, *description)
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Team with Id '%s' failed to update", model.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError("Failed to update Team", err.Error())
 		return
 	}
 
@@ -147,10 +145,6 @@ func (r *TeamResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	err := r.client.DeleteTeam(ctx, model.ProjectId, model.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Team with Id '%s' failed to delete", model.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError("Failed to delete Team", err.Error())
 	}
-}
-
-func (r *TeamResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
