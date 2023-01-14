@@ -2,6 +2,8 @@ package utils
 
 import "github.com/google/uuid"
 
+var EmptyString = String("")
+
 // Bool Get a pointer to a boolean value
 func Bool(value bool) *bool {
 	return &value

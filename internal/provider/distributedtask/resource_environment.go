@@ -3,7 +3,6 @@ package distributedtask
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -16,7 +15,6 @@ import (
 )
 
 var _ resource.Resource = &EnvironmentResource{}
-var _ resource.ResourceWithImportState = &EnvironmentResource{}
 
 func NewEnvironmentResource() resource.Resource {
 	return &EnvironmentResource{}
@@ -27,7 +25,7 @@ type EnvironmentResource struct {
 }
 
 type EnvironmentResourceModel struct {
-	Description string      `tfsdk:"description"`
+	Description *string     `tfsdk:"description"`
 	Id          types.Int64 `tfsdk:"id"`
 	Name        string      `tfsdk:"name"`
 	ProjectId   string      `tfsdk:"project_id"`
@@ -83,7 +81,8 @@ func (r *EnvironmentResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	environment, err := r.client.CreateEnvironment(ctx, model.ProjectId, model.Name, model.Description)
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
+	environment, err := r.client.CreateEnvironment(ctx, model.ProjectId, model.Name, *description)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create environment", err.Error())
 		return
@@ -113,7 +112,7 @@ func (r *EnvironmentResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	model.Description = *environment.Description
+	model.Description = utils.IfThenElse[*string](environment.Description != nil, model.Description, utils.EmptyString)
 	model.Name = *environment.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
@@ -127,7 +126,8 @@ func (r *EnvironmentResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	_, err := r.client.UpdateEnvironment(ctx, model.ProjectId, int(model.Id.ValueInt64()), model.Name, model.Description)
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
+	_, err := r.client.UpdateEnvironment(ctx, model.ProjectId, int(model.Id.ValueInt64()), model.Name, *description)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Environment with Id '%d' failed to update", model.Id.ValueInt64()), err.Error())
 		return
@@ -148,8 +148,4 @@ func (r *EnvironmentResource) Delete(ctx context.Context, req resource.DeleteReq
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Environment with Id '%d' failed to delete", model.Id.ValueInt64()), err.Error())
 	}
-}
-
-func (r *EnvironmentResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
