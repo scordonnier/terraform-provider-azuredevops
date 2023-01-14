@@ -2,7 +2,6 @@ package serviceendpoint
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -14,7 +13,6 @@ import (
 )
 
 var _ resource.Resource = &ServiceEndpointVsAppCenterResource{}
-var _ resource.ResourceWithImportState = &ServiceEndpointVsAppCenterResource{}
 
 func NewServiceEndpointVsAppCenterResource() resource.Resource {
 	return &ServiceEndpointVsAppCenterResource{}
@@ -27,7 +25,7 @@ type ServiceEndpointVsAppCenterResource struct {
 
 type ServiceEndpointVsAppCenterResourceModel struct {
 	ApiToken          string       `tfsdk:"api_token"`
-	Description       string       `tfsdk:"description"`
+	Description       *string      `tfsdk:"description"`
 	GrantAllPipelines bool         `tfsdk:"grant_all_pipelines"`
 	Id                types.String `tfsdk:"id"`
 	Name              string       `tfsdk:"name"`
@@ -91,7 +89,7 @@ func (r *ServiceEndpointVsAppCenterResource) Read(ctx context.Context, req resou
 		return
 	}
 
-	model.Description = *serviceEndpoint.Description
+	model.Description = utils.IfThenElse[*string](serviceEndpoint.Description != nil, model.Description, utils.EmptyString)
 	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
 
@@ -125,15 +123,12 @@ func (r *ServiceEndpointVsAppCenterResource) Delete(ctx context.Context, req res
 	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
 }
 
-func (r *ServiceEndpointVsAppCenterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
 // Private Methods
 
 func (r *ServiceEndpointVsAppCenterResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointVsAppCenterResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
-		Description:       model.Description,
+		Description:       *description,
 		GrantAllPipelines: model.GrantAllPipelines,
 		Name:              model.Name,
 		Type:              serviceendpoint.ServiceEndpointTypeVsAppCenter,

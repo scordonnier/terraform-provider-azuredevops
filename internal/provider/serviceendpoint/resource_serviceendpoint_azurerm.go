@@ -2,17 +2,16 @@ package serviceendpoint
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
 var _ resource.Resource = &ServiceEndpointAzureRmResource{}
-var _ resource.ResourceWithImportState = &ServiceEndpointAzureRmResource{}
 
 func NewServiceEndpointAzureRmResource() resource.Resource {
 	return &ServiceEndpointAzureRmResource{}
@@ -24,7 +23,7 @@ type ServiceEndpointAzureRmResource struct {
 }
 
 type ServiceEndpointAzureRmResourceModel struct {
-	Description         string       `tfsdk:"description"`
+	Description         *string      `tfsdk:"description"`
 	Id                  types.String `tfsdk:"id"`
 	GrantAllPipelines   bool         `tfsdk:"grant_all_pipelines"`
 	Name                string       `tfsdk:"name"`
@@ -107,7 +106,7 @@ func (r *ServiceEndpointAzureRmResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	model.Description = *serviceEndpoint.Description
+	model.Description = utils.IfThenElse[*string](serviceEndpoint.Description != nil, model.Description, utils.EmptyString)
 	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
 	model.ServicePrincipalId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServicePrincipalId]
@@ -145,13 +144,12 @@ func (r *ServiceEndpointAzureRmResource) Delete(ctx context.Context, req resourc
 	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
 }
 
-func (r *ServiceEndpointAzureRmResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
+// Private Methods
 
 func (r *ServiceEndpointAzureRmResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointAzureRmResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
-		Description:         model.Description,
+		Description:         *description,
 		GrantAllPipelines:   model.GrantAllPipelines,
 		Name:                model.Name,
 		ServicePrincipalId:  model.ServicePrincipalId,

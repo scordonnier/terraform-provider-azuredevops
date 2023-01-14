@@ -4,18 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
 var _ resource.Resource = &ServiceEndpointKubernetesResource{}
-var _ resource.ResourceWithImportState = &ServiceEndpointKubernetesResource{}
 
 func NewServiceEndpointKubernetesResource() resource.Resource {
 	return &ServiceEndpointKubernetesResource{}
@@ -27,7 +26,7 @@ type ServiceEndpointKubernetesResource struct {
 }
 
 type ServiceEndpointKubernetesResourceModel struct {
-	Description       string                    `tfsdk:"description"`
+	Description       *string                   `tfsdk:"description"`
 	GrantAllPipelines bool                      `tfsdk:"grant_all_pipelines"`
 	Id                types.String              `tfsdk:"id"`
 	Kubeconfig        ServiceEndpointKubeconfig `tfsdk:"kubeconfig"`
@@ -110,7 +109,7 @@ func (r *ServiceEndpointKubernetesResource) Read(ctx context.Context, req resour
 		return
 	}
 
-	model.Description = *serviceEndpoint.Description
+	model.Description = utils.IfThenElse[*string](serviceEndpoint.Description != nil, model.Description, utils.EmptyString)
 	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
 
@@ -150,10 +149,6 @@ func (r *ServiceEndpointKubernetesResource) Delete(ctx context.Context, req reso
 	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
 }
 
-func (r *ServiceEndpointKubernetesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
 // Private Methods
 
 func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointKubernetesResourceModel) (*serviceendpoint.CreateOrUpdateServiceEndpointArgs, error) {
@@ -171,11 +166,12 @@ func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs
 
 	server := clusters[0].(map[string]interface{})["cluster"].(map[string]interface{})["server"].(string)
 	clusterContext := contexts[0].(map[string]interface{})["name"].(string)
+	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
 	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
 		AcceptUntrustedCertificates: model.Kubeconfig.AcceptUntrustedCertificates,
 		ClusterContext:              clusterContext,
 		GrantAllPipelines:           model.GrantAllPipelines,
-		Description:                 model.Description,
+		Description:                 *description,
 		Kubeconfig:                  model.Kubeconfig.YamlContent,
 		Name:                        model.Name,
 		Type:                        serviceendpoint.ServiceEndpointTypekubernetes,
