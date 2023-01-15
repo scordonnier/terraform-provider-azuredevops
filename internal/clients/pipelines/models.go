@@ -8,11 +8,28 @@ type Permission struct {
 	AuthorizedOn *core.Time        `json:"authorizedOn,omitempty"`
 }
 
+type PipelineGeneralSettings struct {
+	DisableClassicPipelineCreation   *bool `json:"disableClassicPipelineCreation,omitempty"`
+	EnforceJobAuthScope              *bool `json:"enforceJobAuthScope,omitempty"`
+	EnforceJobAuthScopeForReleases   *bool `json:"enforceJobAuthScopeForReleases,omitempty"`
+	EnforceReferencedRepoScopedToken *bool `json:"enforceReferencedRepoScopedToken,omitempty"`
+	EnforceSettableVar               *bool `json:"enforceSettableVar,omitempty"`
+	PublishPipelineMetadata          *bool `json:"publishPipelineMetadata,omitempty"`
+	StatusBadgesArePrivate           *bool `json:"statusBadgesArePrivate,omitempty"`
+}
+
 type PipelinePermission struct {
 	Authorized   *bool             `json:"authorized,omitempty"`
 	AuthorizedBy *core.IdentityRef `json:"authorizedBy,omitempty"`
 	AuthorizedOn *core.Time        `json:"authorizedOn,omitempty"`
 	Id           *int              `json:"id,omitempty"`
+}
+
+type PipelineRetentionSettings struct {
+	PurgeArtifacts               *RetentionSetting `json:"purgeArtifacts,omitempty"`
+	PurgePullRequestRuns         *RetentionSetting `json:"purgePullRequestRuns,omitempty"`
+	PurgeRuns                    *RetentionSetting `json:"purgeRuns,omitempty"`
+	RetainRunsPerProtectedBranch *RetentionSetting `json:"retainRunsPerProtectedBranch,omitempty"`
 }
 
 type Resource struct {
@@ -25,4 +42,10 @@ type ResourcePipelinePermissions struct {
 	AllPipelines *Permission           `json:"allPipelines,omitempty"`
 	Pipelines    *[]PipelinePermission `json:"pipelines,omitempty"`
 	Resource     *Resource             `json:"resource,omitempty"`
+}
+
+type RetentionSetting struct {
+	Max   *int `json:"max,omitempty"`
+	Min   *int `json:"min,omitempty"`
+	Value *int `json:"value,omitempty"`
 }

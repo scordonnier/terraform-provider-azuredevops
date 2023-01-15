@@ -71,6 +71,7 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 		core.NewProjectFeaturesDataSource,
 		core.NewTeamDataSource,
 		core.NewTeamsDataSource,
+		distributedtask.NewPipelineSettingsDataSource,
 		graph.NewGroupDataSource,
 		graph.NewGroupsDataSource,
 		graph.NewUserDataSource,

@@ -38,15 +38,15 @@ func (d *ProjectFeaturesDataSource) Schema(_ context.Context, _ datasource.Schem
 		MarkdownDescription: "Use this data source to access information about features of an existing project within Azure DevOps.",
 		Attributes: map[string]schema.Attribute{
 			"artifacts": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "If enabled, gives access to Artifacts.",
 				Computed:            true,
 			},
 			"boards": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "If enabled, gives access to Azure Boards.",
 				Computed:            true,
 			},
 			"pipelines": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "If enabled, gives access to Azure Pipelines.",
 				Computed:            true,
 			},
 			"project_id": schema.StringAttribute{
@@ -57,11 +57,11 @@ func (d *ProjectFeaturesDataSource) Schema(_ context.Context, _ datasource.Schem
 				},
 			},
 			"repositories": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "If enabled, gives access to Azure Repos.",
 				Computed:            true,
 			},
 			"testplans": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "If enabled, gives access to Azure Test Plans.",
 				Computed:            true,
 			},
 		},
