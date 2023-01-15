@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_serviceendpoint_vsappcenter Resource - azuredevops"
-subcategory: ""
+subcategory: "Service Endpoints"
 description: |-
   Manages a Visual Studio App Center service endpoint within an Azure DevOps project.
 ---

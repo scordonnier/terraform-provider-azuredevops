@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_teams Data Source - azuredevops"
-subcategory: ""
+subcategory: "Users & Groups"
 description: |-
   Use this data source to access information about existing teams within an Azure DevOps project.
 ---

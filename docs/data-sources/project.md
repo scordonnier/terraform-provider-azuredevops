@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_project Data Source - azuredevops"
-subcategory: ""
+subcategory: "Projects"
 description: |-
   Use this data source to access information about an existing project within Azure DevOps.
 ---

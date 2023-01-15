@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_environment_kubernetes Resource - azuredevops"
-subcategory: ""
+subcategory: "Pipelines"
 description: |-
   Manage a Kubernetes resource on an environment in Azure Pipelines.
 ---
