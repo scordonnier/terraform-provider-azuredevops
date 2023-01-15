@@ -10,7 +10,31 @@ const (
 	CapabilitiesProcessTemplateTypeId = "templateTypeId"
 	CapabilitiesVersionControl        = "versioncontrol"
 	CapabilitiesVersionControlType    = "sourceControlType"
+	ProjectFeatureArtifacts           = "ms.azure-artifacts.feature"
+	ProjectFeatureBoards              = "ms.vss-work.agile"
+	ProjectFeaturePipelines           = "ms.vss-build.pipelines"
+	ProjectFeatureRepositories        = "ms.vss-code.version-control"
+	ProjectFeatureTestPlans           = "ms.vss-test-web.test"
 )
+
+type ContributedFeatureSettingScope struct {
+	SettingScope *string `json:"settingScope,omitempty"`
+	UserScoped   *bool   `json:"userScoped,omitempty"`
+}
+
+type ContributedFeatureState struct {
+	FeatureId  *string                         `json:"featureId,omitempty"`
+	Overridden *bool                           `json:"overridden,omitempty"`
+	Reason     *string                         `json:"reason,omitempty"`
+	Scope      *ContributedFeatureSettingScope `json:"scope,omitempty"`
+	State      *string                         `json:"state,omitempty"`
+}
+
+type ContributedFeatureStateQuery struct {
+	FeatureIds    *[]string                           `json:"featureIds,omitempty"`
+	FeatureStates *map[string]ContributedFeatureState `json:"featureStates,omitempty"`
+	ScopeValues   *map[string]string                  `json:"scopeValues,omitempty"`
+}
 
 type Identity struct {
 	CustomDisplayName   *string      `json:"customDisplayName,omitempty"`

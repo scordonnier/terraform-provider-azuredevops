@@ -68,6 +68,7 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 	return []func() datasource.DataSource{
 		core.NewProcessDataSource,
 		core.NewProjectDataSource,
+		core.NewProjectFeaturesDataSource,
 		core.NewTeamDataSource,
 		core.NewTeamsDataSource,
 		graph.NewGroupDataSource,

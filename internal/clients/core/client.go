@@ -14,12 +14,16 @@ import (
 )
 
 const (
-	pathApis       = "_apis"
-	pathOperations = "operations"
-	pathProcess    = "process"
-	pathProcesses  = "processes"
-	pathProjects   = "projects"
-	pathTeams      = "teams"
+	pathApis               = "_apis"
+	pathFeatureManagement  = "FeatureManagement"
+	pathFeatureStatesQuery = "FeatureStatesQuery"
+	pathHost               = "host"
+	pathOperations         = "operations"
+	pathProcess            = "process"
+	pathProcesses          = "processes"
+	pathProject            = "project"
+	pathProjects           = "projects"
+	pathTeams              = "teams"
 )
 
 type Client struct {
@@ -106,6 +110,24 @@ func (c *Client) GetProject(ctx context.Context, id string) (*TeamProject, error
 	queryParams := url.Values{"includeCapabilities": []string{"true"}}
 	project, _, err := networking.GetJSON[TeamProject](c.restClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	return project, err
+}
+
+func (c *Client) GetProjectFeatures(ctx context.Context, projectId string) (*ContributedFeatureStateQuery, error) {
+	pathSegments := []string{pathApis, pathFeatureManagement, pathFeatureStatesQuery, pathHost, pathProject, projectId}
+	body := &ContributedFeatureStateQuery{
+		FeatureIds: &[]string{
+			ProjectFeatureBoards,
+			ProjectFeatureRepositories,
+			ProjectFeaturePipelines,
+			ProjectFeatureTestPlans,
+			ProjectFeatureArtifacts,
+		},
+		ScopeValues: &map[string]string{
+			"project": projectId,
+		},
+	}
+	featureStates, _, err := networking.PostJSON[ContributedFeatureStateQuery](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
+	return featureStates, err
 }
 
 func (c *Client) GetProjects(ctx context.Context, state string, continuationToken string) (*[]TeamProjectReference, string, error) {
