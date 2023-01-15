@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_user Data Source - azuredevops"
-subcategory: ""
+subcategory: "Users & Groups"
 description: |-
   Use this data source to access information about an existing user within an Azure DevOps project.
 ---

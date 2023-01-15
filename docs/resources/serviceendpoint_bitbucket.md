@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_serviceendpoint_bitbucket Resource - azuredevops"
-subcategory: ""
+subcategory: "Service Endpoints"
 description: |-
   Manages a Bitbucket service endpoint within an Azure DevOps project.
 ---

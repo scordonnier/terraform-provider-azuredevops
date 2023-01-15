@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_group_membership Resource - azuredevops"
-subcategory: ""
+subcategory: "Users & Groups"
 description: |-
   Manage group membership within an Azure DevOps project.
 ---

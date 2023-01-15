@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_project Resource - azuredevops"
-subcategory: ""
+subcategory: "Projects"
 description: |-
   Manage a project within Azure DevOps.
 ---

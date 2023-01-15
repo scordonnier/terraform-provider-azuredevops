@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_serviceendpoint_github Resource - azuredevops"
-subcategory: ""
+subcategory: "Service Endpoints"
 description: |-
   Manages a GitHub service endpoint within an Azure DevOps project.
 ---

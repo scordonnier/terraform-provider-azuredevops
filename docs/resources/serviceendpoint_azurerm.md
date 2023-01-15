@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_serviceendpoint_azurerm Resource - azuredevops"
-subcategory: ""
+subcategory: "Service Endpoints"
 description: |-
   Manages an AzureRM service endpoint within an Azure DevOps project.
 ---

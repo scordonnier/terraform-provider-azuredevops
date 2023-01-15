@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_group Resource - azuredevops"
-subcategory: ""
+subcategory: "Users & Groups"
 description: |-
   Manage a group within an Azure DevOps project.
 ---

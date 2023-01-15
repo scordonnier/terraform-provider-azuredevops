@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_iteration Resource - azuredevops"
-subcategory: ""
+subcategory: "Work Items"
 description: |-
   Manage an iteration within an Azure DevOps project.
 ---

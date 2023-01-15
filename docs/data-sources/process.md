@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_process Data Source - azuredevops"
-subcategory: ""
+subcategory: "Projects"
 description: |-
   Use this data source to access information about an existing process within Azure DevOps.
 ---

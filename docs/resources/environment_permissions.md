@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_environment_permissions Resource - azuredevops"
-subcategory: ""
+subcategory: "Pipelines"
 description: |-
   Sets permissions on environments in Azure Pipelines. All permissions that currently exists will be overwritten.
 ---

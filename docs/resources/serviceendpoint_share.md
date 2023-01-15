@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_serviceendpoint_share Resource - azuredevops"
-subcategory: ""
+subcategory: "Service Endpoints"
 description: |-
   Shares a service endpoint with multiple Azure DevOps projects.
 ---

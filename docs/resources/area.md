@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_area Resource - azuredevops"
-subcategory: ""
+subcategory: "Work Items"
 description: |-
   Manage an area within an Azure DevOps project.
 ---

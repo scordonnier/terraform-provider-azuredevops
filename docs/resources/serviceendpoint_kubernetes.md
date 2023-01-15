@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_serviceendpoint_kubernetes Resource - azuredevops"
-subcategory: ""
+subcategory: "Service Endpoints"
 description: |-
   Manages a Kubernetes service endpoint within an Azure DevOps project.
 ---

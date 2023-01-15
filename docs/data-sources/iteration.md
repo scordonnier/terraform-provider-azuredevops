@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_iteration Data Source - azuredevops"
-subcategory: ""
+subcategory: "Work Items"
 description: |-
   Use this data source to access information about an existing iteration within an Azure DevOps project.
 ---

@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_environment Resource - azuredevops"
-subcategory: ""
+subcategory: "Pipelines"
 description: |-
   Manage environments in Azure Pipelines.
 ---
