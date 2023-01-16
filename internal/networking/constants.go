@@ -12,4 +12,5 @@ const (
 
 	ApiVersion70         = "7.0"
 	ApiVersion70Preview1 = "7.0-preview.1"
+	ApiVersion71Preview1 = "7.1-preview.1"
 )

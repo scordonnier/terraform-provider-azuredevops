@@ -68,8 +68,10 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 	return []func() datasource.DataSource{
 		core.NewProcessDataSource,
 		core.NewProjectDataSource,
+		core.NewProjectFeaturesDataSource,
 		core.NewTeamDataSource,
 		core.NewTeamsDataSource,
+		distributedtask.NewPipelineSettingsDataSource,
 		graph.NewGroupDataSource,
 		graph.NewGroupsDataSource,
 		graph.NewUserDataSource,
@@ -82,10 +84,12 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		core.NewProjectResource,
+		core.NewProjectFeaturesResource,
 		core.NewTeamResource,
 		distributedtask.NewEnvironmentResource,
 		distributedtask.NewEnvironmentKubernetesResource,
 		distributedtask.NewEnvironmentPermissionsResource,
+		distributedtask.NewPipelinesSettingsResource,
 		graph.NewGroupResource,
 		graph.NewGroupMembershipResource,
 		serviceendpoint.NewServiceEndpointAzureRmResource,

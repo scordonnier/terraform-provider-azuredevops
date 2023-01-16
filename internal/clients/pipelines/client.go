@@ -9,8 +9,11 @@ const (
 	PipelinePermissionsResourceTypeEndpoint = "endpoint"
 
 	pathApis                = "_apis"
+	pathBuild               = "build"
+	pathGeneralSettings     = "generalsettings"
 	pathPipelinePermissions = "pipelinepermissions"
 	pathPipelines           = "pipelines"
+	pathRetention           = "retention"
 )
 
 type Client struct {
@@ -29,6 +32,18 @@ func (c *Client) GetPipelinePermissions(ctx context.Context, projectId string, r
 	return permissions, err
 }
 
+func (c *Client) GetPipelineRetentionSettings(ctx context.Context, projectId string) (*PipelineRetentionSettings, error) {
+	pathSegments := []string{projectId, pathApis, pathBuild, pathRetention}
+	settings, _, err := networking.GetJSON[PipelineRetentionSettings](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
+	return settings, err
+}
+
+func (c *Client) GetPipelineSettings(ctx context.Context, projectId string) (*PipelineGeneralSettings, error) {
+	pathSegments := []string{projectId, pathApis, pathBuild, pathGeneralSettings}
+	settings, _, err := networking.GetJSON[PipelineGeneralSettings](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
+	return settings, err
+}
+
 func (c *Client) GrantAllPipelines(ctx context.Context, projectId string, resourceType string, resourceId string, granted bool) (*ResourcePipelinePermissions, error) {
 	pathSegments := []string{projectId, pathApis, pathPipelines, pathPipelinePermissions, resourceType, resourceId}
 	body := &ResourcePipelinePermissions{
@@ -42,4 +57,16 @@ func (c *Client) GrantAllPipelines(ctx context.Context, projectId string, resour
 	}
 	permissions, _, err := networking.PatchJSON[ResourcePipelinePermissions](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	return permissions, err
+}
+
+func (c *Client) UpdatePipelineRetentionSettings(ctx context.Context, projectId string, settings *UpdatePipelineRetentionSettings) (*PipelineRetentionSettings, error) {
+	pathSegments := []string{projectId, pathApis, pathBuild, pathRetention}
+	retentionSettings, _, err := networking.PatchJSON[PipelineRetentionSettings](c.restClient, ctx, pathSegments, nil, settings, networking.ApiVersion70)
+	return retentionSettings, err
+}
+
+func (c *Client) UpdatePipelineSettings(ctx context.Context, projectId string, settings *PipelineGeneralSettings) (*PipelineGeneralSettings, error) {
+	pathSegments := []string{projectId, pathApis, pathBuild, pathGeneralSettings}
+	generalSettings, _, err := networking.PatchJSON[PipelineGeneralSettings](c.restClient, ctx, pathSegments, nil, settings, networking.ApiVersion71Preview1)
+	return generalSettings, err
 }
