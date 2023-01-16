@@ -49,3 +49,10 @@ type RetentionSetting struct {
 	Min   *int `json:"min,omitempty"`
 	Value *int `json:"value,omitempty"`
 }
+
+type UpdatePipelineRetentionSettings struct {
+	PurgeArtifacts               *RetentionSetting `json:"artifactsRetention,omitempty"`
+	PurgePullRequestRuns         *RetentionSetting `json:"pullRequestRunRetention,omitempty"`
+	PurgeRuns                    *RetentionSetting `json:"runRetention,omitempty"`
+	RetainRunsPerProtectedBranch *RetentionSetting `json:"retainRunsPerProtectedBranch,omitempty"`
+}

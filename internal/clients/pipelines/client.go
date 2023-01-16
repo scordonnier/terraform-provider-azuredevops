@@ -58,3 +58,15 @@ func (c *Client) GrantAllPipelines(ctx context.Context, projectId string, resour
 	permissions, _, err := networking.PatchJSON[ResourcePipelinePermissions](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	return permissions, err
 }
+
+func (c *Client) UpdatePipelineRetentionSettings(ctx context.Context, projectId string, settings *UpdatePipelineRetentionSettings) (*PipelineRetentionSettings, error) {
+	pathSegments := []string{projectId, pathApis, pathBuild, pathRetention}
+	retentionSettings, _, err := networking.PatchJSON[PipelineRetentionSettings](c.restClient, ctx, pathSegments, nil, settings, networking.ApiVersion70)
+	return retentionSettings, err
+}
+
+func (c *Client) UpdatePipelineSettings(ctx context.Context, projectId string, settings *PipelineGeneralSettings) (*PipelineGeneralSettings, error) {
+	pathSegments := []string{projectId, pathApis, pathBuild, pathGeneralSettings}
+	generalSettings, _, err := networking.PatchJSON[PipelineGeneralSettings](c.restClient, ctx, pathSegments, nil, settings, networking.ApiVersion71Preview1)
+	return generalSettings, err
+}
