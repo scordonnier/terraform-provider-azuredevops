@@ -84,6 +84,7 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		core.NewProjectResource,
+		core.NewProjectFeaturesResource,
 		core.NewTeamResource,
 		distributedtask.NewEnvironmentResource,
 		distributedtask.NewEnvironmentKubernetesResource,

@@ -16,6 +16,7 @@ import (
 const (
 	pathApis               = "_apis"
 	pathFeatureManagement  = "FeatureManagement"
+	pathFeatureStates      = "FeatureStates"
 	pathFeatureStatesQuery = "FeatureStatesQuery"
 	pathHost               = "host"
 	pathOperations         = "operations"
@@ -183,6 +184,20 @@ func (c *Client) UpdateProject(ctx context.Context, projectId string, name strin
 	}
 	operation, _, err := networking.PatchJSON[OperationReference](c.restClient, ctx, pathSegments, nil, project, networking.ApiVersion70)
 	return operation, err
+}
+
+func (c *Client) UpdateProjectFeature(ctx context.Context, projectId string, featureId string, state string) (*ContributedFeatureState, error) {
+	pathSegments := []string{pathApis, pathFeatureManagement, pathFeatureStates, pathHost, pathProject, projectId, featureId}
+	body := &ContributedFeatureState{
+		FeatureId: &featureId,
+		Scope: &ContributedFeatureSettingScope{
+			SettingScope: utils.String("project"),
+			UserScoped:   utils.Bool(false),
+		},
+		State: &state,
+	}
+	featureState, _, err := networking.PatchJSON[ContributedFeatureState](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
+	return featureState, err
 }
 
 func (c *Client) UpdateTeam(ctx context.Context, projectId string, teamId string, name string, description string) (*WebApiTeam, error) {
