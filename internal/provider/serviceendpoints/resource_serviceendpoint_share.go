@@ -3,7 +3,6 @@ package serviceendpoints
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -15,7 +14,6 @@ import (
 )
 
 var _ resource.Resource = &ServiceEndpointShareResource{}
-var _ resource.ResourceWithImportState = &ServiceEndpointShareResource{}
 
 func NewServiceEndpointShareResource() resource.Resource {
 	return &ServiceEndpointShareResource{}
@@ -159,9 +157,7 @@ func (r *ServiceEndpointShareResource) Delete(ctx context.Context, req resource.
 	}
 }
 
-func (r *ServiceEndpointShareResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
+// Private Methods
 
 func (r *ServiceEndpointShareResource) createOrUpdateServiceEndpointShare(ctx context.Context, model *ServiceEndpointShareResourceModel) error {
 	id := model.Id.ValueString()

@@ -3,7 +3,6 @@ package pipelines
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -17,7 +16,6 @@ import (
 )
 
 var _ resource.Resource = &EnvironmentKubernetesResource{}
-var _ resource.ResourceWithImportState = &EnvironmentKubernetesResource{}
 
 func NewEnvironmentKubernetesResource() resource.Resource {
 	return &EnvironmentKubernetesResource{}
@@ -167,10 +165,6 @@ func (r *EnvironmentKubernetesResource) Delete(ctx context.Context, req resource
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete Kubernetes resource", err.Error())
 	}
-}
-
-func (r *EnvironmentKubernetesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 // Private Methods

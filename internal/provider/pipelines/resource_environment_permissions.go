@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -28,7 +27,6 @@ const (
 )
 
 var _ resource.Resource = &EnvironmentPermissionsResource{}
-var _ resource.ResourceWithImportState = &EnvironmentPermissionsResource{}
 
 func NewEnvironmentPermissionsResource() resource.Resource {
 	return &EnvironmentPermissionsResource{}
@@ -232,9 +230,7 @@ func (r *EnvironmentPermissionsResource) Delete(ctx context.Context, req resourc
 	}
 }
 
-func (r *EnvironmentPermissionsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
+// Private Methods
 
 func (r *EnvironmentPermissionsResource) getIdentityPermissions(p *[]EnvironmentPermissions) []*security.IdentityPermissions {
 	var permissions []*security.IdentityPermissions
