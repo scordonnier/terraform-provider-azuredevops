@@ -1,4 +1,4 @@
-package serviceendpoint
+package serviceendpoints
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
@@ -19,8 +19,8 @@ func NewServiceEndpointGitHubResource() resource.Resource {
 }
 
 type ServiceEndpointGitHubResource struct {
-	pipelineClient        *pipelines.Client
-	serviceEndpointClient *serviceendpoint.Client
+	pipelinesClient        *pipelines.Client
+	serviceEndpointsClient *serviceendpoints.Client
 }
 
 type ServiceEndpointGitHubResourceModel struct {
@@ -54,8 +54,8 @@ func (r *ServiceEndpointGitHubResource) Configure(_ context.Context, req resourc
 		return
 	}
 
-	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
-	r.serviceEndpointClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
+	r.pipelinesClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
+	r.serviceEndpointsClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointsClient
 }
 
 func (r *ServiceEndpointGitHubResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -66,7 +66,7 @@ func (r *ServiceEndpointGitHubResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -84,7 +84,7 @@ func (r *ServiceEndpointGitHubResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, r.pipelineClient, resp)
+	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -104,7 +104,7 @@ func (r *ServiceEndpointGitHubResource) Update(ctx context.Context, req resource
 		return
 	}
 
-	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
+	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -120,18 +120,18 @@ func (r *ServiceEndpointGitHubResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointsClient, resp)
 }
 
 // Private Methods
 
-func (r *ServiceEndpointGitHubResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointGitHubResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+func (r *ServiceEndpointGitHubResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointGitHubResourceModel) *serviceendpoints.CreateOrUpdateServiceEndpointArgs {
 	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
-	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
+	return &serviceendpoints.CreateOrUpdateServiceEndpointArgs{
 		Description:       *description,
 		GrantAllPipelines: model.GrantAllPipelines,
 		Name:              model.Name,
-		Type:              serviceendpoint.ServiceEndpointTypeGitHub,
+		Type:              serviceendpoints.ServiceEndpointTypeGitHub,
 		Token:             model.AccessToken,
 	}
 }

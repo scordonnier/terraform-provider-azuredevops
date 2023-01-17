@@ -1,4 +1,4 @@
-package serviceendpoint
+package serviceendpoints
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -21,8 +21,8 @@ func NewServiceEndpointKubernetesResource() resource.Resource {
 }
 
 type ServiceEndpointKubernetesResource struct {
-	pipelineClient        *pipelines.Client
-	serviceEndpointClient *serviceendpoint.Client
+	pipelinesClient        *pipelines.Client
+	serviceEndpointsClient *serviceendpoints.Client
 }
 
 type ServiceEndpointKubernetesResourceModel struct {
@@ -68,8 +68,8 @@ func (r *ServiceEndpointKubernetesResource) Configure(_ context.Context, req res
 		return
 	}
 
-	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
-	r.serviceEndpointClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
+	r.pipelinesClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
+	r.serviceEndpointsClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointsClient
 }
 
 func (r *ServiceEndpointKubernetesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -86,7 +86,7 @@ func (r *ServiceEndpointKubernetesResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, args, r.serviceEndpointClient, r.pipelineClient, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, args, r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -104,7 +104,7 @@ func (r *ServiceEndpointKubernetesResource) Read(ctx context.Context, req resour
 		return
 	}
 
-	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, r.pipelineClient, resp)
+	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -130,7 +130,7 @@ func (r *ServiceEndpointKubernetesResource) Update(ctx context.Context, req reso
 		return
 	}
 
-	_, err = UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, args, r.serviceEndpointClient, r.pipelineClient, resp)
+	_, err = UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, args, r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -146,12 +146,12 @@ func (r *ServiceEndpointKubernetesResource) Delete(ctx context.Context, req reso
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointsClient, resp)
 }
 
 // Private Methods
 
-func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointKubernetesResourceModel) (*serviceendpoint.CreateOrUpdateServiceEndpointArgs, error) {
+func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointKubernetesResourceModel) (*serviceendpoints.CreateOrUpdateServiceEndpointArgs, error) {
 	var yamlKubeconfig map[string]interface{}
 	err := yaml.Unmarshal([]byte(model.Kubeconfig.YamlContent), &yamlKubeconfig)
 	if err != nil {
@@ -167,14 +167,14 @@ func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs
 	server := clusters[0].(map[string]interface{})["cluster"].(map[string]interface{})["server"].(string)
 	clusterContext := contexts[0].(map[string]interface{})["name"].(string)
 	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
-	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
+	return &serviceendpoints.CreateOrUpdateServiceEndpointArgs{
 		AcceptUntrustedCertificates: model.Kubeconfig.AcceptUntrustedCertificates,
 		ClusterContext:              clusterContext,
 		GrantAllPipelines:           model.GrantAllPipelines,
 		Description:                 *description,
 		Kubeconfig:                  model.Kubeconfig.YamlContent,
 		Name:                        model.Name,
-		Type:                        serviceendpoint.ServiceEndpointTypekubernetes,
+		Type:                        serviceendpoints.ServiceEndpointTypekubernetes,
 		Url:                         server,
 	}, nil
 }

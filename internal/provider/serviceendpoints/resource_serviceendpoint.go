@@ -1,4 +1,4 @@
-package serviceendpoint
+package serviceendpoints
 
 import (
 	"context"
@@ -10,20 +10,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"time"
 )
 
-func CreateResourceServiceEndpoint(ctx context.Context, projectId string, args *serviceendpoint.CreateOrUpdateServiceEndpointArgs, serviceEndpointClient *serviceendpoint.Client, pipelineClient *pipelines.Client, resp *resource.CreateResponse) (*serviceendpoint.ServiceEndpoint, error) {
-	serviceEndpoint, err := serviceEndpointClient.CreateServiceEndpoint(ctx, args, projectId)
+func CreateResourceServiceEndpoint(ctx context.Context, projectId string, args *serviceendpoints.CreateOrUpdateServiceEndpointArgs, serviceEndpointsClient *serviceendpoints.Client, pipelinesClient *pipelines.Client, resp *resource.CreateResponse) (*serviceendpoints.ServiceEndpoint, error) {
+	serviceEndpoint, err := serviceEndpointsClient.CreateServiceEndpoint(ctx, args, projectId)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create service endpoint", err.Error())
 		return nil, err
 	}
 
 	stateRefreshFunc := func() (interface{}, string, error) {
-		pendingServiceEndpoint, err := serviceEndpointClient.GetServiceEndpoint(ctx, serviceEndpoint.Id.String(), projectId)
+		pendingServiceEndpoint, err := serviceEndpointsClient.GetServiceEndpoint(ctx, serviceEndpoint.Id.String(), projectId)
 		if err != nil {
 			return nil, "Failed", err
 		}
@@ -50,12 +50,12 @@ func CreateResourceServiceEndpoint(ctx context.Context, projectId string, args *
 
 	readyServiceEndpoint, err := stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		serviceEndpointClient.DeleteServiceEndpoint(ctx, serviceEndpoint.Id.String(), []string{projectId})
+		_ = serviceEndpointsClient.DeleteServiceEndpoint(ctx, serviceEndpoint.Id.String(), []string{projectId})
 		return nil, err
 	}
 
-	serviceEndpoint = readyServiceEndpoint.(*serviceendpoint.ServiceEndpoint)
-	_, err = pipelineClient.GrantAllPipelines(ctx, projectId, pipelines.PipelinePermissionsResourceTypeEndpoint, serviceEndpoint.Id.String(), args.GrantAllPipelines)
+	serviceEndpoint = readyServiceEndpoint.(*serviceendpoints.ServiceEndpoint)
+	_, err = pipelinesClient.GrantAllPipelines(ctx, projectId, pipelines.PipelinePermissionsResourceTypeEndpoint, serviceEndpoint.Id.String(), args.GrantAllPipelines)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to grant service endpoint access to all pipelines", err.Error())
 		return nil, err
@@ -64,8 +64,8 @@ func CreateResourceServiceEndpoint(ctx context.Context, projectId string, args *
 	return serviceEndpoint, nil
 }
 
-func ReadResourceServiceEndpoint(ctx context.Context, id string, projectId string, serviceEndpointClient *serviceendpoint.Client, pipelineClient *pipelines.Client, resp *resource.ReadResponse) (*serviceendpoint.ServiceEndpoint, bool, error) {
-	serviceEndpoint, err := serviceEndpointClient.GetServiceEndpoint(ctx, id, projectId)
+func ReadResourceServiceEndpoint(ctx context.Context, id string, projectId string, serviceEndpointsClient *serviceendpoints.Client, pipelinesClient *pipelines.Client, resp *resource.ReadResponse) (*serviceendpoints.ServiceEndpoint, bool, error) {
+	serviceEndpoint, err := serviceEndpointsClient.GetServiceEndpoint(ctx, id, projectId)
 	if err != nil {
 		if utils.ResponseWasNotFound(err) {
 			resp.State.RemoveResource(ctx)
@@ -81,7 +81,7 @@ func ReadResourceServiceEndpoint(ctx context.Context, id string, projectId strin
 		return nil, false, errors.New("service endpoint does not exist anymore")
 	}
 
-	permissions, err := pipelineClient.GetPipelinePermissions(ctx, projectId, pipelines.PipelinePermissionsResourceTypeEndpoint, serviceEndpoint.Id.String())
+	permissions, err := pipelinesClient.GetPipelinePermissions(ctx, projectId, pipelines.PipelinePermissionsResourceTypeEndpoint, serviceEndpoint.Id.String())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to retrieve grant access", err.Error())
 		return nil, false, err
@@ -94,8 +94,8 @@ func ReadResourceServiceEndpoint(ctx context.Context, id string, projectId strin
 	return serviceEndpoint, authorized, nil
 }
 
-func UpdateResourceServiceEndpoint(ctx context.Context, id string, projectId string, args *serviceendpoint.CreateOrUpdateServiceEndpointArgs, serviceEndpointClient *serviceendpoint.Client, pipelineClient *pipelines.Client, resp *resource.UpdateResponse) (*serviceendpoint.ServiceEndpoint, error) {
-	serviceEndpoint, err := serviceEndpointClient.UpdateServiceEndpoint(ctx, id, args, projectId)
+func UpdateResourceServiceEndpoint(ctx context.Context, id string, projectId string, args *serviceendpoints.CreateOrUpdateServiceEndpointArgs, serviceEndpointsClient *serviceendpoints.Client, pipelinesClient *pipelines.Client, resp *resource.UpdateResponse) (*serviceendpoints.ServiceEndpoint, error) {
+	serviceEndpoint, err := serviceEndpointsClient.UpdateServiceEndpoint(ctx, id, args, projectId)
 	if err != nil {
 		if utils.ResponseWasNotFound(err) {
 			resp.Diagnostics.AddError(fmt.Sprintf("Service connection with Id '%s' does not exist", id), "")
@@ -106,7 +106,7 @@ func UpdateResourceServiceEndpoint(ctx context.Context, id string, projectId str
 		return nil, err
 	}
 
-	_, err = pipelineClient.GrantAllPipelines(ctx, projectId, pipelines.PipelinePermissionsResourceTypeEndpoint, serviceEndpoint.Id.String(), args.GrantAllPipelines)
+	_, err = pipelinesClient.GrantAllPipelines(ctx, projectId, pipelines.PipelinePermissionsResourceTypeEndpoint, serviceEndpoint.Id.String(), args.GrantAllPipelines)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to grant service endpoint access to all pipelines", err.Error())
 		return nil, err
@@ -115,8 +115,8 @@ func UpdateResourceServiceEndpoint(ctx context.Context, id string, projectId str
 	return serviceEndpoint, nil
 }
 
-func DeleteResourceServiceEndpoint(ctx context.Context, id string, projectId string, serviceEndpointClient *serviceendpoint.Client, resp *resource.DeleteResponse) {
-	err := serviceEndpointClient.DeleteServiceEndpoint(ctx, id, []string{projectId})
+func DeleteResourceServiceEndpoint(ctx context.Context, id string, projectId string, serviceEndpointsClient *serviceendpoints.Client, resp *resource.DeleteResponse) {
+	err := serviceEndpointsClient.DeleteServiceEndpoint(ctx, id, []string{projectId})
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Service connection with Id '%s' failed to delete", id), err.Error())
 	}

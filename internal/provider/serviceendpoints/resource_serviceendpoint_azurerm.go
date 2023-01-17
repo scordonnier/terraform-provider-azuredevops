@@ -1,4 +1,4 @@
-package serviceendpoint
+package serviceendpoints
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
@@ -18,8 +18,8 @@ func NewServiceEndpointAzureRmResource() resource.Resource {
 }
 
 type ServiceEndpointAzureRmResource struct {
-	pipelineClient        *pipelines.Client
-	serviceEndpointClient *serviceendpoint.Client
+	pipelinesClient        *pipelines.Client
+	serviceEndpointsClient *serviceendpoints.Client
 }
 
 type ServiceEndpointAzureRmResourceModel struct {
@@ -71,8 +71,8 @@ func (r *ServiceEndpointAzureRmResource) Configure(_ context.Context, req resour
 		return
 	}
 
-	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
-	r.serviceEndpointClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
+	r.pipelinesClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
+	r.serviceEndpointsClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointsClient
 }
 
 func (r *ServiceEndpointAzureRmResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -83,7 +83,7 @@ func (r *ServiceEndpointAzureRmResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
+	serviceEndpoint, err := CreateResourceServiceEndpoint(ctx, model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -101,7 +101,7 @@ func (r *ServiceEndpointAzureRmResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, r.pipelineClient, resp)
+	serviceEndpoint, granted, err := ReadResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -109,10 +109,10 @@ func (r *ServiceEndpointAzureRmResource) Read(ctx context.Context, req resource.
 	model.Description = utils.IfThenElse[*string](serviceEndpoint.Description != nil, model.Description, utils.EmptyString)
 	model.GrantAllPipelines = granted
 	model.Name = *serviceEndpoint.Name
-	model.ServicePrincipalId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServicePrincipalId]
-	model.SubscriptionId = (*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionId]
-	model.SubscriptionName = (*serviceEndpoint.Data)[serviceendpoint.ServiceEndpointDataSubscriptionName]
-	model.TenantId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoint.ServiceEndpointAuthorizationParamsServiceTenantId]
+	model.ServicePrincipalId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoints.ServiceEndpointAuthorizationParamsServicePrincipalId]
+	model.SubscriptionId = (*serviceEndpoint.Data)[serviceendpoints.ServiceEndpointDataSubscriptionId]
+	model.SubscriptionName = (*serviceEndpoint.Data)[serviceendpoints.ServiceEndpointDataSubscriptionName]
+	model.TenantId = (*serviceEndpoint.Authorization.Parameters)[serviceendpoints.ServiceEndpointAuthorizationParamsServiceTenantId]
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -125,7 +125,7 @@ func (r *ServiceEndpointAzureRmResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointClient, r.pipelineClient, resp)
+	_, err := UpdateResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.getCreateOrUpdateServiceEndpointArgs(model), r.serviceEndpointsClient, r.pipelinesClient, resp)
 	if err != nil {
 		return
 	}
@@ -141,14 +141,14 @@ func (r *ServiceEndpointAzureRmResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointClient, resp)
+	DeleteResourceServiceEndpoint(ctx, model.Id.ValueString(), model.ProjectId, r.serviceEndpointsClient, resp)
 }
 
 // Private Methods
 
-func (r *ServiceEndpointAzureRmResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointAzureRmResourceModel) *serviceendpoint.CreateOrUpdateServiceEndpointArgs {
+func (r *ServiceEndpointAzureRmResource) getCreateOrUpdateServiceEndpointArgs(model *ServiceEndpointAzureRmResourceModel) *serviceendpoints.CreateOrUpdateServiceEndpointArgs {
 	description := utils.IfThenElse[*string](model.Description != nil, model.Description, utils.EmptyString)
-	return &serviceendpoint.CreateOrUpdateServiceEndpointArgs{
+	return &serviceendpoints.CreateOrUpdateServiceEndpointArgs{
 		Description:         *description,
 		GrantAllPipelines:   model.GrantAllPipelines,
 		Name:                model.Name,
@@ -157,6 +157,6 @@ func (r *ServiceEndpointAzureRmResource) getCreateOrUpdateServiceEndpointArgs(mo
 		SubscriptionId:      model.SubscriptionId,
 		SubscriptionName:    model.SubscriptionName,
 		TenantId:            model.TenantId,
-		Type:                serviceendpoint.ServiceEndpointTypeAzureRm,
+		Type:                serviceendpoints.ServiceEndpointTypeAzureRm,
 	}
 }

@@ -1,4 +1,4 @@
-package serviceendpoint
+package serviceendpoints
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"golang.org/x/exp/slices"
 )
@@ -22,7 +22,7 @@ func NewServiceEndpointShareResource() resource.Resource {
 }
 
 type ServiceEndpointShareResource struct {
-	client *serviceendpoint.Client
+	client *serviceendpoints.Client
 }
 
 type ServiceEndpointShareResourceModel struct {
@@ -77,7 +77,7 @@ func (r *ServiceEndpointShareResource) Configure(_ context.Context, req resource
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
+	r.client = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointsClient
 }
 
 func (r *ServiceEndpointShareResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

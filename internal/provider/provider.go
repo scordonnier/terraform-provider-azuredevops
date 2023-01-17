@@ -11,7 +11,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/pipelines"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/workitems"
 )
 
@@ -92,12 +92,12 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		pipelines.NewEnvironmentKubernetesResource,
 		pipelines.NewEnvironmentPermissionsResource,
 		pipelines.NewPipelinesSettingsResource,
-		serviceendpoint.NewServiceEndpointAzureRmResource,
-		serviceendpoint.NewServiceEndpointBitbucketResource,
-		serviceendpoint.NewServiceEndpointGitHubResource,
-		serviceendpoint.NewServiceEndpointKubernetesResource,
-		serviceendpoint.NewServiceEndpointShareResource,
-		serviceendpoint.NewServiceEndpointVsAppCenterResource,
+		serviceendpoints.NewServiceEndpointAzureRmResource,
+		serviceendpoints.NewServiceEndpointBitbucketResource,
+		serviceendpoints.NewServiceEndpointGitHubResource,
+		serviceendpoints.NewServiceEndpointKubernetesResource,
+		serviceendpoints.NewServiceEndpointShareResource,
+		serviceendpoints.NewServiceEndpointVsAppCenterResource,
 		workitems.NewAreaResource,
 		workitems.NewIterationResource,
 	}
