@@ -68,7 +68,7 @@ func (d *AreaDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	d.client = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemClient
+	d.client = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemsClient
 }
 
 func (d *AreaDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

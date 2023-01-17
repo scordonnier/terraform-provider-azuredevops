@@ -3,7 +3,6 @@ package graph
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -14,7 +13,6 @@ import (
 )
 
 var _ resource.Resource = &GroupMembershipResource{}
-var _ resource.ResourceWithImportState = &GroupMembershipResource{}
 
 func NewGroupMembershipResource() resource.Resource {
 	return &GroupMembershipResource{}
@@ -137,8 +135,4 @@ func (r *GroupMembershipResource) Delete(ctx context.Context, req resource.Delet
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Unable to delete memberships for group '%s' in project '%s'", model.DisplayName, model.ProjectId), err.Error())
 	}
-}
-
-func (r *GroupMembershipResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

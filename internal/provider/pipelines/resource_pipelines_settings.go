@@ -1,4 +1,4 @@
-package distributedtask
+package pipelines
 
 import (
 	"context"
@@ -110,7 +110,7 @@ func (r *PipelinesSettingsResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelineClient
+	r.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
 }
 
 func (r *PipelinesSettingsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

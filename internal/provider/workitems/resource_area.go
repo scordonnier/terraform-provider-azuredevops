@@ -83,7 +83,7 @@ func (r *AreaResource) Configure(_ context.Context, req resource.ConfigureReques
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemClient
+	r.client = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemsClient
 }
 
 func (r *AreaResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

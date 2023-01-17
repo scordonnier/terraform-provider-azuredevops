@@ -1,4 +1,4 @@
-package distributedtask
+package pipelines
 
 import (
 	"context"
@@ -100,7 +100,7 @@ func (d *PipelineSettingsDataSource) Configure(_ context.Context, req datasource
 		return
 	}
 
-	d.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelineClient
+	d.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
 }
 
 func (d *PipelineSettingsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

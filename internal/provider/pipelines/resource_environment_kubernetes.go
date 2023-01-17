@@ -1,9 +1,8 @@
-package distributedtask
+package pipelines
 
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -12,19 +11,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/distributedtask"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
 var _ resource.Resource = &EnvironmentKubernetesResource{}
-var _ resource.ResourceWithImportState = &EnvironmentKubernetesResource{}
 
 func NewEnvironmentKubernetesResource() resource.Resource {
 	return &EnvironmentKubernetesResource{}
 }
 
 type EnvironmentKubernetesResource struct {
-	client *distributedtask.Client
+	client *pipelines.Client
 }
 
 type EnvironmentKubernetesResourceModel struct {
@@ -107,7 +105,7 @@ func (r *EnvironmentKubernetesResource) Configure(_ context.Context, req resourc
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).DistributedTaskClient
+	r.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
 }
 
 func (r *EnvironmentKubernetesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -169,14 +167,10 @@ func (r *EnvironmentKubernetesResource) Delete(ctx context.Context, req resource
 	}
 }
 
-func (r *EnvironmentKubernetesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
 // Private Methods
 
-func getEnvironmentResource(model *EnvironmentKubernetesResourceModel) *distributedtask.EnvironmentResourceKubernetes {
-	return &distributedtask.EnvironmentResourceKubernetes{
+func getEnvironmentResource(model *EnvironmentKubernetesResourceModel) *pipelines.EnvironmentResourceKubernetes {
+	return &pipelines.EnvironmentResourceKubernetes{
 		Name:              &model.Name,
 		Namespace:         &model.Namespace,
 		ServiceEndpointId: &model.ServiceEndpointId,

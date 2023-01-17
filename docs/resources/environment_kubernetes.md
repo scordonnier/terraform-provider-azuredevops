@@ -33,7 +33,7 @@ resource "azuredevops_environment" "production" {
   project_id  = data.azuredevops_project.sandbox.id
 }
 
-resource "azuredevops_environment_kubernetes" "ci-envs" {
+resource "azuredevops_environment_kubernetes" "production-api-backend" {
   environment_id      = azuredevops_environment.production.id
   name                = "API Backend"
   namespace           = "api-backend"
