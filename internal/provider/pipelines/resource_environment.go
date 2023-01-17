@@ -1,4 +1,4 @@
-package distributedtask
+package pipelines
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/distributedtask"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
@@ -21,7 +21,7 @@ func NewEnvironmentResource() resource.Resource {
 }
 
 type EnvironmentResource struct {
-	client *distributedtask.Client
+	client *pipelines.Client
 }
 
 type EnvironmentResourceModel struct {
@@ -70,7 +70,7 @@ func (r *EnvironmentResource) Configure(_ context.Context, req resource.Configur
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).DistributedTaskClient
+	r.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
 }
 
 func (r *EnvironmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

@@ -1,4 +1,4 @@
-package distributedtask
+package pipelines
 
 import (
 	"context"

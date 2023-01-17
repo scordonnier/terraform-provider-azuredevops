@@ -1,4 +1,4 @@
-package distributedtask
+package pipelines
 
 type PipelineGeneralSettings struct {
 	DisableClassicPipelineCreation   *bool `tfsdk:"disable_classic_pipeline_creation"`

@@ -71,7 +71,7 @@ func (r *ServiceEndpointAzureRmResource) Configure(_ context.Context, req resour
 		return
 	}
 
-	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelineClient
+	r.pipelineClient = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
 	r.serviceEndpointClient = req.ProviderData.(*clients.AzureDevOpsClient).ServiceEndpointClient
 }
 

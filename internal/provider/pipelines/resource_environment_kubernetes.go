@@ -1,4 +1,4 @@
-package distributedtask
+package pipelines
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/distributedtask"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
@@ -24,7 +24,7 @@ func NewEnvironmentKubernetesResource() resource.Resource {
 }
 
 type EnvironmentKubernetesResource struct {
-	client *distributedtask.Client
+	client *pipelines.Client
 }
 
 type EnvironmentKubernetesResourceModel struct {
@@ -107,7 +107,7 @@ func (r *EnvironmentKubernetesResource) Configure(_ context.Context, req resourc
 		return
 	}
 
-	r.client = req.ProviderData.(*clients.AzureDevOpsClient).DistributedTaskClient
+	r.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
 }
 
 func (r *EnvironmentKubernetesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -175,8 +175,8 @@ func (r *EnvironmentKubernetesResource) ImportState(ctx context.Context, req res
 
 // Private Methods
 
-func getEnvironmentResource(model *EnvironmentKubernetesResourceModel) *distributedtask.EnvironmentResourceKubernetes {
-	return &distributedtask.EnvironmentResourceKubernetes{
+func getEnvironmentResource(model *EnvironmentKubernetesResourceModel) *pipelines.EnvironmentResourceKubernetes {
+	return &pipelines.EnvironmentResourceKubernetes{
 		Name:              &model.Name,
 		Namespace:         &model.Namespace,
 		ServiceEndpointId: &model.ServiceEndpointId,

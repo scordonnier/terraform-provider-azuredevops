@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/distributedtask"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/graph"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoint"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/workitems"
 )
@@ -71,11 +71,11 @@ func (p *AzureDevOpsProvider) DataSources(_ context.Context) []func() datasource
 		core.NewProjectFeaturesDataSource,
 		core.NewTeamDataSource,
 		core.NewTeamsDataSource,
-		distributedtask.NewPipelineSettingsDataSource,
 		graph.NewGroupDataSource,
 		graph.NewGroupsDataSource,
 		graph.NewUserDataSource,
 		graph.NewUsersDataSource,
+		pipelines.NewPipelineSettingsDataSource,
 		workitems.NewAreaDataSource,
 		workitems.NewIterationDataSource,
 	}
@@ -86,12 +86,12 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		core.NewProjectResource,
 		core.NewProjectFeaturesResource,
 		core.NewTeamResource,
-		distributedtask.NewEnvironmentResource,
-		distributedtask.NewEnvironmentKubernetesResource,
-		distributedtask.NewEnvironmentPermissionsResource,
-		distributedtask.NewPipelinesSettingsResource,
 		graph.NewGroupResource,
 		graph.NewGroupMembershipResource,
+		pipelines.NewEnvironmentResource,
+		pipelines.NewEnvironmentKubernetesResource,
+		pipelines.NewEnvironmentPermissionsResource,
+		pipelines.NewPipelinesSettingsResource,
 		serviceendpoint.NewServiceEndpointAzureRmResource,
 		serviceendpoint.NewServiceEndpointBitbucketResource,
 		serviceendpoint.NewServiceEndpointGitHubResource,
