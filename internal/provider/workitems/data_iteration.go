@@ -68,7 +68,7 @@ func (d *IterationDataSource) Configure(_ context.Context, req datasource.Config
 		return
 	}
 
-	d.client = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemClient
+	d.client = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemsClient
 }
 
 func (d *IterationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

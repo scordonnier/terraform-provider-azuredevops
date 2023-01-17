@@ -18,7 +18,7 @@ type AzureDevOpsClient struct {
 	PipelinesClient       *pipelines.Client
 	SecurityClient        *security.Client
 	ServiceEndpointClient *serviceendpoint.Client
-	WorkItemClient        *workitems.Client
+	WorkItemsClient       *workitems.Client
 }
 
 func NewAzureDevOpsClient(organizationUrl string, authorization string, providerVersion string) *AzureDevOpsClient {
@@ -31,6 +31,6 @@ func NewAzureDevOpsClient(organizationUrl string, authorization string, provider
 		PipelinesClient:       pipelines.NewClient(azdoClient),
 		SecurityClient:        security.NewClient(azdoClient, vsspsClient),
 		ServiceEndpointClient: serviceendpoint.NewClient(azdoClient),
-		WorkItemClient:        workitems.NewClient(azdoClient),
+		WorkItemsClient:       workitems.NewClient(azdoClient),
 	}
 }
