@@ -26,7 +26,6 @@ resource "azuredevops_environment_permissions" "production" {
   project_id = azuredevops_environment.production.project_id
   permissions {
     identity_name = "[Sandbox]\\Contributors"
-    identity_type = "group"
 
     administer     = "notset"
     create         = "notset"
@@ -37,7 +36,6 @@ resource "azuredevops_environment_permissions" "production" {
   }
   permissions {
     identity_name = "user@noreply.com"
-    identity_type = "user"
 
     administer     = "allow"
     create         = "allow"
