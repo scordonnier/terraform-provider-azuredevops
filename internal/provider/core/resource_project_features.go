@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
@@ -236,14 +237,14 @@ func (v featuresDependenciesValidator) MarkdownDescription(ctx context.Context) 
 func (v featuresDependenciesValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	switch req.Path.String() {
 	case "boards":
-		var testplans *string
+		var testplans types.String
 		diags := req.Config.GetAttribute(ctx, path.Root("testplans"), &testplans)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
 			return
 		}
 
-		if req.ConfigValue.ValueString() == stateDisabled && *testplans == stateEnabled {
+		if req.ConfigValue.ValueString() == stateDisabled && testplans.ValueString() == stateEnabled {
 			resp.Diagnostics.AddError(v.Description(ctx), "`Azure Test Plans` can't be enabled when `Azure Boards` is disabled")
 		}
 	default:

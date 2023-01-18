@@ -7,6 +7,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"net/url"
+	"strings"
 )
 
 const (
@@ -34,7 +35,7 @@ func (c *Client) CreateServiceEndpoint(ctx context.Context, args *CreateOrUpdate
 
 func (c *Client) DeleteServiceEndpoint(ctx context.Context, id string, projectIds []string) error {
 	pathSegments := []string{pathApis, pathServiceEndpoint, pathEndpoints, id}
-	queryParams := url.Values{"projectIds": projectIds}
+	queryParams := url.Values{"projectIds": []string{strings.Join(projectIds, ",")}}
 	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
 	return err
 }
