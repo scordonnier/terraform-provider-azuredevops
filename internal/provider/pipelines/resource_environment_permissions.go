@@ -3,7 +3,6 @@ package pipelines
 import (
 	"context"
 	"github.com/ahmetb/go-linq/v3"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -14,7 +13,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/graph"
 	clientSecurity "github.com/scordonnier/terraform-provider-azuredevops/internal/clients/security"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/security"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
 const (
@@ -66,31 +65,23 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 				MarkdownDescription: "The ID of the environment. If you omit the value, the permissions are applied to the environments page and by default all environments inherit permissions from there.",
 				Optional:            true,
 			},
-			"project_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the project.",
-				Required:            true,
-				Validators: []validator.String{
-					utils.UUIDStringValidator(),
-				},
-			},
-		},
-		Blocks: map[string]schema.Block{
-			"permissions": schema.ListNestedBlock{
+			"permissions": schema.SetNestedAttribute{
 				MarkdownDescription: "The permissions to assign.",
-				NestedObject: schema.NestedBlockObject{
+				Required:            true,
+				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"administer": schema.StringAttribute{
 							MarkdownDescription: "Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+								validators.PermissionsValidator(),
 							},
 						},
 						"create": schema.StringAttribute{
 							MarkdownDescription: "Sets the `Create` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+								validators.PermissionsValidator(),
 							},
 						},
 						"identity_descriptor": schema.StringAttribute{
@@ -103,36 +94,46 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 						"identity_name": schema.StringAttribute{
 							MarkdownDescription: "The identity name to assign the permissions.",
 							Required:            true,
+							Validators: []validator.String{
+								validators.StringNotEmptyValidator(),
+							},
 						},
 						"manage": schema.StringAttribute{
 							MarkdownDescription: "Sets the `Manage` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+								validators.PermissionsValidator(),
 							},
 						},
 						"manage_history": schema.StringAttribute{
 							MarkdownDescription: "Sets the `ManageHistory` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+								validators.PermissionsValidator(),
 							},
 						},
 						"use": schema.StringAttribute{
 							MarkdownDescription: "Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+								validators.PermissionsValidator(),
 							},
 						},
 						"view": schema.StringAttribute{
 							MarkdownDescription: "Sets the `View` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
-								stringvalidator.OneOfCaseInsensitive("notset", "allow", "deny"),
+								validators.PermissionsValidator(),
 							},
 						},
 					},
+				},
+			},
+			"project_id": schema.StringAttribute{
+				MarkdownDescription: "The ID of the project.",
+				Required:            true,
+				Validators: []validator.String{
+					validators.UUIDStringValidator(),
 				},
 			},
 		},
