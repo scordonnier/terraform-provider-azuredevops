@@ -39,6 +39,10 @@ func (c *Client) GetAccessControlLists(ctx context.Context, namespaceId string, 
 	return acls, err
 }
 
+func (c *Client) GetClassificationNodeToken(iterationId string) string {
+	return fmt.Sprintf("vstfs:///Classification/Node/%s", iterationId)
+}
+
 func (c *Client) GetEnvironmentToken(projectId string, environmentId int) string {
 	token := "Environments/" + projectId
 	if environmentId > 0 {
@@ -55,10 +59,6 @@ func (c *Client) GetIdentityByDescriptor(ctx context.Context, descriptor string)
 func (c *Client) GetIdentityBySubjectDescriptor(ctx context.Context, subjectDescriptor string) (*Identity, error) {
 	queryParams := url.Values{"subjectDescriptors": []string{subjectDescriptor}, "queryMembership": []string{"none"}}
 	return c.getIdentity(ctx, queryParams, subjectDescriptor)
-}
-
-func (c *Client) GetIterationToken(iterationId string) string {
-	return fmt.Sprintf("vstfs:///Classification/Node/%s", iterationId)
 }
 
 func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespacesCollection, error) {

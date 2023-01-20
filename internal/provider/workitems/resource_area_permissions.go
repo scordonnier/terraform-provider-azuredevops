@@ -19,43 +19,47 @@ import (
 	"strings"
 )
 
-var _ resource.Resource = &IterationPermissionsResource{}
+var _ resource.Resource = &AreaPermissionsResource{}
 
-func NewIterationPermissionsResource() resource.Resource {
-	return &IterationPermissionsResource{}
+func NewAreaPermissionsResource() resource.Resource {
+	return &AreaPermissionsResource{}
 }
 
-type IterationPermissionsResource struct {
+type AreaPermissionsResource struct {
 	graphClient     *graph.Client
 	securityClient  *clientSecurity.Client
 	workItemsClient *workitems.Client
 }
 
-type IterationPermissionsResourceModel struct {
-	Path        string                 `tfsdk:"path"`
-	Permissions []IterationPermissions `tfsdk:"permissions"`
-	ProjectId   string                 `tfsdk:"project_id"`
+type AreaPermissionsResourceModel struct {
+	Path        string            `tfsdk:"path"`
+	Permissions []AreaPermissions `tfsdk:"permissions"`
+	ProjectId   string            `tfsdk:"project_id"`
 }
 
-type IterationPermissions struct {
+type AreaPermissions struct {
 	Create             string       `tfsdk:"create"`
 	Delete             string       `tfsdk:"delete"`
 	IdentityDescriptor types.String `tfsdk:"identity_descriptor"`
 	IdentityName       string       `tfsdk:"identity_name"`
+	ManageTestPlans    string       `tfsdk:"manage_test_plans"`
+	ManageTestSuites   string       `tfsdk:"manage_test_suites"`
 	Read               string       `tfsdk:"read"`
+	WorkItemsRead      string       `tfsdk:"workitems_read"`
+	WorkItemsWrite     string       `tfsdk:"workitems_write"`
 	Write              string       `tfsdk:"write"`
 }
 
-func (r *IterationPermissionsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_iteration_permissions"
+func (r *AreaPermissionsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_area_permissions"
 }
 
-func (r *IterationPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AreaPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Sets permissions on iterations of an existing project within Azure DevOps. All permissions that currently exists will be overwritten.",
+		MarkdownDescription: "Sets permissions on areas of an existing project within Azure DevOps. All permissions that currently exists will be overwritten.",
 		Attributes: map[string]schema.Attribute{
 			"path": schema.StringAttribute{
-				MarkdownDescription: "The path of the iteration.",
+				MarkdownDescription: "The path of the area.",
 				Required:            true,
 			},
 			"permissions": schema.ListNestedAttribute{
@@ -91,8 +95,36 @@ func (r *IterationPermissionsResource) Schema(_ context.Context, _ resource.Sche
 								validators.StringNotEmptyValidator(),
 							},
 						},
+						"manage_test_plans": schema.StringAttribute{
+							MarkdownDescription: "Sets the `MANAGE_TEST_PLANS` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								validators.PermissionsValidator(),
+							},
+						},
+						"manage_test_suites": schema.StringAttribute{
+							MarkdownDescription: "Sets the `MANAGE_TEST_SUITES` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								validators.PermissionsValidator(),
+							},
+						},
 						"read": schema.StringAttribute{
 							MarkdownDescription: "Sets the `GENERIC_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								validators.PermissionsValidator(),
+							},
+						},
+						"workitems_read": schema.StringAttribute{
+							MarkdownDescription: "Sets the `WORK_ITEM_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
+							Required:            true,
+							Validators: []validator.String{
+								validators.PermissionsValidator(),
+							},
+						},
+						"workitems_write": schema.StringAttribute{
+							MarkdownDescription: "Sets the `WORK_ITEM_WRITE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 							Required:            true,
 							Validators: []validator.String{
 								validators.PermissionsValidator(),
@@ -119,7 +151,7 @@ func (r *IterationPermissionsResource) Schema(_ context.Context, _ resource.Sche
 	}
 }
 
-func (r *IterationPermissionsResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *AreaPermissionsResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -129,8 +161,8 @@ func (r *IterationPermissionsResource) Configure(_ context.Context, req resource
 	r.workItemsClient = req.ProviderData.(*clients.AzureDevOpsClient).WorkItemsClient
 }
 
-func (r *IterationPermissionsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *IterationPermissionsResourceModel
+func (r *AreaPermissionsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *AreaPermissionsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -144,7 +176,7 @@ func (r *IterationPermissionsResource) Create(ctx context.Context, req resource.
 	}
 
 	permissions := r.getPermissions(&model.Permissions)
-	err = security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdIteration, token, permissions, r.securityClient, r.graphClient)
+	err = security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
@@ -155,8 +187,8 @@ func (r *IterationPermissionsResource) Create(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *IterationPermissionsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *IterationPermissionsResourceModel
+func (r *AreaPermissionsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *AreaPermissionsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -169,7 +201,7 @@ func (r *IterationPermissionsResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdIteration, token, r.securityClient)
+	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdCSS, token, r.securityClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to retrieve access control lists", err.Error())
 		return
@@ -180,8 +212,8 @@ func (r *IterationPermissionsResource) Read(ctx context.Context, req resource.Re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *IterationPermissionsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *IterationPermissionsResourceModel
+func (r *AreaPermissionsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *AreaPermissionsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -195,7 +227,7 @@ func (r *IterationPermissionsResource) Update(ctx context.Context, req resource.
 	}
 
 	permissions := r.getPermissions(&model.Permissions)
-	err = security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdIteration, token, permissions, r.securityClient, r.graphClient)
+	err = security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update permissions", err.Error())
 		return
@@ -206,8 +238,8 @@ func (r *IterationPermissionsResource) Update(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *IterationPermissionsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *IterationPermissionsResourceModel
+func (r *AreaPermissionsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *AreaPermissionsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -220,7 +252,7 @@ func (r *IterationPermissionsResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	err = r.securityClient.RemoveAccessControlLists(ctx, clientSecurity.NamespaceIdIteration, token)
+	err = r.securityClient.RemoveAccessControlLists(ctx, clientSecurity.NamespaceIdCSS, token)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete environment permissions", err.Error())
 	}
@@ -228,32 +260,36 @@ func (r *IterationPermissionsResource) Delete(ctx context.Context, req resource.
 
 // Private Methods
 
-func (r *IterationPermissionsResource) getPermissions(p *[]IterationPermissions) []*security.IdentityPermissions {
+func (r *AreaPermissionsResource) getPermissions(p *[]AreaPermissions) []*security.IdentityPermissions {
 	var permissions []*security.IdentityPermissions
 	for _, permission := range *p {
 		permissions = append(permissions, &security.IdentityPermissions{
 			IdentityDescriptor: permission.IdentityDescriptor.ValueString(),
 			IdentityName:       permission.IdentityName,
 			Permissions: map[string]string{
-				permissionNameCreate: permission.Create,
-				permissionNameDelete: permission.Delete,
-				permissionNameRead:   permission.Read,
-				permissionNameWrite:  permission.Write,
+				permissionNameCreate:           permission.Create,
+				permissionNameDelete:           permission.Delete,
+				permissionNameManageTestPlans:  permission.ManageTestPlans,
+				permissionNameManageTestSuites: permission.ManageTestSuites,
+				permissionNameRead:             permission.Read,
+				permissionNameWorkItemsRead:    permission.WorkItemsRead,
+				permissionNameWorkItemsWrite:   permission.WorkItemsWrite,
+				permissionNameWrite:            permission.Write,
 			},
 		})
 	}
 	return permissions
 }
 
-func (r *IterationPermissionsResource) getToken(ctx context.Context, projectId string, path string) (string, error) {
+func (r *AreaPermissionsResource) getToken(ctx context.Context, projectId string, path string) (string, error) {
 	var tokens []string
 	if path != "" {
-		iteration, err := r.workItemsClient.GetIteration(ctx, projectId, "")
+		area, err := r.workItemsClient.GetArea(ctx, projectId, "")
 		if err != nil {
 			return "", err
 		}
 
-		tokens = append(tokens, r.securityClient.GetClassificationNodeToken(iteration.Identifier.String()))
+		tokens = append(tokens, r.securityClient.GetClassificationNodeToken(area.Identifier.String()))
 	}
 
 	components := strings.Split(path, "/")
@@ -262,7 +298,7 @@ func (r *IterationPermissionsResource) getToken(ctx context.Context, projectId s
 		if i > 0 {
 			tokenPath = fmt.Sprintf("%s/%s", strings.Join(components[:i], "/"), component)
 		}
-		iteration, err := r.workItemsClient.GetIteration(ctx, projectId, tokenPath)
+		iteration, err := r.workItemsClient.GetArea(ctx, projectId, tokenPath)
 		if err != nil {
 			return "", err
 		}
@@ -273,7 +309,7 @@ func (r *IterationPermissionsResource) getToken(ctx context.Context, projectId s
 	return strings.Join(tokens, ":"), nil
 }
 
-func (r *IterationPermissionsResource) updatePermissions(p1 *[]IterationPermissions, p2 []*security.IdentityPermissions) {
+func (r *AreaPermissionsResource) updatePermissions(p1 *[]AreaPermissions, p2 []*security.IdentityPermissions) {
 	if len(p2) == 0 {
 		return
 	}
@@ -287,7 +323,11 @@ func (r *IterationPermissionsResource) updatePermissions(p1 *[]IterationPermissi
 		permission.IdentityName = identityPermissions.IdentityName
 		permission.Create = identityPermissions.Permissions[permissionNameCreate]
 		permission.Delete = identityPermissions.Permissions[permissionNameDelete]
+		permission.ManageTestPlans = identityPermissions.Permissions[permissionNameManageTestPlans]
+		permission.ManageTestSuites = identityPermissions.Permissions[permissionNameManageTestSuites]
 		permission.Read = identityPermissions.Permissions[permissionNameRead]
+		permission.WorkItemsRead = identityPermissions.Permissions[permissionNameWorkItemsRead]
+		permission.WorkItemsWrite = identityPermissions.Permissions[permissionNameWorkItemsWrite]
 		permission.Write = identityPermissions.Permissions[permissionNameWrite]
 	}
 }

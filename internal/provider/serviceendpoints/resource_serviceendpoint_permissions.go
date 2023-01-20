@@ -172,11 +172,6 @@ func (r *ServiceEndpointPermissionsResource) Read(ctx context.Context, req resou
 	token := r.securityClient.GetServiceEndpointToken(model.ProjectId, model.Id.ValueString())
 	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, r.securityClient)
 	if err != nil {
-		if permissions != nil && len(permissions) == 0 {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-
 		resp.Diagnostics.AddError("Unable to retrieve access control lists", err.Error())
 		return
 	}
@@ -243,6 +238,10 @@ func (r *ServiceEndpointPermissionsResource) getPermissions(p *[]ServiceEndpoint
 }
 
 func (r *ServiceEndpointPermissionsResource) updatePermissions(p1 *[]ServiceEndpointPermissions, p2 []*security.IdentityPermissions) {
+	if len(p2) == 0 {
+		return
+	}
+
 	for index := range *p1 {
 		permission := &(*p1)[index]
 		identityPermissions := linq.From(p2).FirstWith(func(p interface{}) bool {

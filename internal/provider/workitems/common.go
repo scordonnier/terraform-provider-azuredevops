@@ -5,7 +5,18 @@ import (
 	"strings"
 )
 
-func GetAreaOrIterationPath(node *workitems.WorkItemClassificationNode) string {
+const (
+	permissionNameCreate           = "CREATE_CHILDREN"
+	permissionNameDelete           = "DELETE"
+	permissionNameManageTestPlans  = "MANAGE_TEST_PLANS"
+	permissionNameManageTestSuites = "MANAGE_TEST_SUITES"
+	permissionNameRead             = "GENERIC_READ"
+	permissionNameWrite            = "GENERIC_WRITE"
+	permissionNameWorkItemsRead    = "WORK_ITEM_READ"
+	permissionNameWorkItemsWrite   = "WORK_ITEM_WRITE"
+)
+
+func getAreaOrIterationPath(node *workitems.WorkItemClassificationNode) string {
 	components := strings.Split(*node.Path, "\\")
 	var pathComponents []string
 	if len(components) > 3 {
@@ -18,7 +29,7 @@ func GetAreaOrIterationPath(node *workitems.WorkItemClassificationNode) string {
 	return finalPath
 }
 
-func PlanAreaOrIterationPath(path string, name string, isMove bool) string {
+func planAreaOrIterationPath(path string, name string, isMove bool) string {
 	if isMove {
 		return strings.TrimPrefix(strings.Join([]string{path, name}, "/"), "/")
 	} else {

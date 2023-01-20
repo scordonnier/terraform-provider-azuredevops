@@ -181,11 +181,6 @@ func (r *EnvironmentPermissionsResource) Read(ctx context.Context, req resource.
 	token := r.securityClient.GetEnvironmentToken(model.ProjectId, int(model.Id.ValueInt64()))
 	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, r.securityClient)
 	if err != nil {
-		if permissions != nil && len(permissions) == 0 {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-
 		resp.Diagnostics.AddError("Unable to retrieve access control lists", err.Error())
 		return
 	}
@@ -253,6 +248,10 @@ func (r *EnvironmentPermissionsResource) getPermissions(p *[]EnvironmentPermissi
 }
 
 func (r *EnvironmentPermissionsResource) updatePermissions(p1 *[]EnvironmentPermissions, p2 []*security.IdentityPermissions) {
+	if len(p2) == 0 {
+		return
+	}
+
 	for index := range *p1 {
 		permission := &(*p1)[index]
 		identityPermissions := linq.From(p2).FirstWith(func(p interface{}) bool {
