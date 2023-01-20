@@ -1,11 +1,11 @@
 ---
-page_title: "azuredevops_pipelines_settings Resource - azuredevops"
-subcategory: "Pipelines"
+page_title: "azuredevops_pipeline_settings Resource - azuredevops"
+subcategory: ""
 description: |-
   Manage pipeline settings of an existing project within Azure DevOps.
 ---
 
-# azuredevops_pipelines_settings (Resource)
+# azuredevops_pipeline_settings (Resource)
 
 Manage pipeline settings of an existing project within Azure DevOps.
 
@@ -16,7 +16,7 @@ data "azuredevops_project" "sandbox" {
   name = "Sandbox"
 }
 
-resource "azuredevops_pipelines_settings" "sandbox" {
+resource "azuredevops_pipeline_settings" "sandbox" {
   general = {
     disable_classic_pipeline_creation    = false
     enforce_job_auth_scope               = true

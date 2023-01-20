@@ -2,7 +2,7 @@ data "azuredevops_project" "sandbox" {
   name = "Sandbox"
 }
 
-resource "azuredevops_pipelines_settings" "sandbox" {
+resource "azuredevops_pipeline_settings" "sandbox" {
   general = {
     disable_classic_pipeline_creation    = false
     enforce_job_auth_scope               = true

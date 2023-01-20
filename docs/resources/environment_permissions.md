@@ -24,26 +24,28 @@ resource "azuredevops_environment" "production" {
 resource "azuredevops_environment_permissions" "production" {
   id         = azuredevops_environment.production.id
   project_id = azuredevops_environment.production.project_id
-  permissions {
-    identity_name = "[Sandbox]\\Contributors"
+  permissions = [
+    {
+      identity_name = "[Sandbox]\\Contributors"
 
-    administer     = "notset"
-    create         = "notset"
-    manage         = "notset"
-    manage_history = "notset"
-    use            = "allow"
-    view           = "allow"
-  }
-  permissions {
-    identity_name = "user@noreply.com"
+      administer     = "notset"
+      create         = "notset"
+      manage         = "notset"
+      manage_history = "notset"
+      use            = "allow"
+      view           = "allow"
+    },
+    {
+      identity_name = "user@noreply.com"
 
-    administer     = "allow"
-    create         = "allow"
-    manage         = "allow"
-    manage_history = "allow"
-    use            = "allow"
-    view           = "allow"
-  }
+      administer     = "allow"
+      create         = "allow"
+      manage         = "allow"
+      manage_history = "allow"
+      use            = "allow"
+      view           = "allow"
+    }
+  ]
 }
 ```
 
@@ -52,14 +54,14 @@ resource "azuredevops_environment_permissions" "production" {
 
 ### Required
 
+- `permissions` (Attributes List) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
 - `project_id` (String) The ID of the project.
 
 ### Optional
 
 - `id` (Number) The ID of the environment. If you omit the value, the permissions are applied to the environments page and by default all environments inherit permissions from there.
-- `permissions` (Block List) The permissions to assign. (see [below for nested schema](#nestedblock--permissions))
 
-<a id="nestedblock--permissions"></a>
+<a id="nestedatt--permissions"></a>
 ### Nested Schema for `permissions`
 
 Required:
