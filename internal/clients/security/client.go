@@ -57,6 +57,10 @@ func (c *Client) GetIdentityBySubjectDescriptor(ctx context.Context, subjectDesc
 	return c.getIdentity(ctx, queryParams, subjectDescriptor)
 }
 
+func (c *Client) GetIterationToken(iterationId string) string {
+	return fmt.Sprintf("vstfs:///Classification/Node/%s", iterationId)
+}
+
 func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespacesCollection, error) {
 	cacheKey := utils.GetCacheKey("Namespaces")
 	if n, ok := c.cache.Get(cacheKey); ok {
