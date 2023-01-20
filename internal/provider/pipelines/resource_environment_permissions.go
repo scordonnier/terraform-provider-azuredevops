@@ -159,7 +159,7 @@ func (r *EnvironmentPermissionsResource) Create(ctx context.Context, req resourc
 
 	token := r.securityClient.GetEnvironmentToken(model.ProjectId, int(model.Id.ValueInt64()))
 	permissions := r.getPermissions(&model.Permissions)
-	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
+	err := security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
@@ -200,7 +200,7 @@ func (r *EnvironmentPermissionsResource) Update(ctx context.Context, req resourc
 
 	token := r.securityClient.GetEnvironmentToken(model.ProjectId, int(model.Id.ValueInt64()))
 	permissions := r.getPermissions(&model.Permissions)
-	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
+	err := security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update permissions", err.Error())
 		return

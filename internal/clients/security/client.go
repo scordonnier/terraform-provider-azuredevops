@@ -9,13 +9,15 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 const (
-	pathAccessControlLists = "accesscontrollists"
-	pathApis               = "_apis"
-	pathIdentities         = "identities"
-	pathSecurityNamespaces = "securitynamespaces"
+	pathAccessControlEntries = "accesscontrolentries"
+	pathAccessControlLists   = "accesscontrollists"
+	pathApis                 = "_apis"
+	pathIdentities           = "identities"
+	pathSecurityNamespaces   = "securitynamespaces"
 )
 
 type Client struct {
@@ -61,6 +63,10 @@ func (c *Client) GetIdentityBySubjectDescriptor(ctx context.Context, subjectDesc
 	return c.getIdentity(ctx, queryParams, subjectDescriptor)
 }
 
+func (c *Client) GetProjectToken(projectId string) string {
+	return fmt.Sprintf("$PROJECT:vstfs:///Classification/TeamProject/%s", projectId)
+}
+
 func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespacesCollection, error) {
 	cacheKey := utils.GetCacheKey("Namespaces")
 	if n, ok := c.cache.Get(cacheKey); ok {
@@ -85,10 +91,28 @@ func (c *Client) GetServiceEndpointToken(projectId string, serviceEndpointId str
 	return token
 }
 
+func (c *Client) RemoveAccessControlEntries(ctx context.Context, namespaceId string, token string, descriptors []string) error {
+	pathSegments := []string{pathApis, pathAccessControlEntries, namespaceId}
+	queryParams := url.Values{"token": []string{token}, "descriptors": []string{strings.Join(descriptors, ",")}}
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.azdoClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
+	return err
+}
+
 func (c *Client) RemoveAccessControlLists(ctx context.Context, namespaceId string, token string) error {
 	pathSegments := []string{pathApis, pathAccessControlLists, namespaceId}
 	queryParams := url.Values{"tokens": []string{token}}
 	_, _, err := networking.DeleteJSON[networking.NoJSON](c.azdoClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
+	return err
+}
+
+func (c *Client) SetAccessControlEntries(ctx context.Context, namespaceId string, token string, accessControlEntries *[]AccessControlEntry) error {
+	pathSegments := []string{pathApis, pathAccessControlEntries, namespaceId}
+	body := SetAccessControlEntriesArgs{
+		AccessControlEntries: accessControlEntries,
+		Merge:                utils.Bool(false),
+		Token:                &token,
+	}
+	_, _, err := networking.PostJSON[AccessControlEntryCollection](c.azdoClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return err
 }
 

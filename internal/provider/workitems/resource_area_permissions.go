@@ -176,7 +176,7 @@ func (r *AreaPermissionsResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	permissions := r.getPermissions(&model.Permissions)
-	err = security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
+	err = security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
@@ -227,7 +227,7 @@ func (r *AreaPermissionsResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	permissions := r.getPermissions(&model.Permissions)
-	err = security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
+	err = security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update permissions", err.Error())
 		return

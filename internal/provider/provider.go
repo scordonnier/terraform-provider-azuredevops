@@ -85,6 +85,7 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		core.NewProjectResource,
 		core.NewProjectFeaturesResource,
+		core.NewProjectPermissionsResource,
 		core.NewTeamResource,
 		graph.NewGroupResource,
 		graph.NewGroupMembershipResource,

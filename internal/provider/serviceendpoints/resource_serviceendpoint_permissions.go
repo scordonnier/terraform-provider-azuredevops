@@ -150,7 +150,7 @@ func (r *ServiceEndpointPermissionsResource) Create(ctx context.Context, req res
 
 	token := r.securityClient.GetServiceEndpointToken(model.ProjectId, model.Id.ValueString())
 	permissions := r.getPermissions(&model.Permissions)
-	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, permissions, r.securityClient, r.graphClient)
+	err := security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
@@ -191,7 +191,7 @@ func (r *ServiceEndpointPermissionsResource) Update(ctx context.Context, req res
 
 	token := r.securityClient.GetServiceEndpointToken(model.ProjectId, model.Id.ValueString())
 	permissions := r.getPermissions(&model.Permissions)
-	err := security.CreateOrUpdateIdentityPermissions(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, permissions, r.securityClient, r.graphClient)
+	err := security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update permissions", err.Error())
 		return

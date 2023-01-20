@@ -16,7 +16,7 @@ type IdentityPermissions struct {
 	Permissions        map[string]string
 }
 
-func CreateOrUpdateIdentityPermissions(ctx context.Context, namespaceId string, token string, permissions []*IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) error {
+func CreateOrUpdateAccessControlEntry(ctx context.Context, namespaceId string, token string, permission *IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) error {
 	namespaces, namespacesErr := securityClient.GetSecurityNamespaces(ctx)
 	if namespacesErr != nil {
 		return namespacesErr
@@ -25,73 +25,42 @@ func CreateOrUpdateIdentityPermissions(ctx context.Context, namespaceId string, 
 	namespace := linq.From(*namespaces.Value).FirstWith(func(n interface{}) bool {
 		return n.(security.SecurityNamespaceDescription).NamespaceId.String() == namespaceId
 	}).(security.SecurityNamespaceDescription)
+
+	accessControlEntry, err := getAccessControlEntry(ctx, &namespace, permission, securityClient, graphClient)
+	if err != nil {
+		return err
+	}
+
+	err = securityClient.SetAccessControlEntries(ctx, namespaceId, token, &[]security.AccessControlEntry{*accessControlEntry})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateOrUpdateAccessControlList(ctx context.Context, namespaceId string, token string, permissions []*IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) error {
+	namespaces, namespacesErr := securityClient.GetSecurityNamespaces(ctx)
+	if namespacesErr != nil {
+		return namespacesErr
+	}
+
+	namespace := linq.From(*namespaces.Value).FirstWith(func(n interface{}) bool {
+		return n.(security.SecurityNamespaceDescription).NamespaceId.String() == namespaceId
+	}).(security.SecurityNamespaceDescription)
+
 	accessControlList := &security.AccessControlList{
 		AcesDictionary: &map[string]security.AccessControlEntry{},
 		Token:          &token,
 	}
 
 	for _, permission := range permissions {
-		if permission.IdentityDescriptor == "" {
-			identity, identityErr := graphClient.GetIdentityPickerIdentity(ctx, permission.IdentityName)
-			if identityErr != nil {
-				return identityErr
-			}
-
-			subjectDescriptor := identity.SubjectDescriptor
-			if subjectDescriptor == nil {
-				switch *identity.EntityType {
-				case "Group":
-					group, err := graphClient.CreateGroupByOriginId(ctx, *identity.OriginId)
-					if err != nil {
-						return err
-					}
-
-					subjectDescriptor = group.Descriptor
-				case "User":
-					user, err := graphClient.CreateUserByOriginId(ctx, *identity.OriginId)
-					if err != nil {
-						return err
-					}
-
-					subjectDescriptor = user.Descriptor
-				default:
-					return errors.New(fmt.Sprintf("Unknown entity type '%s'", *identity.EntityType))
-				}
-			}
-
-			identity2, err := securityClient.GetIdentityBySubjectDescriptor(ctx, *subjectDescriptor)
-			if err != nil {
-				return err
-			}
-
-			permission.IdentityDescriptor = *identity2.Descriptor
+		accessControlEntry, err := getAccessControlEntry(ctx, &namespace, permission, securityClient, graphClient)
+		if err != nil {
+			return err
 		}
 
-		allow := 0
-		deny := 0
-
-		for key, value := range permission.Permissions {
-			action := linq.From(*namespace.Actions).FirstWith(func(a interface{}) bool {
-				return strings.EqualFold(*a.(security.ActionDefinition).Name, key)
-			}).(security.ActionDefinition)
-
-			if strings.EqualFold("deny", value) {
-				allow = allow &^ *action.Bit
-				deny = deny | *action.Bit
-			} else if strings.EqualFold("allow", value) {
-				deny = deny &^ *action.Bit
-				allow = allow | *action.Bit
-			} else if strings.EqualFold("notset", value) {
-				allow = allow &^ *action.Bit
-				deny = deny &^ *action.Bit
-			}
-		}
-
-		(*accessControlList.AcesDictionary)[permission.IdentityDescriptor] = security.AccessControlEntry{
-			Descriptor: &permission.IdentityDescriptor,
-			Allow:      &allow,
-			Deny:       &deny,
-		}
+		(*accessControlList.AcesDictionary)[permission.IdentityDescriptor] = *accessControlEntry
 	}
 
 	aclErr := securityClient.SetAccessControlLists(ctx, namespaceId, &[]security.AccessControlList{*accessControlList})
@@ -168,4 +137,70 @@ func ReadIdentityPermissions(ctx context.Context, namespaceId string, token stri
 	}
 
 	return identityPermissions, nil
+}
+
+// Private Methods
+
+func getAccessControlEntry(ctx context.Context, namespace *security.SecurityNamespaceDescription, permission *IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) (*security.AccessControlEntry, error) {
+	if permission.IdentityDescriptor == "" {
+		identity, identityErr := graphClient.GetIdentityPickerIdentity(ctx, permission.IdentityName)
+		if identityErr != nil {
+			return nil, identityErr
+		}
+
+		subjectDescriptor := identity.SubjectDescriptor
+		if subjectDescriptor == nil {
+			switch *identity.EntityType {
+			case "Group":
+				group, err := graphClient.CreateGroupByOriginId(ctx, *identity.OriginId)
+				if err != nil {
+					return nil, err
+				}
+
+				subjectDescriptor = group.Descriptor
+			case "User":
+				user, err := graphClient.CreateUserByOriginId(ctx, *identity.OriginId)
+				if err != nil {
+					return nil, err
+				}
+
+				subjectDescriptor = user.Descriptor
+			default:
+				return nil, errors.New(fmt.Sprintf("Unknown entity type '%s'", *identity.EntityType))
+			}
+		}
+
+		identity2, err := securityClient.GetIdentityBySubjectDescriptor(ctx, *subjectDescriptor)
+		if err != nil {
+			return nil, err
+		}
+
+		permission.IdentityDescriptor = *identity2.Descriptor
+	}
+
+	allow := 0
+	deny := 0
+
+	for key, value := range permission.Permissions {
+		action := linq.From(*namespace.Actions).FirstWith(func(a interface{}) bool {
+			return strings.EqualFold(*a.(security.ActionDefinition).Name, key)
+		}).(security.ActionDefinition)
+
+		if strings.EqualFold("deny", value) {
+			allow = allow &^ *action.Bit
+			deny = deny | *action.Bit
+		} else if strings.EqualFold("allow", value) {
+			deny = deny &^ *action.Bit
+			allow = allow | *action.Bit
+		} else if strings.EqualFold("notset", value) {
+			allow = allow &^ *action.Bit
+			deny = deny &^ *action.Bit
+		}
+	}
+
+	return &security.AccessControlEntry{
+		Descriptor: &permission.IdentityDescriptor,
+		Allow:      &allow,
+		Deny:       &deny,
+	}, nil
 }
