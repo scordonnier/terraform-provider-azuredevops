@@ -39,7 +39,7 @@ func (c *Client) GetAccessControlLists(ctx context.Context, namespaceId string, 
 	return acls, err
 }
 
-func (c *Client) GetEnvironmentToken(environmentId int, projectId string) string {
+func (c *Client) GetEnvironmentToken(projectId string, environmentId int) string {
 	token := "Environments/" + projectId
 	if environmentId > 0 {
 		token += "/" + strconv.Itoa(environmentId)
@@ -71,6 +71,14 @@ func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespaces
 
 	c.cache.Set(cacheKey, namespaces, cache.NoExpiration)
 	return namespaces, err
+}
+
+func (c *Client) GetServiceEndpointToken(projectId string, serviceEndpointId string) string {
+	token := "endpoints/" + projectId
+	if serviceEndpointId != "" {
+		token += "/" + serviceEndpointId
+	}
+	return token
 }
 
 func (c *Client) RemoveAccessControlLists(ctx context.Context, namespaceId string, token string) error {
