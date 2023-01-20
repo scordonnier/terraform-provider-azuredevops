@@ -63,6 +63,14 @@ func (c *Client) GetIdentityBySubjectDescriptor(ctx context.Context, subjectDesc
 	return c.getIdentity(ctx, queryParams, subjectDescriptor)
 }
 
+func (c *Client) GetPipelineToken(projectId string, pipelineId int) string {
+	token := projectId
+	if pipelineId > 0 {
+		token += "/" + strconv.Itoa(pipelineId)
+	}
+	return token
+}
+
 func (c *Client) GetProjectToken(projectId string) string {
 	return fmt.Sprintf("$PROJECT:vstfs:///Classification/TeamProject/%s", projectId)
 }
