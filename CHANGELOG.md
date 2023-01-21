@@ -3,6 +3,7 @@
 FEATURES:
 
 **New Resource** `azuredevops_area_permissions`<br/>
+**New Resource** `azuredevops_git_permissions`<br/>
 **New Resource** `azuredevops_iteration_permissions`<br/>
 **New Resource** `azuredevops_pipeline_permissions`<br/>
 **New Resource** `azuredevops_project_permissions`<br/>
