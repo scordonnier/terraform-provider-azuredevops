@@ -75,6 +75,14 @@ func (c *Client) GetProjectToken(projectId string) string {
 	return fmt.Sprintf("$PROJECT:vstfs:///Classification/TeamProject/%s", projectId)
 }
 
+func (c *Client) GetRepositoryToken(projectId string, repositoryId string) string {
+	token := fmt.Sprintf("repoV2/%s", projectId)
+	if repositoryId != "" {
+		token += "/" + repositoryId
+	}
+	return token
+}
+
 func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespacesCollection, error) {
 	cacheKey := utils.GetCacheKey("Namespaces")
 	if n, ok := c.cache.Get(cacheKey); ok {

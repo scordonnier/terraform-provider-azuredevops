@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/git"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoints"
@@ -87,6 +88,7 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		core.NewProjectFeaturesResource,
 		core.NewProjectPermissionsResource,
 		core.NewTeamResource,
+		git.NewGitPermissionsResource,
 		graph.NewGroupResource,
 		graph.NewGroupMembershipResource,
 		pipelines.NewEnvironmentResource,
