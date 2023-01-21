@@ -8,25 +8,14 @@ resource "azuredevops_environment" "production" {
 }
 
 resource "azuredevops_environment_permissions" "production" {
-  id         = azuredevops_environment.production.id
-  project_id = azuredevops_environment.production.project_id
-  permissions {
-    identity_name = "[Sandbox]\\Contributors"
-
+  id             = azuredevops_environment.production.id
+  principal_name = "[Sandbox]\\Contributors"
+  project_id     = azuredevops_environment.production.project_id
+  permissions = {
     administer     = "notset"
     create         = "notset"
     manage         = "notset"
     manage_history = "notset"
-    use            = "allow"
-    view           = "allow"
-  }
-  permissions {
-    identity_name = "user@noreply.com"
-
-    administer     = "allow"
-    create         = "allow"
-    manage         = "allow"
-    manage_history = "allow"
     use            = "allow"
     view           = "allow"
   }

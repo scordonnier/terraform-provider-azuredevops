@@ -1,13 +1,13 @@
 ---
-page_title: "azuredevops_pipelines_settings Data Source - azuredevops"
+page_title: "azuredevops_pipeline_settings Resource - azuredevops"
 subcategory: "Pipelines"
 description: |-
-  Use this data source to access information about pipeline settings of an existing project within Azure DevOps.
+  Manage pipeline settings of an existing project within Azure DevOps.
 ---
 
-# azuredevops_pipelines_settings (Data Source)
+# azuredevops_pipeline_settings (Resource)
 
-Use this data source to access information about pipeline settings of an existing project within Azure DevOps.
+Manage pipeline settings of an existing project within Azure DevOps.
 
 ## Example Usage
 
@@ -16,8 +16,22 @@ data "azuredevops_project" "sandbox" {
   name = "Sandbox"
 }
 
-data "azuredevops_pipelines_settings" "sandbox" {
+resource "azuredevops_pipeline_settings" "sandbox" {
+  general = {
+    disable_classic_pipeline_creation    = false
+    enforce_job_auth_scope               = true
+    enforce_job_auth_scope_for_releases  = true
+    enforce_referenced_repo_scoped_token = true
+    enforce_settable_var                 = true
+    publish_pipeline_metadata            = false
+    status_badges_are_private            = true
+  }
   project_id = data.azuredevops_project.sandbox.id
+  retention = {
+    days_to_keep_artifacts        = 30
+    days_to_keep_pullrequest_runs = 10
+    days_to_keep_runs             = 30
+  }
 }
 ```
 
@@ -26,17 +40,14 @@ data "azuredevops_pipelines_settings" "sandbox" {
 
 ### Required
 
-- `project_id` (String) The ID of the project.
-
-### Read-Only
-
 - `general` (Attributes) (see [below for nested schema](#nestedatt--general))
+- `project_id` (String) The ID of the project.
 - `retention` (Attributes) (see [below for nested schema](#nestedatt--retention))
 
 <a id="nestedatt--general"></a>
 ### Nested Schema for `general`
 
-Read-Only:
+Required:
 
 - `disable_classic_pipeline_creation` (Boolean) When this is enabled, users will not be able to create / import classic pipelines, classic release pipelines, task groups, and deployment groups. Existing classic (release) pipelines, task groups, and deployment groups will continue to work.
 - `enforce_job_auth_scope` (Boolean) If enabled, scope of access for all non-release pipelines reduces to the current project.
@@ -50,7 +61,7 @@ Read-Only:
 <a id="nestedatt--retention"></a>
 ### Nested Schema for `retention`
 
-Read-Only:
+Required:
 
 - `days_to_keep_artifacts` (Number) Number of days to keep artifacts, symbols and attachments.
 - `days_to_keep_pullrequest_runs` (Number) Number of days to keep pull request runs.

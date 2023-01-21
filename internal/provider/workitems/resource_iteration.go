@@ -117,7 +117,7 @@ func (r *IterationResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	model.Id = types.Int64Value(int64(*area.Id))
-	model.Path = types.StringValue(GetAreaOrIterationPath(area))
+	model.Path = types.StringValue(getAreaOrIterationPath(area))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -170,7 +170,7 @@ func (r *IterationResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	newModel.Path = types.StringValue(GetAreaOrIterationPath(area))
+	newModel.Path = types.StringValue(getAreaOrIterationPath(area))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &newModel)...)
 }
@@ -202,9 +202,9 @@ func (r *IterationResource) ModifyPlan(ctx context.Context, req resource.ModifyP
 	}
 
 	if strings.EqualFold(currentModel.ParentPath, newModel.ParentPath) {
-		newModel.Path = types.StringValue(PlanAreaOrIterationPath(currentModel.Path.ValueString(), newModel.Name, false))
+		newModel.Path = types.StringValue(planAreaOrIterationPath(currentModel.Path.ValueString(), newModel.Name, false))
 	} else {
-		newModel.Path = types.StringValue(PlanAreaOrIterationPath(newModel.ParentPath, newModel.Name, true))
+		newModel.Path = types.StringValue(planAreaOrIterationPath(newModel.ParentPath, newModel.Name, true))
 	}
 	resp.Plan.Set(ctx, *newModel)
 }

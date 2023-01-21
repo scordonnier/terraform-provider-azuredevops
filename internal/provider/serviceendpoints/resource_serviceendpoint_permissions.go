@@ -1,4 +1,4 @@
-package pipelines
+package serviceendpoints
 
 import (
 	"context"
@@ -17,52 +17,50 @@ import (
 )
 
 const (
-	permissionNameAdminister    = "Administer"
-	permissionNameCreate        = "Create"
-	permissionNameManage        = "Manage"
-	permissionNameManageHistory = "ManageHistory"
-	permissionNameUse           = "Use"
-	permissionNameView          = "View"
+	permissionNameAdminister        = "Administer"
+	permissionNameCreate            = "Create"
+	permissionNameUse               = "Use"
+	permissionNameViewAuthorization = "ViewAuthorization"
+	permissionNameViewEndpoint      = "ViewEndpoint"
 )
 
-var _ resource.Resource = &EnvironmentPermissionsResource{}
+var _ resource.Resource = &ServiceEndpointPermissionsResource{}
 
-func NewEnvironmentPermissionsResource() resource.Resource {
-	return &EnvironmentPermissionsResource{}
+func NewServiceEndpointPermissionsResource() resource.Resource {
+	return &ServiceEndpointPermissionsResource{}
 }
 
-type EnvironmentPermissionsResource struct {
+type ServiceEndpointPermissionsResource struct {
 	graphClient    *graph.Client
 	securityClient *clientSecurity.Client
 }
 
-type EnvironmentPermissionsResourceModel struct {
-	Id                  types.Int64            `tfsdk:"id"`
-	Permissions         EnvironmentPermissions `tfsdk:"permissions"`
-	PrincipalDescriptor types.String           `tfsdk:"principal_descriptor"`
-	PrincipalName       string                 `tfsdk:"principal_name"`
-	ProjectId           string                 `tfsdk:"project_id"`
+type ServiceEndpointPermissionsResourceModel struct {
+	Id                  types.String               `tfsdk:"id"`
+	Permissions         ServiceEndpointPermissions `tfsdk:"permissions"`
+	PrincipalDescriptor types.String               `tfsdk:"principal_descriptor"`
+	PrincipalName       string                     `tfsdk:"principal_name"`
+	ProjectId           string                     `tfsdk:"project_id"`
 }
 
-type EnvironmentPermissions struct {
-	Administer    string `tfsdk:"administer"`
-	Create        string `tfsdk:"create"`
-	Manage        string `tfsdk:"manage"`
-	ManageHistory string `tfsdk:"manage_history"`
-	Use           string `tfsdk:"use"`
-	View          string `tfsdk:"view"`
+type ServiceEndpointPermissions struct {
+	Administer        string `tfsdk:"administer"`
+	Create            string `tfsdk:"create"`
+	Use               string `tfsdk:"use"`
+	ViewAuthorization string `tfsdk:"view_authorization"`
+	ViewEndpoint      string `tfsdk:"view_endpoint"`
 }
 
-func (r *EnvironmentPermissionsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_environment_permissions"
+func (r *ServiceEndpointPermissionsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_serviceendpoint_permissions"
 }
 
-func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ServiceEndpointPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Sets permissions on environments in Azure Pipelines. All permissions that currently exists will be overwritten.",
+		MarkdownDescription: "Sets permissions on service endpoints of an existing project within Azure DevOps. All permissions that currently exists will be overwritten.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				MarkdownDescription: "The ID of the environment. If you omit the value, the permissions are applied to the environments page and by default all environments inherit permissions from there.",
+			"id": schema.StringAttribute{
+				MarkdownDescription: "The ID of the service endpoint. If you omit the value, the permissions are applied to the service connections page and by default all service connections inherit permissions from there.",
 				Optional:            true,
 			},
 			"permissions": schema.SingleNestedAttribute{
@@ -83,20 +81,6 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 							validators.PermissionsValidator(),
 						},
 					},
-					"manage": schema.StringAttribute{
-						MarkdownDescription: "Sets the `Manage` permission for the identity. Must be `notset`, `allow` or `deny`.",
-						Required:            true,
-						Validators: []validator.String{
-							validators.PermissionsValidator(),
-						},
-					},
-					"manage_history": schema.StringAttribute{
-						MarkdownDescription: "Sets the `ManageHistory` permission for the identity. Must be `notset`, `allow` or `deny`.",
-						Required:            true,
-						Validators: []validator.String{
-							validators.PermissionsValidator(),
-						},
-					},
 					"use": schema.StringAttribute{
 						MarkdownDescription: "Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
@@ -104,8 +88,15 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 							validators.PermissionsValidator(),
 						},
 					},
-					"view": schema.StringAttribute{
-						MarkdownDescription: "Sets the `View` permission for the identity. Must be `notset`, `allow` or `deny`.",
+					"view_authorization": schema.StringAttribute{
+						MarkdownDescription: "Sets the `ViewAuthorization` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+					"view_endpoint": schema.StringAttribute{
+						MarkdownDescription: "Sets the `ViewEndpoint` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
 							validators.PermissionsValidator(),
@@ -138,7 +129,7 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 	}
 }
 
-func (r *EnvironmentPermissionsResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *ServiceEndpointPermissionsResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -147,17 +138,17 @@ func (r *EnvironmentPermissionsResource) Configure(_ context.Context, req resour
 	r.securityClient = req.ProviderData.(*clients.AzureDevOpsClient).SecurityClient
 }
 
-func (r *EnvironmentPermissionsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *EnvironmentPermissionsResourceModel
+func (r *ServiceEndpointPermissionsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *ServiceEndpointPermissionsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	token := r.securityClient.GetEnvironmentToken(model.ProjectId, int(model.Id.ValueInt64()))
+	token := r.securityClient.GetServiceEndpointToken(model.ProjectId, model.Id.ValueString())
 	permissions := r.getPermissions(model)
-	err := security.CreateOrUpdateAccessControlEntry(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
+	err := security.CreateOrUpdateAccessControlEntry(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
@@ -168,16 +159,16 @@ func (r *EnvironmentPermissionsResource) Create(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *EnvironmentPermissionsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *EnvironmentPermissionsResourceModel
+func (r *ServiceEndpointPermissionsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *ServiceEndpointPermissionsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	token := r.securityClient.GetEnvironmentToken(model.ProjectId, int(model.Id.ValueInt64()))
-	permissions, err := security.ReadPrincipalPermissions(ctx, clientSecurity.NamespaceIdEnvironment, token, r.securityClient)
+	token := r.securityClient.GetServiceEndpointToken(model.ProjectId, model.Id.ValueString())
+	permissions, err := security.ReadPrincipalPermissions(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, r.securityClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to retrieve access control lists", err.Error())
 		return
@@ -188,17 +179,17 @@ func (r *EnvironmentPermissionsResource) Read(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *EnvironmentPermissionsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *EnvironmentPermissionsResourceModel
+func (r *ServiceEndpointPermissionsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *ServiceEndpointPermissionsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	token := r.securityClient.GetEnvironmentToken(model.ProjectId, int(model.Id.ValueInt64()))
+	token := r.securityClient.GetServiceEndpointToken(model.ProjectId, model.Id.ValueString())
 	permissions := r.getPermissions(model)
-	err := security.CreateOrUpdateAccessControlEntry(ctx, clientSecurity.NamespaceIdEnvironment, token, permissions, r.securityClient, r.graphClient)
+	err := security.CreateOrUpdateAccessControlEntry(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
@@ -209,16 +200,16 @@ func (r *EnvironmentPermissionsResource) Update(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *EnvironmentPermissionsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *EnvironmentPermissionsResourceModel
+func (r *ServiceEndpointPermissionsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *ServiceEndpointPermissionsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	token := r.securityClient.GetEnvironmentToken(model.ProjectId, int(model.Id.ValueInt64()))
-	err := r.securityClient.RemoveAccessControlEntries(ctx, clientSecurity.NamespaceIdEnvironment, token, []string{model.PrincipalDescriptor.ValueString()})
+	token := r.securityClient.GetServiceEndpointToken(model.ProjectId, model.Id.ValueString())
+	err := r.securityClient.RemoveAccessControlEntries(ctx, clientSecurity.NamespaceIdServiceEndpoints, token, []string{model.PrincipalDescriptor.ValueString()})
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete permissions", err.Error())
 		return
@@ -227,22 +218,21 @@ func (r *EnvironmentPermissionsResource) Delete(ctx context.Context, req resourc
 
 // Private Methods
 
-func (r *EnvironmentPermissionsResource) getPermissions(model *EnvironmentPermissionsResourceModel) *security.PrincipalPermissions {
+func (r *ServiceEndpointPermissionsResource) getPermissions(model *ServiceEndpointPermissionsResourceModel) *security.PrincipalPermissions {
 	return &security.PrincipalPermissions{
 		PrincipalDescriptor: model.PrincipalDescriptor.ValueString(),
 		PrincipalName:       model.PrincipalName,
 		Permissions: map[string]string{
-			permissionNameAdminister:    model.Permissions.Administer,
-			permissionNameCreate:        model.Permissions.Create,
-			permissionNameManage:        model.Permissions.Manage,
-			permissionNameManageHistory: model.Permissions.ManageHistory,
-			permissionNameUse:           model.Permissions.Use,
-			permissionNameView:          model.Permissions.View,
+			permissionNameAdminister:        model.Permissions.Administer,
+			permissionNameCreate:            model.Permissions.Create,
+			permissionNameUse:               model.Permissions.Use,
+			permissionNameViewAuthorization: model.Permissions.ViewAuthorization,
+			permissionNameViewEndpoint:      model.Permissions.ViewEndpoint,
 		},
 	}
 }
 
-func (r *EnvironmentPermissionsResource) setPermissions(model *EnvironmentPermissionsResourceModel, p []*security.PrincipalPermissions) {
+func (r *ServiceEndpointPermissionsResource) setPermissions(model *ServiceEndpointPermissionsResourceModel, p []*security.PrincipalPermissions) {
 	if len(p) == 0 {
 		return
 	}
@@ -252,10 +242,9 @@ func (r *EnvironmentPermissionsResource) setPermissions(model *EnvironmentPermis
 	}).(*security.PrincipalPermissions)
 	model.Permissions.Administer = principalPermissions.Permissions[permissionNameAdminister]
 	model.Permissions.Create = principalPermissions.Permissions[permissionNameCreate]
-	model.Permissions.Manage = principalPermissions.Permissions[permissionNameManage]
-	model.Permissions.ManageHistory = principalPermissions.Permissions[permissionNameManageHistory]
 	model.Permissions.Use = principalPermissions.Permissions[permissionNameUse]
-	model.Permissions.View = principalPermissions.Permissions[permissionNameView]
+	model.Permissions.ViewAuthorization = principalPermissions.Permissions[permissionNameViewAuthorization]
+	model.Permissions.ViewEndpoint = principalPermissions.Permissions[permissionNameViewEndpoint]
 	model.PrincipalDescriptor = types.StringValue(principalPermissions.PrincipalDescriptor)
 	model.PrincipalName = principalPermissions.PrincipalName
 }

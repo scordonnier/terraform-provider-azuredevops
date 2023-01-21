@@ -27,7 +27,7 @@ type PipelineSettingsDataSourceModel struct {
 }
 
 func (d *PipelineSettingsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_pipelines_settings"
+	resp.TypeName = req.ProviderTypeName + "_pipeline_settings"
 }
 
 func (d *PipelineSettingsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {

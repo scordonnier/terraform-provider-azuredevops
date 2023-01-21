@@ -11,27 +11,27 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 )
 
-var _ resource.Resource = &PipelinesSettingsResource{}
+var _ resource.Resource = &PipelineSettingsResource{}
 
-func NewPipelinesSettingsResource() resource.Resource {
-	return &PipelinesSettingsResource{}
+func NewPipelineSettingsResource() resource.Resource {
+	return &PipelineSettingsResource{}
 }
 
-type PipelinesSettingsResource struct {
+type PipelineSettingsResource struct {
 	client *pipelines.Client
 }
 
-type PipelinesSettingsResourceModel struct {
+type PipelineSettingsResourceModel struct {
 	General   PipelineGeneralSettings   `tfsdk:"general"`
 	ProjectId string                    `tfsdk:"project_id"`
 	Retention PipelineRetentionSettings `tfsdk:"retention"`
 }
 
-func (r *PipelinesSettingsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_pipelines_settings"
+func (r *PipelineSettingsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_pipeline_settings"
 }
 
-func (r *PipelinesSettingsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *PipelineSettingsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manage pipeline settings of an existing project within Azure DevOps.",
 		Attributes: map[string]schema.Attribute{
@@ -105,7 +105,7 @@ func (r *PipelinesSettingsResource) Schema(_ context.Context, _ resource.SchemaR
 	}
 }
 
-func (r *PipelinesSettingsResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *PipelineSettingsResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -113,8 +113,8 @@ func (r *PipelinesSettingsResource) Configure(_ context.Context, req resource.Co
 	r.client = req.ProviderData.(*clients.AzureDevOpsClient).PipelinesClient
 }
 
-func (r *PipelinesSettingsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var model *PipelinesSettingsResourceModel
+func (r *PipelineSettingsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var model *PipelineSettingsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -130,8 +130,8 @@ func (r *PipelinesSettingsResource) Create(ctx context.Context, req resource.Cre
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *PipelinesSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var model *PipelinesSettingsResourceModel
+func (r *PipelineSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var model *PipelineSettingsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -165,8 +165,8 @@ func (r *PipelinesSettingsResource) Read(ctx context.Context, req resource.ReadR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *PipelinesSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var model *PipelinesSettingsResourceModel
+func (r *PipelineSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var model *PipelineSettingsResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -182,8 +182,8 @@ func (r *PipelinesSettingsResource) Update(ctx context.Context, req resource.Upd
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
-func (r *PipelinesSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var model *PipelinesSettingsResourceModel
+func (r *PipelineSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var model *PipelineSettingsResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &model)...)
 
 	if resp.Diagnostics.HasError() {
@@ -210,7 +210,7 @@ func (r *PipelinesSettingsResource) Delete(ctx context.Context, req resource.Del
 
 // Private Methods
 
-func (r *PipelinesSettingsResource) updatePipelineSettings(ctx context.Context, model *PipelinesSettingsResourceModel) error {
+func (r *PipelineSettingsResource) updatePipelineSettings(ctx context.Context, model *PipelineSettingsResourceModel) error {
 	pipelineSettings := &pipelines.PipelineGeneralSettings{
 		DisableClassicPipelineCreation:   model.General.DisableClassicPipelineCreation,
 		EnforceJobAuthScope:              model.General.EnforceJobAuthScope,

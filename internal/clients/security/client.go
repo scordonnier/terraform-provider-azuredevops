@@ -9,13 +9,15 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 const (
-	pathAccessControlLists = "accesscontrollists"
-	pathApis               = "_apis"
-	pathIdentities         = "identities"
-	pathSecurityNamespaces = "securitynamespaces"
+	pathAccessControlEntries = "accesscontrolentries"
+	pathAccessControlLists   = "accesscontrollists"
+	pathApis                 = "_apis"
+	pathIdentities           = "identities"
+	pathSecurityNamespaces   = "securitynamespaces"
 )
 
 type Client struct {
@@ -39,7 +41,11 @@ func (c *Client) GetAccessControlLists(ctx context.Context, namespaceId string, 
 	return acls, err
 }
 
-func (c *Client) GetEnvironmentToken(environmentId int, projectId string) string {
+func (c *Client) GetClassificationNodeToken(iterationId string) string {
+	return fmt.Sprintf("vstfs:///Classification/Node/%s", iterationId)
+}
+
+func (c *Client) GetEnvironmentToken(projectId string, environmentId int) string {
 	token := "Environments/" + projectId
 	if environmentId > 0 {
 		token += "/" + strconv.Itoa(environmentId)
@@ -55,6 +61,26 @@ func (c *Client) GetIdentityByDescriptor(ctx context.Context, descriptor string)
 func (c *Client) GetIdentityBySubjectDescriptor(ctx context.Context, subjectDescriptor string) (*Identity, error) {
 	queryParams := url.Values{"subjectDescriptors": []string{subjectDescriptor}, "queryMembership": []string{"none"}}
 	return c.getIdentity(ctx, queryParams, subjectDescriptor)
+}
+
+func (c *Client) GetPipelineToken(projectId string, pipelineId int) string {
+	token := projectId
+	if pipelineId > 0 {
+		token += "/" + strconv.Itoa(pipelineId)
+	}
+	return token
+}
+
+func (c *Client) GetProjectToken(projectId string) string {
+	return fmt.Sprintf("$PROJECT:vstfs:///Classification/TeamProject/%s", projectId)
+}
+
+func (c *Client) GetRepositoryToken(projectId string, repositoryId string) string {
+	token := fmt.Sprintf("repoV2/%s", projectId)
+	if repositoryId != "" {
+		token += "/" + repositoryId
+	}
+	return token
 }
 
 func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespacesCollection, error) {
@@ -73,10 +99,36 @@ func (c *Client) GetSecurityNamespaces(ctx context.Context) (*SecurityNamespaces
 	return namespaces, err
 }
 
+func (c *Client) GetServiceEndpointToken(projectId string, serviceEndpointId string) string {
+	token := "endpoints/" + projectId
+	if serviceEndpointId != "" {
+		token += "/" + serviceEndpointId
+	}
+	return token
+}
+
+func (c *Client) RemoveAccessControlEntries(ctx context.Context, namespaceId string, token string, descriptors []string) error {
+	pathSegments := []string{pathApis, pathAccessControlEntries, namespaceId}
+	queryParams := url.Values{"token": []string{token}, "descriptors": []string{strings.Join(descriptors, ",")}}
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.azdoClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
+	return err
+}
+
 func (c *Client) RemoveAccessControlLists(ctx context.Context, namespaceId string, token string) error {
 	pathSegments := []string{pathApis, pathAccessControlLists, namespaceId}
 	queryParams := url.Values{"tokens": []string{token}}
 	_, _, err := networking.DeleteJSON[networking.NoJSON](c.azdoClient, ctx, pathSegments, queryParams, networking.ApiVersion70)
+	return err
+}
+
+func (c *Client) SetAccessControlEntries(ctx context.Context, namespaceId string, token string, accessControlEntries *[]AccessControlEntry) error {
+	pathSegments := []string{pathApis, pathAccessControlEntries, namespaceId}
+	body := SetAccessControlEntriesArgs{
+		AccessControlEntries: accessControlEntries,
+		Merge:                utils.Bool(false),
+		Token:                &token,
+	}
+	_, _, err := networking.PostJSON[AccessControlEntryCollection](c.azdoClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
 	return err
 }
 

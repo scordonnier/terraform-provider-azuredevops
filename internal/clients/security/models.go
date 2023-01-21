@@ -9,6 +9,11 @@ type AccessControlEntry struct {
 	ExtendedInfo *AceExtendedInformation `json:"extendedInfo,omitempty"`
 }
 
+type AccessControlEntryCollection struct {
+	Count *int                  `json:"count"`
+	Value *[]AccessControlEntry `json:"value"`
+}
+
 type AccessControlList struct {
 	AcesDictionary      *map[string]AccessControlEntry `json:"acesDictionary,omitempty"`
 	IncludeExtendedInfo *bool                          `json:"includeExtendedInfo,omitempty"`
@@ -79,4 +84,10 @@ type SecurityNamespaceDescription struct {
 type SecurityNamespacesCollection struct {
 	Count *int                            `json:"count"`
 	Value *[]SecurityNamespaceDescription `json:"value"`
+}
+
+type SetAccessControlEntriesArgs struct {
+	AccessControlEntries *[]AccessControlEntry `json:"accessControlEntries,omitempty"`
+	Merge                *bool                 `json:"merge,omitempty"`
+	Token                *string               `json:"token,omitempty"`
 }

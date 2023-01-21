@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/core"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/git"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/provider/serviceendpoints"
@@ -85,20 +86,26 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		core.NewProjectResource,
 		core.NewProjectFeaturesResource,
+		core.NewProjectPermissionsResource,
 		core.NewTeamResource,
+		git.NewGitPermissionsResource,
 		graph.NewGroupResource,
 		graph.NewGroupMembershipResource,
 		pipelines.NewEnvironmentResource,
 		pipelines.NewEnvironmentKubernetesResource,
 		pipelines.NewEnvironmentPermissionsResource,
-		pipelines.NewPipelinesSettingsResource,
+		pipelines.NewPipelinePermissionsResource,
+		pipelines.NewPipelineSettingsResource,
 		serviceendpoints.NewServiceEndpointAzureRmResource,
 		serviceendpoints.NewServiceEndpointBitbucketResource,
 		serviceendpoints.NewServiceEndpointGitHubResource,
 		serviceendpoints.NewServiceEndpointKubernetesResource,
+		serviceendpoints.NewServiceEndpointPermissionsResource,
 		serviceendpoints.NewServiceEndpointShareResource,
 		serviceendpoints.NewServiceEndpointVsAppCenterResource,
+		workitems.NewAreaPermissionsResource,
 		workitems.NewAreaResource,
+		workitems.NewIterationPermissionsResource,
 		workitems.NewIterationResource,
 	}
 }

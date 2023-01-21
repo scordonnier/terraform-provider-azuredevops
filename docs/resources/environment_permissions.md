@@ -22,25 +22,14 @@ resource "azuredevops_environment" "production" {
 }
 
 resource "azuredevops_environment_permissions" "production" {
-  id         = azuredevops_environment.production.id
-  project_id = azuredevops_environment.production.project_id
-  permissions {
-    identity_name = "[Sandbox]\\Contributors"
-
+  id             = azuredevops_environment.production.id
+  principal_name = "[Sandbox]\\Contributors"
+  project_id     = azuredevops_environment.production.project_id
+  permissions = {
     administer     = "notset"
     create         = "notset"
     manage         = "notset"
     manage_history = "notset"
-    use            = "allow"
-    view           = "allow"
-  }
-  permissions {
-    identity_name = "user@noreply.com"
-
-    administer     = "allow"
-    create         = "allow"
-    manage         = "allow"
-    manage_history = "allow"
     use            = "allow"
     view           = "allow"
   }
@@ -52,26 +41,26 @@ resource "azuredevops_environment_permissions" "production" {
 
 ### Required
 
+- `permissions` (Attributes) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
+- `principal_name` (String) The principal name to assign the permissions.
 - `project_id` (String) The ID of the project.
 
 ### Optional
 
 - `id` (Number) The ID of the environment. If you omit the value, the permissions are applied to the environments page and by default all environments inherit permissions from there.
-- `permissions` (Block List) The permissions to assign. (see [below for nested schema](#nestedblock--permissions))
 
-<a id="nestedblock--permissions"></a>
+### Read-Only
+
+- `principal_descriptor` (String) The principal descriptor to assign the permissions.
+
+<a id="nestedatt--permissions"></a>
 ### Nested Schema for `permissions`
 
 Required:
 
 - `administer` (String) Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `create` (String) Sets the `Create` permission for the identity. Must be `notset`, `allow` or `deny`.
-- `identity_name` (String) The identity name to assign the permissions.
 - `manage` (String) Sets the `Manage` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `manage_history` (String) Sets the `ManageHistory` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `use` (String) Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `view` (String) Sets the `View` permission for the identity. Must be `notset`, `allow` or `deny`.
-
-Read-Only:
-
-- `identity_descriptor` (String) The identity descriptor to assign the permissions.
