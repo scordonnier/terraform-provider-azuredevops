@@ -1,11 +1,11 @@
 ---
-page_title: "azuredevops_pipelines_settings Data Source - azuredevops"
+page_title: "azuredevops_pipeline_settings Data Source - azuredevops"
 subcategory: "Pipelines"
 description: |-
   Use this data source to access information about pipeline settings of an existing project within Azure DevOps.
 ---
 
-# azuredevops_pipelines_settings (Data Source)
+# azuredevops_pipeline_settings (Data Source)
 
 Use this data source to access information about pipeline settings of an existing project within Azure DevOps.
 
@@ -16,7 +16,7 @@ data "azuredevops_project" "sandbox" {
   name = "Sandbox"
 }
 
-data "azuredevops_pipelines_settings" "sandbox" {
+data "azuredevops_pipeline_settings" "sandbox" {
   project_id = data.azuredevops_project.sandbox.id
 }
 ```

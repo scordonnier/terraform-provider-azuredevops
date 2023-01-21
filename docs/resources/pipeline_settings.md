@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_pipeline_settings Resource - azuredevops"
-subcategory: ""
+subcategory: "Pipelines"
 description: |-
   Manage pipeline settings of an existing project within Azure DevOps.
 ---

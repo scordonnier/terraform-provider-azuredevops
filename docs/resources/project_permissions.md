@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_project_permissions Resource - azuredevops"
-subcategory: ""
+subcategory: "Projects"
 description: |-
   Sets permissions on projects within Azure DevOps. All permissions that currently exists will be overwritten.
 ---

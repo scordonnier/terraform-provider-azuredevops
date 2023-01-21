@@ -10,7 +10,7 @@ FEATURES:
 
 BREAKING CHANGES:
 
-**Rename** `azuredevops_pipelines_settings` to `azuredevops_pipeline_settings`<br/>
+**Rename (Data / Resource)** `azuredevops_pipelines_settings` to `azuredevops_pipeline_settings`<br/>
 **Resource** `azuredevops_environment_permissions` : Update schema to specify permissions as new resources<br/>
 
 ## v0.4.1

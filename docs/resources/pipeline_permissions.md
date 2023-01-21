@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_pipeline_permissions Resource - azuredevops"
-subcategory: ""
+subcategory: "Pipelines"
 description: |-
   Sets permissions on pipelines within an Azure DevOps project. All permissions that currently exists will be overwritten.
 ---

@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_serviceendpoint_permissions Resource - azuredevops"
-subcategory: ""
+subcategory: "Service Endpoints"
 description: |-
   Sets permissions on service endpoints of an existing project within Azure DevOps. All permissions that currently exists will be overwritten.
 ---

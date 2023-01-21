@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_iteration_permissions Resource - azuredevops"
-subcategory: ""
+subcategory: "Work Items"
 description: |-
   Sets permissions on iterations of an existing project within Azure DevOps. All permissions that currently exists will be overwritten.
 ---

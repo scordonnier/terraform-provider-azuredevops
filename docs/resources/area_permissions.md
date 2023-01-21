@@ -1,6 +1,6 @@
 ---
 page_title: "azuredevops_area_permissions Resource - azuredevops"
-subcategory: ""
+subcategory: "Work Items"
 description: |-
   Sets permissions on areas of an existing project within Azure DevOps. All permissions that currently exists will be overwritten.
 ---
