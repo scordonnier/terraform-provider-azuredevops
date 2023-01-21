@@ -10,13 +10,13 @@ import (
 	"strings"
 )
 
-type IdentityPermissions struct {
-	IdentityDescriptor string
-	IdentityName       string
-	Permissions        map[string]string
+type PrincipalPermissions struct {
+	Permissions         map[string]string
+	PrincipalDescriptor string
+	PrincipalName       string
 }
 
-func CreateOrUpdateAccessControlEntry(ctx context.Context, namespaceId string, token string, permission *IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) error {
+func CreateOrUpdateAccessControlEntry(ctx context.Context, namespaceId string, token string, permissions *PrincipalPermissions, securityClient *security.Client, graphClient *graph.Client) error {
 	namespaces, namespacesErr := securityClient.GetSecurityNamespaces(ctx)
 	if namespacesErr != nil {
 		return namespacesErr
@@ -26,7 +26,7 @@ func CreateOrUpdateAccessControlEntry(ctx context.Context, namespaceId string, t
 		return n.(security.SecurityNamespaceDescription).NamespaceId.String() == namespaceId
 	}).(security.SecurityNamespaceDescription)
 
-	accessControlEntry, err := getAccessControlEntry(ctx, &namespace, permission, securityClient, graphClient)
+	accessControlEntry, err := getAccessControlEntry(ctx, &namespace, permissions, securityClient, graphClient)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func CreateOrUpdateAccessControlEntry(ctx context.Context, namespaceId string, t
 	return nil
 }
 
-func CreateOrUpdateAccessControlList(ctx context.Context, namespaceId string, token string, permissions []*IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) error {
+func CreateOrUpdateAccessControlList(ctx context.Context, namespaceId string, token string, permissions []*PrincipalPermissions, securityClient *security.Client, graphClient *graph.Client) error {
 	namespaces, namespacesErr := securityClient.GetSecurityNamespaces(ctx)
 	if namespacesErr != nil {
 		return namespacesErr
@@ -60,7 +60,7 @@ func CreateOrUpdateAccessControlList(ctx context.Context, namespaceId string, to
 			return err
 		}
 
-		(*accessControlList.AcesDictionary)[permission.IdentityDescriptor] = *accessControlEntry
+		(*accessControlList.AcesDictionary)[permission.PrincipalDescriptor] = *accessControlEntry
 	}
 
 	aclErr := securityClient.SetAccessControlLists(ctx, namespaceId, &[]security.AccessControlList{*accessControlList})
@@ -71,14 +71,14 @@ func CreateOrUpdateAccessControlList(ctx context.Context, namespaceId string, to
 	return nil
 }
 
-func ReadIdentityPermissions(ctx context.Context, namespaceId string, token string, securityClient *security.Client) ([]*IdentityPermissions, error) {
+func ReadPrincipalPermissions(ctx context.Context, namespaceId string, token string, securityClient *security.Client) ([]*PrincipalPermissions, error) {
 	accessControlLists, err := securityClient.GetAccessControlLists(ctx, namespaceId, token)
 	if err != nil {
 		return nil, err
 	}
 
 	if *accessControlLists.Count == 0 {
-		return []*IdentityPermissions{}, errors.New("access control lists are empty")
+		return []*PrincipalPermissions{}, errors.New("access control lists are empty")
 	}
 
 	namespaces, namespacesErr := securityClient.GetSecurityNamespaces(ctx)
@@ -90,7 +90,7 @@ func ReadIdentityPermissions(ctx context.Context, namespaceId string, token stri
 		return n.(security.SecurityNamespaceDescription).NamespaceId.String() == namespaceId
 	}).(security.SecurityNamespaceDescription)
 
-	var identityPermissions []*IdentityPermissions
+	var identityPermissions []*PrincipalPermissions
 	accessControlList := (*accessControlLists.Value)[0]
 
 	for _, ace := range *accessControlList.AcesDictionary {
@@ -129,10 +129,10 @@ func ReadIdentityPermissions(ctx context.Context, namespaceId string, token stri
 			return nil, errors.New(fmt.Sprintf("Unknown schema class name '%s'.", schemaClassName))
 		}
 
-		identityPermissions = append(identityPermissions, &IdentityPermissions{
-			IdentityDescriptor: *ace.Descriptor,
-			IdentityName:       *identityName,
-			Permissions:        permissions,
+		identityPermissions = append(identityPermissions, &PrincipalPermissions{
+			PrincipalDescriptor: *ace.Descriptor,
+			PrincipalName:       *identityName,
+			Permissions:         permissions,
 		})
 	}
 
@@ -141,9 +141,9 @@ func ReadIdentityPermissions(ctx context.Context, namespaceId string, token stri
 
 // Private Methods
 
-func getAccessControlEntry(ctx context.Context, namespace *security.SecurityNamespaceDescription, permission *IdentityPermissions, securityClient *security.Client, graphClient *graph.Client) (*security.AccessControlEntry, error) {
-	if permission.IdentityDescriptor == "" {
-		identity, identityErr := graphClient.GetIdentityPickerIdentity(ctx, permission.IdentityName)
+func getAccessControlEntry(ctx context.Context, namespace *security.SecurityNamespaceDescription, permission *PrincipalPermissions, securityClient *security.Client, graphClient *graph.Client) (*security.AccessControlEntry, error) {
+	if permission.PrincipalDescriptor == "" {
+		identity, identityErr := graphClient.GetIdentityPickerIdentity(ctx, permission.PrincipalName)
 		if identityErr != nil {
 			return nil, identityErr
 		}
@@ -175,7 +175,7 @@ func getAccessControlEntry(ctx context.Context, namespace *security.SecurityName
 			return nil, err
 		}
 
-		permission.IdentityDescriptor = *identity2.Descriptor
+		permission.PrincipalDescriptor = *identity2.Descriptor
 	}
 
 	allow := 0
@@ -199,7 +199,7 @@ func getAccessControlEntry(ctx context.Context, namespace *security.SecurityName
 	}
 
 	return &security.AccessControlEntry{
-		Descriptor: &permission.IdentityDescriptor,
+		Descriptor: &permission.PrincipalDescriptor,
 		Allow:      &allow,
 		Deny:       &deny,
 	}, nil

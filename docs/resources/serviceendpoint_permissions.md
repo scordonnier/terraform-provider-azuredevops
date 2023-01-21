@@ -17,27 +17,15 @@ data "azuredevops_project" "sandbox" {
 }
 
 resource "azuredevops_serviceendpoint_permissions" "sandbox" {
-  project_id = data.azuredevops_project.sandbox.id
-  permissions = [
-    {
-      identity_name = "[Sandbox]\\Contributors"
-
-      administer         = "notset"
-      create             = "notset"
-      use                = "allow"
-      view_authorization = "allow"
-      view_endpoint      = "allow"
-    },
-    {
-      identity_name = "user@noreply.com"
-
-      administer         = "allow"
-      create             = "allow"
-      use                = "allow"
-      view_authorization = "allow"
-      view_endpoint      = "allow"
-    }
-  ]
+  principal_name = "[Sandbox]\\Contributors"
+  project_id     = data.azuredevops_project.sandbox.id
+  permissions = {
+    administer         = "notset"
+    create             = "notset"
+    use                = "allow"
+    view_authorization = "allow"
+    view_endpoint      = "allow"
+  }
 }
 ```
 
@@ -46,12 +34,17 @@ resource "azuredevops_serviceendpoint_permissions" "sandbox" {
 
 ### Required
 
-- `permissions` (Attributes List) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
+- `permissions` (Attributes) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
+- `principal_name` (String) The principal name to assign the permissions.
 - `project_id` (String) The ID of the project.
 
 ### Optional
 
 - `id` (String) The ID of the service endpoint. If you omit the value, the permissions are applied to the service connections page and by default all service connections inherit permissions from there.
+
+### Read-Only
+
+- `principal_descriptor` (String) The principal descriptor to assign the permissions.
 
 <a id="nestedatt--permissions"></a>
 ### Nested Schema for `permissions`
@@ -60,11 +53,6 @@ Required:
 
 - `administer` (String) Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `create` (String) Sets the `Create` permission for the identity. Must be `notset`, `allow` or `deny`.
-- `identity_name` (String) The identity name to assign the permissions.
 - `use` (String) Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `view_authorization` (String) Sets the `ViewAuthorization` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `view_endpoint` (String) Sets the `ViewEndpoint` permission for the identity. Must be `notset`, `allow` or `deny`.
-
-Read-Only:
-
-- `identity_descriptor` (String) The identity descriptor to assign the permissions.

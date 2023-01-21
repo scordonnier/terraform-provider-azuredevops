@@ -2,12 +2,12 @@
 page_title: "azuredevops_project_permissions Resource - azuredevops"
 subcategory: ""
 description: |-
-  Sets permissions on projects within Azure DevOps.
+  Sets permissions on projects within Azure DevOps. All permissions that currently exists will be overwritten.
 ---
 
 # azuredevops_project_permissions (Resource)
 
-Sets permissions on projects within Azure DevOps.
+Sets permissions on projects within Azure DevOps. All permissions that currently exists will be overwritten.
 
 ## Example Usage
 
@@ -17,61 +17,33 @@ data "azuredevops_project" "sandbox" {
 }
 
 resource "azuredevops_project_permissions" "sandbox" {
-  project_id = data.azuredevops_project.sandbox.id
-  permissions = [
-    {
-      identity_name = "[Sandbox]\\Contributors"
-      boards = {
-        bypass_rules                = "notset"
-        change_process              = "notset"
-        workitem_delete             = "allow"
-        workitem_move               = "allow"
-        workitem_permanently_delete = "allow"
-      }
-      general = {
-        delete                 = "notset"
-        manage_properties      = "notset"
-        rename                 = "notset"
-        read                   = "allow"
-        suppress_notifications = "notset"
-        update_visibility      = "notset"
-        write                  = "notset"
-      }
-      test_plans = {
-        delete_test_results        = "allow"
-        manage_test_configurations = "allow"
-        manage_test_environments   = "allow"
-        publish_test_results       = "allow"
-        view_test_results          = "allow"
-      }
-    },
-    {
-      identity_name = "user@noreply.com"
-      boards = {
-        bypass_rules                = "allow"
-        change_process              = "allow"
-        workitem_delete             = "allow"
-        workitem_move               = "allow"
-        workitem_permanently_delete = "allow"
-      }
-      general = {
-        delete                 = "allow"
-        manage_properties      = "allow"
-        rename                 = "allow"
-        read                   = "allow"
-        suppress_notifications = "allow"
-        update_visibility      = "allow"
-        write                  = "allow"
-      }
-      test_plans = {
-        delete_test_results        = "allow"
-        manage_test_configurations = "allow"
-        manage_test_environments   = "allow"
-        publish_test_results       = "allow"
-        view_test_results          = "allow"
-      }
+  principal_name = "[Sandbox]\\Contributors"
+  project_id     = data.azuredevops_project.sandbox.id
+  permissions = {
+    boards = {
+      bypass_rules                = "notset"
+      change_process              = "notset"
+      workitem_delete             = "allow"
+      workitem_move               = "allow"
+      workitem_permanently_delete = "allow"
     }
-  ]
+    general = {
+      delete                 = "notset"
+      manage_properties      = "notset"
+      rename                 = "notset"
+      read                   = "allow"
+      suppress_notifications = "notset"
+      update_visibility      = "notset"
+      write                  = "notset"
+    }
+    test_plans = {
+      delete_test_results        = "allow"
+      manage_test_configurations = "allow"
+      manage_test_environments   = "allow"
+      publish_test_results       = "allow"
+      view_test_results          = "allow"
+    }
+  }
 }
 ```
 
@@ -80,8 +52,13 @@ resource "azuredevops_project_permissions" "sandbox" {
 
 ### Required
 
-- `permissions` (Attributes List) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
+- `permissions` (Attributes) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
+- `principal_name` (String) The principal name to assign the permissions.
 - `project_id` (String) The ID of the project.
+
+### Read-Only
+
+- `principal_descriptor` (String) The principal descriptor to assign the permissions.
 
 <a id="nestedatt--permissions"></a>
 ### Nested Schema for `permissions`
@@ -90,12 +67,7 @@ Required:
 
 - `boards` (Attributes) (see [below for nested schema](#nestedatt--permissions--boards))
 - `general` (Attributes) (see [below for nested schema](#nestedatt--permissions--general))
-- `identity_name` (String) The identity name to assign the permissions.
 - `test_plans` (Attributes) (see [below for nested schema](#nestedatt--permissions--test_plans))
-
-Read-Only:
-
-- `identity_descriptor` (String) The identity descriptor to assign the permissions.
 
 <a id="nestedatt--permissions--boards"></a>
 ### Nested Schema for `permissions.boards`

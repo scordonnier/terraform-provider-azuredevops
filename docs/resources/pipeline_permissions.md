@@ -2,12 +2,12 @@
 page_title: "azuredevops_pipeline_permissions Resource - azuredevops"
 subcategory: ""
 description: |-
-  Sets permissions on pipelines within an Azure DevOps project.
+  Sets permissions on pipelines within an Azure DevOps project. All permissions that currently exists will be overwritten.
 ---
 
 # azuredevops_pipeline_permissions (Resource)
 
-Sets permissions on pipelines within an Azure DevOps project.
+Sets permissions on pipelines within an Azure DevOps project. All permissions that currently exists will be overwritten.
 
 ## Example Usage
 
@@ -17,47 +17,25 @@ data "azuredevops_project" "sandbox" {
 }
 
 resource "azuredevops_pipeline_permissions" "sandbox" {
-  project_id = data.azuredevops_project.sandbox.id
-  permissions = [
-    {
-      identity_name = "[Sandbox]\\Contributors"
-
-      administer_build_permissions      = "notset"
-      delete_build_definition           = "allow"
-      delete_builds                     = "allow"
-      destroy_builds                    = "allow"
-      edit_build_definition             = "allow"
-      edit_build_quality                = "allow"
-      manage_build_qualities            = "notset"
-      manage_build_queue                = "notset"
-      override_build_checkin_validation = "notset"
-      queue_builds                      = "allow"
-      retain_indefinitely               = "allow"
-      stop_builds                       = "allow"
-      update_build_information          = "allow"
-      view_build_definition             = "allow"
-      view_builds                       = "allow"
-    },
-    {
-      identity_name = "user@noreply.com"
-
-      administer_build_permissions      = "allow"
-      delete_build_definition           = "allow"
-      delete_builds                     = "allow"
-      destroy_builds                    = "allow"
-      edit_build_definition             = "allow"
-      edit_build_quality                = "allow"
-      manage_build_qualities            = "allow"
-      manage_build_queue                = "allow"
-      override_build_checkin_validation = "allow"
-      queue_builds                      = "allow"
-      retain_indefinitely               = "allow"
-      stop_builds                       = "allow"
-      update_build_information          = "allow"
-      view_build_definition             = "allow"
-      view_builds                       = "allow"
-    }
-  ]
+  project_id     = data.azuredevops_project.sandbox.id
+  principal_name = "[Sandbox]\\Contributors"
+  permissions = {
+    administer_build_permissions      = "notset"
+    delete_build_definition           = "allow"
+    delete_builds                     = "allow"
+    destroy_builds                    = "allow"
+    edit_build_definition             = "allow"
+    edit_build_quality                = "allow"
+    manage_build_qualities            = "notset"
+    manage_build_queue                = "notset"
+    override_build_checkin_validation = "notset"
+    queue_builds                      = "allow"
+    retain_indefinitely               = "allow"
+    stop_builds                       = "allow"
+    update_build_information          = "allow"
+    view_build_definition             = "allow"
+    view_builds                       = "allow"
+  }
 }
 ```
 
@@ -66,12 +44,17 @@ resource "azuredevops_pipeline_permissions" "sandbox" {
 
 ### Required
 
-- `permissions` (Attributes List) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
+- `permissions` (Attributes) The permissions to assign. (see [below for nested schema](#nestedatt--permissions))
+- `principal_name` (String) The principal name to assign the permissions.
 - `project_id` (String) The ID of the project.
 
 ### Optional
 
 - `id` (Number) The ID of the pipeline. If you omit the value, the permissions are applied to the pipelines page and by default all pipelines inherit permissions from there.
+
+### Read-Only
+
+- `principal_descriptor` (String) The principal descriptor to assign the permissions.
 
 <a id="nestedatt--permissions"></a>
 ### Nested Schema for `permissions`
@@ -84,7 +67,6 @@ Required:
 - `destroy_builds` (String) Sets the `DestroyBuilds` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `edit_build_definition` (String) Sets the `EditBuildDefinition` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `edit_build_quality` (String) Sets the `EditBuildQuality` permission for the identity. Must be `notset`, `allow` or `deny`.
-- `identity_name` (String) The identity name to assign the permissions.
 - `manage_build_qualities` (String) Sets the `ManageBuildQualities` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `manage_build_queue` (String) Sets the `ManageBuildQueue` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `override_build_checkin_validation` (String) Sets the `OverrideBuildCheckInValidation` permission for the identity. Must be `notset`, `allow` or `deny`.
@@ -94,7 +76,3 @@ Required:
 - `update_build_information` (String) Sets the `UpdateBuildInformation` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `view_build_definition` (String) Sets the `ViewBuildDefinition` permission for the identity. Must be `notset`, `allow` or `deny`.
 - `view_builds` (String) Sets the `ViewBuilds` permission for the identity. Must be `notset`, `allow` or `deny`.
-
-Read-Only:
-
-- `identity_descriptor` (String) The identity descriptor to assign the permissions.

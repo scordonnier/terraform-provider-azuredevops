@@ -32,22 +32,22 @@ type AreaPermissionsResource struct {
 }
 
 type AreaPermissionsResourceModel struct {
-	Path        string            `tfsdk:"path"`
-	Permissions []AreaPermissions `tfsdk:"permissions"`
-	ProjectId   string            `tfsdk:"project_id"`
+	Path                string          `tfsdk:"path"`
+	Permissions         AreaPermissions `tfsdk:"permissions"`
+	PrincipalDescriptor types.String    `tfsdk:"principal_descriptor"`
+	PrincipalName       string          `tfsdk:"principal_name"`
+	ProjectId           string          `tfsdk:"project_id"`
 }
 
 type AreaPermissions struct {
-	Create             string       `tfsdk:"create"`
-	Delete             string       `tfsdk:"delete"`
-	IdentityDescriptor types.String `tfsdk:"identity_descriptor"`
-	IdentityName       string       `tfsdk:"identity_name"`
-	ManageTestPlans    string       `tfsdk:"manage_test_plans"`
-	ManageTestSuites   string       `tfsdk:"manage_test_suites"`
-	Read               string       `tfsdk:"read"`
-	WorkItemsRead      string       `tfsdk:"workitems_read"`
-	WorkItemsWrite     string       `tfsdk:"workitems_write"`
-	Write              string       `tfsdk:"write"`
+	Create           string `tfsdk:"create"`
+	Delete           string `tfsdk:"delete"`
+	ManageTestPlans  string `tfsdk:"manage_test_plans"`
+	ManageTestSuites string `tfsdk:"manage_test_suites"`
+	Read             string `tfsdk:"read"`
+	WorkItemsRead    string `tfsdk:"workitems_read"`
+	WorkItemsWrite   string `tfsdk:"workitems_write"`
+	Write            string `tfsdk:"write"`
 }
 
 func (r *AreaPermissionsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -62,82 +62,80 @@ func (r *AreaPermissionsResource) Schema(_ context.Context, _ resource.SchemaReq
 				MarkdownDescription: "The path of the area.",
 				Required:            true,
 			},
-			"permissions": schema.ListNestedAttribute{
+			"permissions": schema.SingleNestedAttribute{
 				MarkdownDescription: "The permissions to assign.",
 				Required:            true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"create": schema.StringAttribute{
-							MarkdownDescription: "Sets the `CREATE_CHILDREN` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
-						},
-						"delete": schema.StringAttribute{
-							MarkdownDescription: "Sets the `DELETE` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
-						},
-						"identity_descriptor": schema.StringAttribute{
-							MarkdownDescription: "The identity descriptor to assign the permissions.",
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"identity_name": schema.StringAttribute{
-							MarkdownDescription: "The identity name to assign the permissions.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.StringNotEmptyValidator(),
-							},
-						},
-						"manage_test_plans": schema.StringAttribute{
-							MarkdownDescription: "Sets the `MANAGE_TEST_PLANS` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
-						},
-						"manage_test_suites": schema.StringAttribute{
-							MarkdownDescription: "Sets the `MANAGE_TEST_SUITES` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
-						},
-						"read": schema.StringAttribute{
-							MarkdownDescription: "Sets the `GENERIC_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
-						},
-						"workitems_read": schema.StringAttribute{
-							MarkdownDescription: "Sets the `WORK_ITEM_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
-						},
-						"workitems_write": schema.StringAttribute{
-							MarkdownDescription: "Sets the `WORK_ITEM_WRITE` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
-						},
-						"write": schema.StringAttribute{
-							MarkdownDescription: "Sets the `GENERIC_WRITE` permission for the identity. Must be `notset`, `allow` or `deny`.",
-							Required:            true,
-							Validators: []validator.String{
-								validators.PermissionsValidator(),
-							},
+				Attributes: map[string]schema.Attribute{
+					"create": schema.StringAttribute{
+						MarkdownDescription: "Sets the `CREATE_CHILDREN` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
 						},
 					},
+					"delete": schema.StringAttribute{
+						MarkdownDescription: "Sets the `DELETE` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+					"manage_test_plans": schema.StringAttribute{
+						MarkdownDescription: "Sets the `MANAGE_TEST_PLANS` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+					"manage_test_suites": schema.StringAttribute{
+						MarkdownDescription: "Sets the `MANAGE_TEST_SUITES` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+					"read": schema.StringAttribute{
+						MarkdownDescription: "Sets the `GENERIC_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+					"workitems_read": schema.StringAttribute{
+						MarkdownDescription: "Sets the `WORK_ITEM_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+					"workitems_write": schema.StringAttribute{
+						MarkdownDescription: "Sets the `WORK_ITEM_WRITE` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+					"write": schema.StringAttribute{
+						MarkdownDescription: "Sets the `GENERIC_WRITE` permission for the identity. Must be `notset`, `allow` or `deny`.",
+						Required:            true,
+						Validators: []validator.String{
+							validators.PermissionsValidator(),
+						},
+					},
+				},
+			},
+			"principal_descriptor": schema.StringAttribute{
+				MarkdownDescription: "The principal descriptor to assign the permissions.",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"principal_name": schema.StringAttribute{
+				MarkdownDescription: "The principal name to assign the permissions.",
+				Required:            true,
+				Validators: []validator.String{
+					validators.StringNotEmptyValidator(),
 				},
 			},
 			"project_id": schema.StringAttribute{
@@ -175,14 +173,14 @@ func (r *AreaPermissionsResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	permissions := r.getPermissions(&model.Permissions)
-	err = security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
+	permissions := r.getPermissions(model)
+	err = security.CreateOrUpdateAccessControlEntry(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
 	}
 
-	r.updatePermissions(&model.Permissions, permissions)
+	r.setPermissions(model, []*security.PrincipalPermissions{permissions})
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -201,13 +199,13 @@ func (r *AreaPermissionsResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	permissions, err := security.ReadIdentityPermissions(ctx, clientSecurity.NamespaceIdCSS, token, r.securityClient)
+	permissions, err := security.ReadPrincipalPermissions(ctx, clientSecurity.NamespaceIdCSS, token, r.securityClient)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to retrieve access control lists", err.Error())
 		return
 	}
 
-	r.updatePermissions(&model.Permissions, permissions)
+	r.setPermissions(model, permissions)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -226,14 +224,14 @@ func (r *AreaPermissionsResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	permissions := r.getPermissions(&model.Permissions)
-	err = security.CreateOrUpdateAccessControlList(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
+	permissions := r.getPermissions(model)
+	err = security.CreateOrUpdateAccessControlEntry(ctx, clientSecurity.NamespaceIdCSS, token, permissions, r.securityClient, r.graphClient)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to update permissions", err.Error())
+		resp.Diagnostics.AddError("Unable to create permissions", err.Error())
 		return
 	}
 
-	r.updatePermissions(&model.Permissions, permissions)
+	r.setPermissions(model, []*security.PrincipalPermissions{permissions})
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -252,33 +250,30 @@ func (r *AreaPermissionsResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	err = r.securityClient.RemoveAccessControlLists(ctx, clientSecurity.NamespaceIdCSS, token)
+	err = r.securityClient.RemoveAccessControlEntries(ctx, clientSecurity.NamespaceIdCSS, token, []string{model.PrincipalDescriptor.ValueString()})
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to delete environment permissions", err.Error())
+		resp.Diagnostics.AddError("Unable to delete permissions", err.Error())
+		return
 	}
 }
 
 // Private Methods
 
-func (r *AreaPermissionsResource) getPermissions(p *[]AreaPermissions) []*security.IdentityPermissions {
-	var permissions []*security.IdentityPermissions
-	for _, permission := range *p {
-		permissions = append(permissions, &security.IdentityPermissions{
-			IdentityDescriptor: permission.IdentityDescriptor.ValueString(),
-			IdentityName:       permission.IdentityName,
-			Permissions: map[string]string{
-				permissionNameCreate:           permission.Create,
-				permissionNameDelete:           permission.Delete,
-				permissionNameManageTestPlans:  permission.ManageTestPlans,
-				permissionNameManageTestSuites: permission.ManageTestSuites,
-				permissionNameRead:             permission.Read,
-				permissionNameWorkItemsRead:    permission.WorkItemsRead,
-				permissionNameWorkItemsWrite:   permission.WorkItemsWrite,
-				permissionNameWrite:            permission.Write,
-			},
-		})
+func (r *AreaPermissionsResource) getPermissions(model *AreaPermissionsResourceModel) *security.PrincipalPermissions {
+	return &security.PrincipalPermissions{
+		PrincipalDescriptor: model.PrincipalDescriptor.ValueString(),
+		PrincipalName:       model.PrincipalName,
+		Permissions: map[string]string{
+			permissionNameCreate:           model.Permissions.Create,
+			permissionNameDelete:           model.Permissions.Delete,
+			permissionNameManageTestPlans:  model.Permissions.ManageTestPlans,
+			permissionNameManageTestSuites: model.Permissions.ManageTestSuites,
+			permissionNameRead:             model.Permissions.Read,
+			permissionNameWorkItemsRead:    model.Permissions.WorkItemsRead,
+			permissionNameWorkItemsWrite:   model.Permissions.WorkItemsWrite,
+			permissionNameWrite:            model.Permissions.Write,
+		},
 	}
-	return permissions
 }
 
 func (r *AreaPermissionsResource) getToken(ctx context.Context, projectId string, path string) (string, error) {
@@ -309,25 +304,22 @@ func (r *AreaPermissionsResource) getToken(ctx context.Context, projectId string
 	return strings.Join(tokens, ":"), nil
 }
 
-func (r *AreaPermissionsResource) updatePermissions(p1 *[]AreaPermissions, p2 []*security.IdentityPermissions) {
-	if len(p2) == 0 {
+func (r *AreaPermissionsResource) setPermissions(model *AreaPermissionsResourceModel, p []*security.PrincipalPermissions) {
+	if len(p) == 0 {
 		return
 	}
 
-	for index := range *p1 {
-		permission := &(*p1)[index]
-		identityPermissions := linq.From(p2).FirstWith(func(p interface{}) bool {
-			return p.(*security.IdentityPermissions).IdentityName == permission.IdentityName
-		}).(*security.IdentityPermissions)
-		permission.IdentityDescriptor = types.StringValue(identityPermissions.IdentityDescriptor)
-		permission.IdentityName = identityPermissions.IdentityName
-		permission.Create = identityPermissions.Permissions[permissionNameCreate]
-		permission.Delete = identityPermissions.Permissions[permissionNameDelete]
-		permission.ManageTestPlans = identityPermissions.Permissions[permissionNameManageTestPlans]
-		permission.ManageTestSuites = identityPermissions.Permissions[permissionNameManageTestSuites]
-		permission.Read = identityPermissions.Permissions[permissionNameRead]
-		permission.WorkItemsRead = identityPermissions.Permissions[permissionNameWorkItemsRead]
-		permission.WorkItemsWrite = identityPermissions.Permissions[permissionNameWorkItemsWrite]
-		permission.Write = identityPermissions.Permissions[permissionNameWrite]
-	}
+	principalPermissions := linq.From(p).FirstWith(func(p interface{}) bool {
+		return p.(*security.PrincipalPermissions).PrincipalName == model.PrincipalName
+	}).(*security.PrincipalPermissions)
+	model.Permissions.Create = principalPermissions.Permissions[permissionNameCreate]
+	model.Permissions.Delete = principalPermissions.Permissions[permissionNameDelete]
+	model.Permissions.ManageTestPlans = principalPermissions.Permissions[permissionNameManageTestPlans]
+	model.Permissions.ManageTestSuites = principalPermissions.Permissions[permissionNameManageTestSuites]
+	model.Permissions.Read = principalPermissions.Permissions[permissionNameRead]
+	model.Permissions.WorkItemsRead = principalPermissions.Permissions[permissionNameWorkItemsRead]
+	model.Permissions.WorkItemsWrite = principalPermissions.Permissions[permissionNameWorkItemsWrite]
+	model.Permissions.Write = principalPermissions.Permissions[permissionNameWrite]
+	model.PrincipalDescriptor = types.StringValue(principalPermissions.PrincipalDescriptor)
+	model.PrincipalName = principalPermissions.PrincipalName
 }
