@@ -41,17 +41,21 @@ const (
 	ServiceEndpointOwnerEnvironment = "environment"
 	ServiceEndpointOwnerLibrary     = "library"
 
-	ServiceEndpointTypeAzure            = "Azure"
-	ServiceEndpointTypeAzureRm          = "AzureRM"
-	ServiceEndpointTypeBitbucket        = "Bitbucket"
-	ServiceEndpointTypeDocker           = "dockerregistry"
-	ServiceEndpointTypeGeneric          = "Generic"
-	ServiceEndpointTypeGit              = "Git"
-	ServiceEndpointTypeGitHub           = "GitHub"
-	ServiceEndpointTypeGitHubEnterprise = "GitHubEnterprise"
-	ServiceEndpointTypekubernetes       = "kubernetes"
-	ServiceEndpointTypeSSH              = "SSH"
-	ServiceEndpointTypeVsAppCenter      = "vsmobilecenter"
+	ServiceEndpointTypeAzure             = "Azure"
+	ServiceEndpointTypeAzureRm           = "AzureRM"
+	ServiceEndpointTypeBitbucket         = "Bitbucket"
+	ServiceEndpointTypeDocker            = "dockerregistry"
+	ServiceEndpointTypeGeneric           = "Generic"
+	ServiceEndpointTypeGit               = "Git"
+	ServiceEndpointTypeGitHub            = "GitHub"
+	ServiceEndpointTypeGitHubEnterprise  = "GitHubEnterprise"
+	ServiceEndpointTypeJFrogArtifactory  = "jfrogArtifactoryService"
+	ServiceEndpointTypeJFrogDistribution = "jfrogDistributionService"
+	ServiceEndpointTypeJFrogPlatform     = "jfrogPlatformService"
+	ServiceEndpointTypeJFrogXray         = "jfrogXrayService"
+	ServiceEndpointTypekubernetes        = "kubernetes"
+	ServiceEndpointTypeSSH               = "SSH"
+	ServiceEndpointTypeVsAppCenter       = "vsmobilecenter"
 )
 
 type CreateOrUpdateServiceEndpointArgs struct {
@@ -70,7 +74,7 @@ type CreateOrUpdateServiceEndpointArgs struct {
 	Token                       string
 	Type                        string
 	Url                         string
-	UserName                    string
+	Username                    string
 }
 
 type EndpointAuthorization struct {
