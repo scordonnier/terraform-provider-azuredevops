@@ -135,6 +135,6 @@ func (r *ServiceEndpointBitbucketResource) getCreateOrUpdateServiceEndpointArgs(
 		Name:              model.Name,
 		Password:          model.Password,
 		Type:              serviceendpoints.ServiceEndpointTypeBitbucket,
-		UserName:          model.UserName,
+		Username:          model.UserName,
 	}
 }

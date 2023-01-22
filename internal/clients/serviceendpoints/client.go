@@ -129,7 +129,7 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 		return &EndpointAuthorization{
 			Parameters: &map[string]string{
 				ServiceEndpointAuthorizationParamsPassword: args.Password,
-				ServiceEndpointAuthorizationParamsUserName: args.UserName,
+				ServiceEndpointAuthorizationParamsUserName: args.Username,
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
 		}
@@ -139,6 +139,26 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 				ServiceEndpointAuthorizationParamsAccessToken: args.Token,
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeToken),
+		}
+	case ServiceEndpointTypeJFrogArtifactory,
+		ServiceEndpointTypeJFrogDistribution,
+		ServiceEndpointTypeJFrogPlatform,
+		ServiceEndpointTypeJFrogXray:
+		if args.Token != "" {
+			return &EndpointAuthorization{
+				Parameters: &map[string]string{
+					ServiceEndpointAuthorizationParamsApiToken: args.Token,
+				},
+				Scheme: utils.String(ServiceEndpointAuthorizationSchemeToken),
+			}
+		} else {
+			return &EndpointAuthorization{
+				Parameters: &map[string]string{
+					ServiceEndpointAuthorizationParamsPassword: args.Password,
+					ServiceEndpointAuthorizationParamsUserName: args.Username,
+				},
+				Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
+			}
 		}
 	case ServiceEndpointTypekubernetes:
 		return &EndpointAuthorization{
@@ -188,6 +208,14 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 		return utils.String("https://api.bitbucket.org/")
 	case ServiceEndpointTypeGitHub:
 		return utils.String("https://github.com/")
+	case ServiceEndpointTypeJFrogArtifactory:
+		return utils.String(strings.TrimSuffix(args.Url, "/") + "/artifactory")
+	case ServiceEndpointTypeJFrogDistribution:
+		return utils.String(strings.TrimSuffix(args.Url, "/") + "/distribution")
+	case ServiceEndpointTypeJFrogPlatform:
+		return utils.String(strings.TrimSuffix(args.Url, "/"))
+	case ServiceEndpointTypeJFrogXray:
+		return utils.String(strings.TrimSuffix(args.Url, "/") + "/xray")
 	case ServiceEndpointTypekubernetes:
 		return utils.String(args.Url)
 	case ServiceEndpointTypeVsAppCenter:
