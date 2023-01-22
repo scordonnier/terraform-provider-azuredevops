@@ -7,11 +7,12 @@ FEATURES:
 **New Resource** `azuredevops_iteration_permissions`<br/>
 **New Resource** `azuredevops_pipeline_permissions`<br/>
 **New Resource** `azuredevops_project_permissions`<br/>
+**New Resource** `azuredevops_serviceendpoint_jfrog`<br/>
 **New Resource** `azuredevops_serviceendpoint_permissions`<br/>
 
 BREAKING CHANGES:
 
-**Rename (Data / Resource)** `azuredevops_pipelines_settings` to `azuredevops_pipeline_settings`<br/>
+**Rename (Data Source / Resource)** `azuredevops_pipelines_settings` to `azuredevops_pipeline_settings`<br/>
 **Resource** `azuredevops_environment_permissions` : Update schema to specify permissions as new resources<br/>
 
 ## v0.4.1
@@ -25,10 +26,10 @@ BUG FIXES:
 
 FEATURES:
 
-**New Data Resource** `azuredevops_area`<br/>
-**New Data Resource** `azuredevops_iteration`<br/>
-**New Data Resource** `azuredevops_pipelines_settings`<br/>
-**New Data Resource** `azuredevops_project_features`<br/>
+**New Data Source** `azuredevops_area`<br/>
+**New Data Source** `azuredevops_iteration`<br/>
+**New Data Source** `azuredevops_pipelines_settings`<br/>
+**New Data Source** `azuredevops_project_features`<br/>
 
 **New Resource** `azuredevops_area`<br/>
 **New Resource** `azuredevops_environment_kubernetes`<br/>
@@ -56,13 +57,13 @@ And also various improvements and bug fixes.
 
 FEATURES:
 
-**New Data Resource** `azuredevops_group`<br/>
-**New Data Resource** `azuredevops_groups`<br/>
-**New Data Resource** `azuredevops_process`<br/>
-**New Data Resource** `azuredevops_team`<br/>
-**New Data Resource** `azuredevops_teams`<br/>
-**New Data Resource** `azuredevops_user`<br/>
-**New Data Resource** `azuredevops_users`<br/>
+**New Data Source** `azuredevops_group`<br/>
+**New Data Source** `azuredevops_groups`<br/>
+**New Data Source** `azuredevops_process`<br/>
+**New Data Source** `azuredevops_team`<br/>
+**New Data Source** `azuredevops_teams`<br/>
+**New Data Source** `azuredevops_user`<br/>
+**New Data Source** `azuredevops_users`<br/>
 
 **New Resource** `azuredevops_group`<br/>
 **New Resource** `azuredevops_project`<br/>
@@ -77,7 +78,8 @@ BREAKING CHANGES:
 
 FEATURES:
 
-**New Data Resource** `azuredevops_project`<br/>
+**New Data Source** `azuredevops_project`<br/>
+
 **New Resource** `azuredevops_distributedtask_environment`<br/>
 **New Resource** `azuredevops_distributedtask_environment_permissions`<br/> 
 **New Resource** `azuredevops_serviceendpoint_azurerm`<br/>
