@@ -1,6 +1,9 @@
 package pipelines
 
-import "github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
+import (
+	"github.com/google/uuid"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
+)
 
 type CreateOrUpdateEnvironmentArgs struct {
 	Description string `json:"description"`
@@ -94,6 +97,26 @@ type RetentionSetting struct {
 	Max   *int `json:"max,omitempty"`
 	Min   *int `json:"min,omitempty"`
 	Value *int `json:"value,omitempty"`
+}
+
+type TaskAgentPool struct {
+	AgentCloudId  *int              `json:"agentCloudId,omitempty"`
+	AutoProvision *bool             `json:"autoProvision,omitempty"`
+	AutoSize      *bool             `json:"autoSize,omitempty"`
+	AutoUpdate    *bool             `json:"autoUpdate,omitempty"`
+	CreatedBy     *core.IdentityRef `json:"createdBy,omitempty"`
+	CreatedOn     *core.Time        `json:"createdOn,omitempty"`
+	Id            *int              `json:"id,omitempty"`
+	IsHosted      *bool             `json:"isHosted,omitempty"`
+	IsLegacy      *bool             `json:"isLegacy,omitempty"`
+	Name          *string           `json:"name,omitempty"`
+	Options       *string           `json:"options,omitempty"`
+	Owner         *core.IdentityRef `json:"owner,omitempty"`
+	Properties    interface{}       `json:"properties,omitempty"`
+	PoolType      *string           `json:"poolType,omitempty"`
+	Scope         *uuid.UUID        `json:"scope,omitempty"`
+	Size          *int              `json:"size,omitempty"`
+	TargetSize    *int              `json:"targetSize,omitempty"`
 }
 
 type UpdatePipelineRetentionSettings struct {

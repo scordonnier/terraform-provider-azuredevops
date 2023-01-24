@@ -3,6 +3,7 @@ package pipelines
 import (
 	"context"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"strconv"
 )
 
@@ -17,6 +18,7 @@ const (
 	pathKubernetes          = "kubernetes"
 	pathPipelinePermissions = "pipelinepermissions"
 	pathPipelines           = "pipelines"
+	pathPools               = "pools"
 	pathProviders           = "providers"
 	pathRetention           = "retention"
 )
@@ -29,6 +31,24 @@ func NewClient(restClient *networking.RestClient) *Client {
 	return &Client{
 		restClient: restClient,
 	}
+}
+
+func (c *Client) CreateAgentPool(ctx context.Context, name string, autoProvision bool, autoUpdate bool) (*TaskAgentPool, error) {
+	pathSegments := []string{pathApis, pathDistributedTask, pathPools}
+	body := &TaskAgentPool{
+		AutoProvision: &autoProvision,
+		AutoUpdate:    &autoUpdate,
+		IsHosted:      utils.Bool(false),
+		Name:          &name,
+		PoolType:      utils.String("automation"),
+	}
+	pool, _, err := networking.PostJSON[TaskAgentPool](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
+	if err != nil {
+		return nil, err
+	}
+
+	// BUG in REST API: We need to perform an update immediatly after creation to really apply the autoUpdate value
+	return c.UpdateAgentPool(ctx, *pool.Id, name, autoProvision, autoUpdate)
 }
 
 func (c *Client) CreateEnvironment(ctx context.Context, projectId string, name string, description string) (*EnvironmentInstance, error) {
@@ -47,6 +67,12 @@ func (c *Client) CreateEnvironmentResourceKubernetes(ctx context.Context, projec
 	return environmentResource, err
 }
 
+func (c *Client) DeleteAgentPool(ctx context.Context, poolId int) error {
+	pathSegments := []string{pathApis, pathDistributedTask, pathPools, strconv.Itoa(poolId)}
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
+	return err
+}
+
 func (c *Client) DeleteEnvironment(ctx context.Context, projectId string, id int) error {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments, strconv.Itoa(id)}
 	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
@@ -57,6 +83,12 @@ func (c *Client) DeleteEnvironmentResourceKubernetes(ctx context.Context, projec
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments, strconv.Itoa(environmentId), pathProviders, pathKubernetes, strconv.Itoa(resourceId)}
 	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return err
+}
+
+func (c *Client) GetAgentPool(ctx context.Context, poolId int) (*TaskAgentPool, error) {
+	pathSegments := []string{pathApis, pathDistributedTask, pathPools, strconv.Itoa(poolId)}
+	pool, _, err := networking.GetJSON[TaskAgentPool](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
+	return pool, err
 }
 
 func (c *Client) GetEnvironment(ctx context.Context, projectId string, id int) (*EnvironmentInstance, error) {
@@ -102,6 +134,17 @@ func (c *Client) GrantAllPipelines(ctx context.Context, projectId string, resour
 	}
 	permissions, _, err := networking.PatchJSON[ResourcePipelinePermissions](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70Preview1)
 	return permissions, err
+}
+
+func (c *Client) UpdateAgentPool(ctx context.Context, poolId int, name string, autoProvision bool, autoUpdate bool) (*TaskAgentPool, error) {
+	pathSegments := []string{pathApis, pathDistributedTask, pathPools, strconv.Itoa(poolId)}
+	body := &TaskAgentPool{
+		AutoProvision: &autoProvision,
+		AutoUpdate:    &autoUpdate,
+		Name:          &name,
+	}
+	pool, _, err := networking.PatchJSON[TaskAgentPool](c.restClient, ctx, pathSegments, nil, body, networking.ApiVersion70)
+	return pool, err
 }
 
 func (c *Client) UpdateEnvironment(ctx context.Context, projectId string, id int, name string, description string) (*EnvironmentInstance, error) {
