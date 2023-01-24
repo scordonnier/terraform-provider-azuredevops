@@ -54,16 +54,11 @@ func (c *Client) CreateAgentPool(ctx context.Context, name string, autoProvision
 	return c.UpdateAgentPool(ctx, *pool.Id, name, autoProvision, autoUpdate)
 }
 
-func (c *Client) CreateAgentQueue(ctx context.Context, projectId string, poolId int, granted bool) (*TaskAgentQueue, error) {
-	pool, err := c.GetAgentPool(ctx, poolId)
-	if err != nil {
-		return nil, err
-	}
-
+func (c *Client) CreateAgentQueue(ctx context.Context, projectId string, poolId int, name string, authorizePipelines bool) (*TaskAgentQueue, error) {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathQueues}
-	queryParams := url.Values{"authorizePipelines": []string{strconv.FormatBool(granted)}}
+	queryParams := url.Values{"authorizePipelines": []string{strconv.FormatBool(authorizePipelines)}}
 	body := &TaskAgentQueue{
-		Name: pool.Name,
+		Name: &name,
 		Pool: &TaskAgentPoolReference{
 			Id: &poolId,
 		},
