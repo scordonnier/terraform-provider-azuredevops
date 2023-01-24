@@ -9,6 +9,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
 var _ resource.Resource = &PipelineSettingsResource{}
@@ -72,7 +73,7 @@ func (r *PipelineSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 			"retention": schema.SingleNestedAttribute{

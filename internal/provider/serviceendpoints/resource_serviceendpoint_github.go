@@ -10,6 +10,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
 var _ resource.Resource = &ServiceEndpointGitHubResource{}
@@ -43,7 +44,7 @@ func (r *ServiceEndpointGitHubResource) Schema(_ context.Context, _ resource.Sch
 		Required:            true,
 		Sensitive:           true,
 		Validators: []validator.String{
-			utils.StringNotEmptyValidator(),
+			validators.StringNotEmpty(),
 		},
 	}
 	resp.Schema = resourceShema

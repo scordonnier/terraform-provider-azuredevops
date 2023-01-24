@@ -67,7 +67,7 @@ func (r *AgentQueueResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					validators.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
@@ -77,7 +77,7 @@ func (r *AgentQueueResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

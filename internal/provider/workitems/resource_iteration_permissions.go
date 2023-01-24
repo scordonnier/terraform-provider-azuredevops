@@ -66,28 +66,28 @@ func (r *IterationPermissionsResource) Schema(_ context.Context, _ resource.Sche
 						MarkdownDescription: "Sets the `CREATE_CHILDREN` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"delete": schema.StringAttribute{
 						MarkdownDescription: "Sets the `DELETE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"read": schema.StringAttribute{
 						MarkdownDescription: "Sets the `GENERIC_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"write": schema.StringAttribute{
 						MarkdownDescription: "Sets the `GENERIC_WRITE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 				},
@@ -103,14 +103,14 @@ func (r *IterationPermissionsResource) Schema(_ context.Context, _ resource.Sche
 				MarkdownDescription: "The principal name to assign the permissions.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

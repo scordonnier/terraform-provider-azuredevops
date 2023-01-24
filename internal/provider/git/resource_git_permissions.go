@@ -85,7 +85,7 @@ func (r *GitPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequ
 				MarkdownDescription: "The ID of the repository. If you omit the value, the permissions are applied to the repositories page and by default all repositories inherit permissions from there.",
 				Optional:            true,
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 			"permissions": schema.SingleNestedAttribute{
@@ -96,112 +96,112 @@ func (r *GitPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequ
 						MarkdownDescription: "Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"create_branch": schema.StringAttribute{
 						MarkdownDescription: "Sets the `CreateBranch` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"create_repository": schema.StringAttribute{
 						MarkdownDescription: "Sets the `CreateRepository` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"create_tag": schema.StringAttribute{
 						MarkdownDescription: "Sets the `CreateTag` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"contribute": schema.StringAttribute{
 						MarkdownDescription: "Sets the `GenericContribute` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"delete_repository": schema.StringAttribute{
 						MarkdownDescription: "Sets the `DeleteRepository` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"edit_policies": schema.StringAttribute{
 						MarkdownDescription: "Sets the `EditPolicies` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"force_push": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ForcePush` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"manage_note": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ManageNote` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"manage_permissions": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ManagePermissions` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"policy_exempt": schema.StringAttribute{
 						MarkdownDescription: "Sets the `PolicyExempt` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"pullrequest_bypass_policy": schema.StringAttribute{
 						MarkdownDescription: "Sets the `PullRequestBypassPolicy` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"pullrequest_contribute": schema.StringAttribute{
 						MarkdownDescription: "Sets the `PullRequestContribute` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"read": schema.StringAttribute{
 						MarkdownDescription: "Sets the `GenericRead` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"remove_others_locks": schema.StringAttribute{
 						MarkdownDescription: "Sets the `RemoveOthersLocks` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"rename_repository": schema.StringAttribute{
 						MarkdownDescription: "Sets the `RenameRepository` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 				},
@@ -217,14 +217,14 @@ func (r *GitPermissionsResource) Schema(_ context.Context, _ resource.SchemaRequ
 				MarkdownDescription: "The principal name to assign the permissions.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

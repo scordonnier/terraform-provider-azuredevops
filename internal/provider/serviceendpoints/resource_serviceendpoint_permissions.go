@@ -71,35 +71,35 @@ func (r *ServiceEndpointPermissionsResource) Schema(_ context.Context, _ resourc
 						MarkdownDescription: "Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"create": schema.StringAttribute{
 						MarkdownDescription: "Sets the `Create` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"use": schema.StringAttribute{
 						MarkdownDescription: "Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"view_authorization": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ViewAuthorization` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"view_endpoint": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ViewEndpoint` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 				},
@@ -115,14 +115,14 @@ func (r *ServiceEndpointPermissionsResource) Schema(_ context.Context, _ resourc
 				MarkdownDescription: "The principal name to assign the permissions.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

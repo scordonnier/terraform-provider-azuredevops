@@ -12,6 +12,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/workitems"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 	"strings"
 )
 
@@ -48,7 +49,7 @@ func (r *IterationResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				MarkdownDescription: "The finish date of the iteration.",
 				Optional:            true,
 				Validators: []validator.String{
-					utils.DateTimeValidator(),
+					validators.DateTime(),
 				},
 			},
 			"id": schema.Int64Attribute{
@@ -62,7 +63,7 @@ func (r *IterationResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				MarkdownDescription: "The name of the iteration.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"parent_path": schema.StringAttribute{
@@ -80,14 +81,14 @@ func (r *IterationResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 			"start_date": schema.StringAttribute{
 				MarkdownDescription: "The start date of the iteration.",
 				Optional:            true,
 				Validators: []validator.String{
-					utils.DateTimeValidator(),
+					validators.DateTime(),
 				},
 			},
 		},

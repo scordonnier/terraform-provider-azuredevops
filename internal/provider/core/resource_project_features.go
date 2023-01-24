@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
@@ -49,7 +48,7 @@ func (r *ProjectFeaturesResource) Schema(_ context.Context, _ resource.SchemaReq
 				MarkdownDescription: "If enabled, gives access to Azure Artifacts.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.EnabledDisabledValidator(),
+					validators.EnabledDisabled(),
 				},
 			},
 			"boards": schema.StringAttribute{
@@ -57,35 +56,35 @@ func (r *ProjectFeaturesResource) Schema(_ context.Context, _ resource.SchemaReq
 				Required:            true,
 				Validators: []validator.String{
 					featuresDependenciesValidator{},
-					validators.EnabledDisabledValidator(),
+					validators.EnabledDisabled(),
 				},
 			},
 			"pipelines": schema.StringAttribute{
 				MarkdownDescription: "If enabled, gives access to Azure Pipelines.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.EnabledDisabledValidator(),
+					validators.EnabledDisabled(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 			"repositories": schema.StringAttribute{
 				MarkdownDescription: "If enabled, gives access to Azure Repos.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.EnabledDisabledValidator(),
+					validators.EnabledDisabled(),
 				},
 			},
 			"testplans": schema.StringAttribute{
 				MarkdownDescription: "If enabled, gives access to Azure Test Plans.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.EnabledDisabledValidator(),
+					validators.EnabledDisabled(),
 				},
 			},
 		},
