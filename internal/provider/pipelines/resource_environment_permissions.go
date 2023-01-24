@@ -73,42 +73,42 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 						MarkdownDescription: "Sets the `Administer` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"create": schema.StringAttribute{
 						MarkdownDescription: "Sets the `Create` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"manage": schema.StringAttribute{
 						MarkdownDescription: "Sets the `Manage` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"manage_history": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ManageHistory` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"use": schema.StringAttribute{
 						MarkdownDescription: "Sets the `Use` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"view": schema.StringAttribute{
 						MarkdownDescription: "Sets the `View` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 				},
@@ -124,14 +124,14 @@ func (r *EnvironmentPermissionsResource) Schema(_ context.Context, _ resource.Sc
 				MarkdownDescription: "The principal name to assign the permissions.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

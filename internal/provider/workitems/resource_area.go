@@ -12,6 +12,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/workitems"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 	"strings"
 )
 
@@ -53,7 +54,7 @@ func (r *AreaResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				MarkdownDescription: "The name of the area.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"parent_path": schema.StringAttribute{
@@ -71,7 +72,7 @@ func (r *AreaResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

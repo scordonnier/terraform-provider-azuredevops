@@ -12,6 +12,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/graph"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
 var _ resource.Resource = &GroupResource{}
@@ -57,7 +58,7 @@ func (r *GroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				MarkdownDescription: "The display name which should be used for this group.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"name": schema.StringAttribute{
@@ -85,7 +86,7 @@ func (r *GroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				MarkdownDescription: "The ID of the project. Changing this forces a new group to be created.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

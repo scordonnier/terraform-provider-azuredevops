@@ -91,105 +91,105 @@ func (r *PipelinePermissionsResource) Schema(_ context.Context, _ resource.Schem
 						MarkdownDescription: "Sets the `AdministerBuildPermissions` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"delete_build_definition": schema.StringAttribute{
 						MarkdownDescription: "Sets the `DeleteBuildDefinition` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"delete_builds": schema.StringAttribute{
 						MarkdownDescription: "Sets the `DeleteBuilds` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"destroy_builds": schema.StringAttribute{
 						MarkdownDescription: "Sets the `DestroyBuilds` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"edit_build_definition": schema.StringAttribute{
 						MarkdownDescription: "Sets the `EditBuildDefinition` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"edit_build_quality": schema.StringAttribute{
 						MarkdownDescription: "Sets the `EditBuildQuality` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"manage_build_qualities": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ManageBuildQualities` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"manage_build_queue": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ManageBuildQueue` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"override_build_checkin_validation": schema.StringAttribute{
 						MarkdownDescription: "Sets the `OverrideBuildCheckInValidation` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"queue_builds": schema.StringAttribute{
 						MarkdownDescription: "Sets the `QueueBuilds` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"retain_indefinitely": schema.StringAttribute{
 						MarkdownDescription: "Sets the `RetainIndefinitely` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"stop_builds": schema.StringAttribute{
 						MarkdownDescription: "Sets the `StopBuilds` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"update_build_information": schema.StringAttribute{
 						MarkdownDescription: "Sets the `UpdateBuildInformation` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"view_build_definition": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ViewBuildDefinition` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 					"view_builds": schema.StringAttribute{
 						MarkdownDescription: "Sets the `ViewBuilds` permission for the identity. Must be `notset`, `allow` or `deny`.",
 						Required:            true,
 						Validators: []validator.String{
-							validators.PermissionsValidator(),
+							validators.AllowDenyNotset(),
 						},
 					},
 				},
@@ -205,14 +205,14 @@ func (r *PipelinePermissionsResource) Schema(_ context.Context, _ resource.Schem
 				MarkdownDescription: "The principal name to assign the permissions.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

@@ -105,35 +105,35 @@ func (r *ProjectPermissionsResource) Schema(_ context.Context, _ resource.Schema
 								MarkdownDescription: "Sets the `BYPASS_RULES` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"change_process": schema.StringAttribute{
 								MarkdownDescription: "Sets the `CHANGE_PROCESS` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"workitem_delete": schema.StringAttribute{
 								MarkdownDescription: "Sets the `WORK_ITEM_DELETE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"workitem_move": schema.StringAttribute{
 								MarkdownDescription: "Sets the `WORK_ITEM_MOVE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"workitem_permanently_delete": schema.StringAttribute{
 								MarkdownDescription: "Sets the `WORK_ITEM_PERMANENTLY_DELETE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 						},
@@ -145,49 +145,49 @@ func (r *ProjectPermissionsResource) Schema(_ context.Context, _ resource.Schema
 								MarkdownDescription: "Sets the `DELETE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"manage_properties": schema.StringAttribute{
 								MarkdownDescription: "Sets the `MANAGE_PROPERTIES` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"rename": schema.StringAttribute{
 								MarkdownDescription: "Sets the `RENAME` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"read": schema.StringAttribute{
 								MarkdownDescription: "Sets the `GENERIC_READ` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"suppress_notifications": schema.StringAttribute{
 								MarkdownDescription: "Sets the `SUPPRESS_NOTIFICATIONS` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"update_visibility": schema.StringAttribute{
 								MarkdownDescription: "Sets the `UPDATE_VISIBILITY` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"write": schema.StringAttribute{
 								MarkdownDescription: "Sets the `GENERIC_WRITE` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 						},
@@ -199,35 +199,35 @@ func (r *ProjectPermissionsResource) Schema(_ context.Context, _ resource.Schema
 								MarkdownDescription: "Sets the `DELETE_TEST_RESULTS` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"manage_test_configurations": schema.StringAttribute{
 								MarkdownDescription: "Sets the `MANAGE_TEST_CONFIGURATIONS` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"manage_test_environments": schema.StringAttribute{
 								MarkdownDescription: "Sets the `MANAGE_TEST_ENVIRONMENTS` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"publish_test_results": schema.StringAttribute{
 								MarkdownDescription: "Sets the `PUBLISH_TEST_RESULTS` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 							"view_test_results": schema.StringAttribute{
 								MarkdownDescription: "Sets the `VIEW_TEST_RESULTS` permission for the identity. Must be `notset`, `allow` or `deny`.",
 								Required:            true,
 								Validators: []validator.String{
-									validators.PermissionsValidator(),
+									validators.AllowDenyNotset(),
 								},
 							},
 						},
@@ -245,14 +245,14 @@ func (r *ProjectPermissionsResource) Schema(_ context.Context, _ resource.Schema
 				MarkdownDescription: "The principal name to assign the permissions.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					validators.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

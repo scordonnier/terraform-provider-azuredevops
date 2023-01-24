@@ -13,6 +13,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
 var _ resource.Resource = &EnvironmentKubernetesResource{}
@@ -63,7 +64,7 @@ func (r *EnvironmentKubernetesResource) Schema(_ context.Context, _ resource.Sch
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"namespace": schema.StringAttribute{
@@ -73,7 +74,7 @@ func (r *EnvironmentKubernetesResource) Schema(_ context.Context, _ resource.Sch
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
@@ -83,7 +84,7 @@ func (r *EnvironmentKubernetesResource) Schema(_ context.Context, _ resource.Sch
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 			"service_endpoint_id": schema.StringAttribute{
@@ -93,7 +94,7 @@ func (r *EnvironmentKubernetesResource) Schema(_ context.Context, _ resource.Sch
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

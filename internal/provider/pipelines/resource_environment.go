@@ -12,6 +12,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
 var _ resource.Resource = &EnvironmentResource{}
@@ -58,7 +59,7 @@ func (r *EnvironmentResource) Schema(_ context.Context, _ resource.SchemaRequest
 				MarkdownDescription: "The ID of the project. Changing this forces a new environment to be created.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

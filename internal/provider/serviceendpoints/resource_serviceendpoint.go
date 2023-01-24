@@ -12,6 +12,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 	"time"
 )
 
@@ -145,14 +146,14 @@ func GetServiceEndpointResourceSchemaBase(description string) schema.Schema {
 				MarkdownDescription: "The name of the service endpoint.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/serviceendpoints"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 	"golang.org/x/exp/slices"
 )
 
@@ -55,7 +55,7 @@ func (r *ServiceEndpointShareResource) Schema(_ context.Context, _ resource.Sche
 				MarkdownDescription: "The ID of the project hosting the service endpoint.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 			"project_ids": schema.ListAttribute{
@@ -63,7 +63,7 @@ func (r *ServiceEndpointShareResource) Schema(_ context.Context, _ resource.Sche
 				Required:            true,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(utils.UUIDStringValidator()),
+					listvalidator.ValueStringsAre(validators.UUID()),
 				},
 			},
 		},

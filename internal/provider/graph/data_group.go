@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/graph"
-	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 	"strings"
 )
 
@@ -52,7 +52,7 @@ func (d *GroupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				MarkdownDescription: "The display name of the group.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.StringNotEmptyValidator(),
+					validators.StringNotEmpty(),
 				},
 			},
 			"name": schema.StringAttribute{
@@ -71,7 +71,7 @@ func (d *GroupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				MarkdownDescription: "The project ID of the group.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 		},

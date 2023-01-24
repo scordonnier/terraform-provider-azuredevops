@@ -8,6 +8,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/core"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
 )
 
 var _ datasource.DataSource = &ProjectFeaturesDataSource{}
@@ -53,7 +54,7 @@ func (d *ProjectFeaturesDataSource) Schema(_ context.Context, _ datasource.Schem
 				MarkdownDescription: "The ID of the project.",
 				Required:            true,
 				Validators: []validator.String{
-					utils.UUIDStringValidator(),
+					validators.UUID(),
 				},
 			},
 			"repositories": schema.StringAttribute{

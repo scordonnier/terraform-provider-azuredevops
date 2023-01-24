@@ -51,7 +51,7 @@ func (r *ServiceEndpointJFrogResource) Schema(_ context.Context, _ resource.Sche
 		Sensitive:           true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("password"), path.MatchRoot("username")),
-			validators.StringNotEmptyValidator(),
+			validators.StringNotEmpty(),
 		},
 	}
 	resourceShema.Attributes["password"] = schema.StringAttribute{
@@ -60,7 +60,7 @@ func (r *ServiceEndpointJFrogResource) Schema(_ context.Context, _ resource.Sche
 		Sensitive:           true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("access_token")),
-			validators.StringNotEmptyValidator(),
+			validators.StringNotEmpty(),
 		},
 	}
 	resourceShema.Attributes["service"] = schema.StringAttribute{
@@ -74,7 +74,7 @@ func (r *ServiceEndpointJFrogResource) Schema(_ context.Context, _ resource.Sche
 		MarkdownDescription: "Specify the root URL of your JFrog platform (eg. https://my.jfrog.io/).",
 		Required:            true,
 		Validators: []validator.String{
-			validators.StringNotEmptyValidator(),
+			validators.StringNotEmpty(),
 		},
 	}
 	resourceShema.Attributes["username"] = schema.StringAttribute{
@@ -83,7 +83,7 @@ func (r *ServiceEndpointJFrogResource) Schema(_ context.Context, _ resource.Sche
 		Sensitive:           true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("access_token")),
-			validators.StringNotEmptyValidator(),
+			validators.StringNotEmpty(),
 		},
 	}
 	resp.Schema = resourceShema
