@@ -1,3 +1,10 @@
+## v0.6.0
+
+FEATURES:
+
+**New Resource** `azuredevops_agent_pool`<br/>
+**New Resource** `azuredevops_agent_queue`<br/>
+
 ## v0.5.0
 
 FEATURES:
