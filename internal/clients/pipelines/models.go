@@ -119,6 +119,24 @@ type TaskAgentPool struct {
 	TargetSize    *int              `json:"targetSize,omitempty"`
 }
 
+type TaskAgentPoolReference struct {
+	Id       *int       `json:"id,omitempty"`
+	IsHosted *bool      `json:"isHosted,omitempty"`
+	IsLegacy *bool      `json:"isLegacy,omitempty"`
+	Name     *string    `json:"name,omitempty"`
+	Options  *string    `json:"options,omitempty"`
+	PoolType *string    `json:"poolType,omitempty"`
+	Scope    *uuid.UUID `json:"scope,omitempty"`
+	Size     *int       `json:"size,omitempty"`
+}
+
+type TaskAgentQueue struct {
+	Id        *int                    `json:"id,omitempty"`
+	Name      *string                 `json:"name,omitempty"`
+	Pool      *TaskAgentPoolReference `json:"pool,omitempty"`
+	ProjectId *uuid.UUID              `json:"projectId,omitempty"`
+}
+
 type UpdatePipelineRetentionSettings struct {
 	PurgeArtifacts               *RetentionSetting `json:"artifactsRetention,omitempty"`
 	PurgePullRequestRuns         *RetentionSetting `json:"pullRequestRunRetention,omitempty"`

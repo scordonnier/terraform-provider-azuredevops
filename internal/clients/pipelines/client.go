@@ -4,11 +4,13 @@ import (
 	"context"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/networking"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
+	"net/url"
 	"strconv"
 )
 
 const (
 	PipelinePermissionsResourceTypeEndpoint = "endpoint"
+	PipelinePermissionsResourceTypeQueue    = "queue"
 
 	pathApis                = "_apis"
 	pathBuild               = "build"
@@ -19,6 +21,7 @@ const (
 	pathPipelinePermissions = "pipelinepermissions"
 	pathPipelines           = "pipelines"
 	pathPools               = "pools"
+	pathQueues              = "queues"
 	pathProviders           = "providers"
 	pathRetention           = "retention"
 )
@@ -51,6 +54,25 @@ func (c *Client) CreateAgentPool(ctx context.Context, name string, autoProvision
 	return c.UpdateAgentPool(ctx, *pool.Id, name, autoProvision, autoUpdate)
 }
 
+func (c *Client) CreateAgentQueue(ctx context.Context, projectId string, poolId int, granted bool) (*TaskAgentQueue, error) {
+	pool, err := c.GetAgentPool(ctx, poolId)
+	if err != nil {
+		return nil, err
+	}
+
+	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathQueues}
+	queryParams := url.Values{"authorizePipelines": []string{strconv.FormatBool(granted)}}
+	body := &TaskAgentQueue{
+		Name: pool.Name,
+		Pool: &TaskAgentPoolReference{
+			Id: &poolId,
+		},
+		ProjectId: utils.UUID(projectId),
+	}
+	queue, _, err := networking.PostJSON[TaskAgentQueue](c.restClient, ctx, pathSegments, queryParams, body, networking.ApiVersion70)
+	return queue, err
+}
+
 func (c *Client) CreateEnvironment(ctx context.Context, projectId string, name string, description string) (*EnvironmentInstance, error) {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments}
 	body := &CreateOrUpdateEnvironmentArgs{
@@ -73,6 +95,12 @@ func (c *Client) DeleteAgentPool(ctx context.Context, poolId int) error {
 	return err
 }
 
+func (c *Client) DeleteAgentQueue(ctx context.Context, projectId string, queueId int) error {
+	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathQueues, strconv.Itoa(queueId)}
+	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
+	return err
+}
+
 func (c *Client) DeleteEnvironment(ctx context.Context, projectId string, id int) error {
 	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathEnvironments, strconv.Itoa(id)}
 	_, _, err := networking.DeleteJSON[networking.NoJSON](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
@@ -89,6 +117,12 @@ func (c *Client) GetAgentPool(ctx context.Context, poolId int) (*TaskAgentPool, 
 	pathSegments := []string{pathApis, pathDistributedTask, pathPools, strconv.Itoa(poolId)}
 	pool, _, err := networking.GetJSON[TaskAgentPool](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
 	return pool, err
+}
+
+func (c *Client) GetAgentQueue(ctx context.Context, projectId string, queueId int) (*TaskAgentQueue, error) {
+	pathSegments := []string{projectId, pathApis, pathDistributedTask, pathQueues, strconv.Itoa(queueId)}
+	queue, _, err := networking.GetJSON[TaskAgentQueue](c.restClient, ctx, pathSegments, nil, networking.ApiVersion70)
+	return queue, err
 }
 
 func (c *Client) GetEnvironment(ctx context.Context, projectId string, id int) (*EnvironmentInstance, error) {

@@ -92,6 +92,7 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		graph.NewGroupResource,
 		graph.NewGroupMembershipResource,
 		pipelines.NewAgentPoolResource,
+		pipelines.NewAgentQueueResource,
 		pipelines.NewEnvironmentResource,
 		pipelines.NewEnvironmentKubernetesResource,
 		pipelines.NewEnvironmentPermissionsResource,
