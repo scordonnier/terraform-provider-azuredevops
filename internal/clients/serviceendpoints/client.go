@@ -142,6 +142,14 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
 		}
+	case ServiceEndpointTypeGeneric:
+		return &EndpointAuthorization{
+			Parameters: &map[string]string{
+				ServiceEndpointAuthorizationParamsPassword: args.Password,
+				ServiceEndpointAuthorizationParamsUserName: args.Username,
+			},
+			Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
+		}
 	case ServiceEndpointTypeGitHub:
 		return &EndpointAuthorization{
 			Parameters: &map[string]string{
@@ -238,6 +246,8 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 		return utils.String("https://api.bitbucket.org/")
 	case ServiceEndpointTypeDockerRegistry:
 		return utils.String("https://hub.docker.com/")
+	case ServiceEndpointTypeGeneric:
+		return utils.String(args.Url)
 	case ServiceEndpointTypeGitHub:
 		return utils.String("https://github.com/")
 	case ServiceEndpointTypeJFrogArtifactory:
