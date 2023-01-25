@@ -4,6 +4,10 @@ FEATURES:
 
 **New Resource** `azuredevops_agent_pool`<br/>
 **New Resource** `azuredevops_agent_queue`<br/>
+**New Resource** `azuredevops_serviceendpoint_dockerregistry`<br/>
+**New Resource** `azuredevops_serviceendpoint_generic`<br/>
+**New Resource** `azuredevops_serviceendpoint_npm`<br/>
+**New Resource** `azuredevops_serviceendpoint_nuget`<br/>
 
 ## v0.5.0
 
