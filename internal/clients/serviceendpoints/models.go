@@ -10,6 +10,7 @@ const (
 	ServiceEndpointDataAuthorizationType           = "authorizationType"
 	ServiceEndpointDataCreationMode                = "creationMode"
 	ServiceEndpointDataEnvironment                 = "environment"
+	ServiceEndpointDataRegistryType                = "registrytype"
 	ServiceEndpointDataScopeLevel                  = "scopeLevel"
 	ServiceEndpointDataSubscriptionId              = "subscriptionId"
 	ServiceEndpointDataSubscriptionName            = "subscriptionName"
@@ -19,47 +20,38 @@ const (
 	ServiceEndpointAuthorizationParamsAuthenticationType  = "authenticationType"
 	ServiceEndpointAuthorizationParamsClusterContext      = "clusterContext"
 	ServiceEndpointAuthorizationParamsKubeconfig          = "kubeconfig"
+	ServiceEndpointAuthorizationParamsNuGetKey            = "nugetkey"
 	ServiceEndpointAuthorizationParamsPassword            = "password"
+	ServiceEndpointAuthorizationParamsRegistry            = "registry"
 	ServiceEndpointAuthorizationParamsServicePrincipalId  = "serviceprincipalid"
 	ServiceEndpointAuthorizationParamsServicePrincipalKey = "serviceprincipalkey"
 	ServiceEndpointAuthorizationParamsServiceTenantId     = "tenantid"
 	ServiceEndpointAuthorizationParamsUserName            = "username"
 
-	ServiceEndpointAuthorizationSchemeJwt                    = "JWT"
-	ServiceEndpointAuthorizationSchemeKubernetes             = "Kubernetes"
-	ServiceEndpointAuthorizationSchemeManagedServiceIdentity = "ManagedServiceIdentity"
-	ServiceEndpointAuthorizationSchemeNone                   = "None"
-	ServiceEndpointAuthorizationSchemeOAuth                  = "OAuth"
-	ServiceEndpointAuthorizationSchemeOAuth2                 = "OAuth2"
-	ServiceEndpointAuthorizationSchemePersonalAccessToken    = "PersonalAccessToken"
-	ServiceEndpointAuthorizationSchemeServicePrincipal       = "ServicePrincipal"
-	ServiceEndpointAuthorizationSchemeToken                  = "Token"
-	ServiceEndpointAuthorizationSchemeUsernamePassword       = "UsernamePassword"
+	ServiceEndpointAuthorizationSchemeKubernetes       = "Kubernetes"
+	ServiceEndpointAuthorizationSchemeNone             = "None"
+	ServiceEndpointAuthorizationSchemeServicePrincipal = "ServicePrincipal"
+	ServiceEndpointAuthorizationSchemeToken            = "Token"
+	ServiceEndpointAuthorizationSchemeUsernamePassword = "UsernamePassword"
 
-	ServiceEndpointOwnerAgentCloud  = "agentcloud"
-	ServiceEndpointOwnerBoards      = "boards"
-	ServiceEndpointOwnerEnvironment = "environment"
-	ServiceEndpointOwnerLibrary     = "library"
-
-	ServiceEndpointTypeAzure             = "Azure"
 	ServiceEndpointTypeAzureRm           = "AzureRM"
 	ServiceEndpointTypeBitbucket         = "Bitbucket"
-	ServiceEndpointTypeDocker            = "dockerregistry"
+	ServiceEndpointTypeDockerRegistry    = "dockerregistry"
 	ServiceEndpointTypeGeneric           = "Generic"
-	ServiceEndpointTypeGit               = "Git"
 	ServiceEndpointTypeGitHub            = "GitHub"
-	ServiceEndpointTypeGitHubEnterprise  = "GitHubEnterprise"
 	ServiceEndpointTypeJFrogArtifactory  = "jfrogArtifactoryService"
 	ServiceEndpointTypeJFrogDistribution = "jfrogDistributionService"
 	ServiceEndpointTypeJFrogPlatform     = "jfrogPlatformService"
 	ServiceEndpointTypeJFrogXray         = "jfrogXrayService"
-	ServiceEndpointTypekubernetes        = "kubernetes"
-	ServiceEndpointTypeSSH               = "SSH"
+	ServiceEndpointTypeKubernetes        = "kubernetes"
+	ServiceEndpointTypeNuGet             = "externalnugetfeed"
+	ServiceEndpointTypeNpm               = "externalnpmregistry"
 	ServiceEndpointTypeVsAppCenter       = "vsmobilecenter"
 )
 
 type CreateOrUpdateServiceEndpointArgs struct {
 	AcceptUntrustedCertificates bool
+	ApiKey                      string
 	ClusterContext              string
 	Description                 string
 	GrantAllPipelines           bool
