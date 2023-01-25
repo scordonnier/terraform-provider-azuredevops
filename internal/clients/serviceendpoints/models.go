@@ -56,6 +56,7 @@ const (
 	ServiceEndpointTypeJFrogPlatform     = "jfrogPlatformService"
 	ServiceEndpointTypeJFrogXray         = "jfrogXrayService"
 	ServiceEndpointTypeKubernetes        = "kubernetes"
+	ServiceEndpointTypeNpm               = "externalnpmregistry"
 	ServiceEndpointTypeSSH               = "SSH"
 	ServiceEndpointTypeVsAppCenter       = "vsmobilecenter"
 )

@@ -177,6 +177,23 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeKubernetes),
 		}
+	case ServiceEndpointTypeNpm:
+		if args.Token != "" {
+			return &EndpointAuthorization{
+				Parameters: &map[string]string{
+					ServiceEndpointAuthorizationParamsApiToken: args.Token,
+				},
+				Scheme: utils.String(ServiceEndpointAuthorizationSchemeToken),
+			}
+		} else {
+			return &EndpointAuthorization{
+				Parameters: &map[string]string{
+					ServiceEndpointAuthorizationParamsPassword: args.Password,
+					ServiceEndpointAuthorizationParamsUserName: args.Username,
+				},
+				Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
+			}
+		}
 	case ServiceEndpointTypeVsAppCenter:
 		return &EndpointAuthorization{
 			Parameters: &map[string]string{
@@ -232,6 +249,8 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 	case ServiceEndpointTypeJFrogXray:
 		return utils.String(strings.TrimSuffix(args.Url, "/") + "/xray")
 	case ServiceEndpointTypeKubernetes:
+		return utils.String(args.Url)
+	case ServiceEndpointTypeNpm:
 		return utils.String(args.Url)
 	case ServiceEndpointTypeVsAppCenter:
 		return utils.String("https://api.appcenter.ms/v0.1")
