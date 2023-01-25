@@ -174,7 +174,7 @@ func (r *ServiceEndpointKubernetesResource) getCreateOrUpdateServiceEndpointArgs
 		Description:                 *description,
 		Kubeconfig:                  model.Kubeconfig.YamlContent,
 		Name:                        model.Name,
-		Type:                        serviceendpoints.ServiceEndpointTypekubernetes,
+		Type:                        serviceendpoints.ServiceEndpointTypeKubernetes,
 		Url:                         server,
 	}, nil
 }

@@ -133,6 +133,15 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 			},
 			Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
 		}
+	case ServiceEndpointTypeDockerRegistry:
+		return &EndpointAuthorization{
+			Parameters: &map[string]string{
+				ServiceEndpointAuthorizationParamsPassword: args.Password,
+				ServiceEndpointAuthorizationParamsRegistry: args.Url,
+				ServiceEndpointAuthorizationParamsUserName: args.Username,
+			},
+			Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
+		}
 	case ServiceEndpointTypeGitHub:
 		return &EndpointAuthorization{
 			Parameters: &map[string]string{
@@ -160,7 +169,7 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 				Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
 			}
 		}
-	case ServiceEndpointTypekubernetes:
+	case ServiceEndpointTypeKubernetes:
 		return &EndpointAuthorization{
 			Parameters: &map[string]string{
 				ServiceEndpointAuthorizationParamsClusterContext: args.ClusterContext,
@@ -190,7 +199,11 @@ func getServiceEndpointData(args *CreateOrUpdateServiceEndpointArgs) *map[string
 			ServiceEndpointDataSubscriptionId:   args.SubscriptionId,
 			ServiceEndpointDataSubscriptionName: args.SubscriptionName,
 		}
-	case ServiceEndpointTypekubernetes:
+	case ServiceEndpointTypeDockerRegistry:
+		return &map[string]string{
+			ServiceEndpointDataRegistryType: "Others",
+		}
+	case ServiceEndpointTypeKubernetes:
 		return &map[string]string{
 			ServiceEndpointDataAuthorizationType:           "Kubeconfig",
 			ServiceEndpointDataAcceptUntrustedCertificates: fmt.Sprintf("%v", args.AcceptUntrustedCertificates),
@@ -206,6 +219,8 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 		return utils.String("https://management.azure.com/")
 	case ServiceEndpointTypeBitbucket:
 		return utils.String("https://api.bitbucket.org/")
+	case ServiceEndpointTypeDockerRegistry:
+		return utils.String("https://hub.docker.com/")
 	case ServiceEndpointTypeGitHub:
 		return utils.String("https://github.com/")
 	case ServiceEndpointTypeJFrogArtifactory:
@@ -216,7 +231,7 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 		return utils.String(strings.TrimSuffix(args.Url, "/"))
 	case ServiceEndpointTypeJFrogXray:
 		return utils.String(strings.TrimSuffix(args.Url, "/") + "/xray")
-	case ServiceEndpointTypekubernetes:
+	case ServiceEndpointTypeKubernetes:
 		return utils.String(args.Url)
 	case ServiceEndpointTypeVsAppCenter:
 		return utils.String("https://api.appcenter.ms/v0.1")
