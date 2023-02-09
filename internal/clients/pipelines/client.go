@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	PipelinePermissionsResourceTypeEndpoint = "endpoint"
-	PipelinePermissionsResourceTypeQueue    = "queue"
+	PipelinePermissionsResourceTypeEndpoint    = "endpoint"
+	PipelinePermissionsResourceTypeEnvironment = "environment"
+	PipelinePermissionsResourceTypeQueue       = "queue"
 
 	pathApis                = "_apis"
 	pathBuild               = "build"

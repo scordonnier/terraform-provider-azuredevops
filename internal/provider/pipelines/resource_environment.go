@@ -13,6 +13,7 @@ import (
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/clients/pipelines"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/utils"
 	"github.com/scordonnier/terraform-provider-azuredevops/internal/validators"
+	"strconv"
 )
 
 var _ resource.Resource = &EnvironmentResource{}
@@ -26,10 +27,11 @@ type EnvironmentResource struct {
 }
 
 type EnvironmentResourceModel struct {
-	Description *string     `tfsdk:"description"`
-	Id          types.Int64 `tfsdk:"id"`
-	Name        string      `tfsdk:"name"`
-	ProjectId   string      `tfsdk:"project_id"`
+	Description       *string     `tfsdk:"description"`
+	GrantAllPipelines types.Bool  `tfsdk:"grant_all_pipelines"`
+	Id                types.Int64 `tfsdk:"id"`
+	Name              string      `tfsdk:"name"`
+	ProjectId         string      `tfsdk:"project_id"`
 }
 
 func (r *EnvironmentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -43,6 +45,10 @@ func (r *EnvironmentResource) Schema(_ context.Context, _ resource.SchemaRequest
 			"description": schema.StringAttribute{
 				MarkdownDescription: "The description of the environment.",
 				Optional:            true,
+			},
+			"grant_all_pipelines": schema.BoolAttribute{
+				MarkdownDescription: "Set to true to grant access to all pipelines in the project.",
+				Required:            true,
 			},
 			"id": schema.Int64Attribute{
 				Computed:            true,
@@ -89,6 +95,12 @@ func (r *EnvironmentResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	_, err = r.client.GrantAllPipelines(ctx, model.ProjectId, pipelines.PipelinePermissionsResourceTypeEnvironment, strconv.Itoa(*environment.Id), model.GrantAllPipelines.ValueBool())
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to grant environment access to all pipelines", err.Error())
+		return
+	}
+
 	model.Id = types.Int64Value(int64(*environment.Id))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
@@ -113,8 +125,17 @@ func (r *EnvironmentResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	permissions, err := r.client.GetPipelinePermissions(ctx, model.ProjectId, pipelines.PipelinePermissionsResourceTypeEnvironment, model.Id.String())
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to retrieve grant access", err.Error())
+		return
+	}
+
 	model.Description = utils.IfThenElse[*string](environment.Description != nil, model.Description, utils.EmptyString)
 	model.Name = *environment.Name
+	if permissions.AllPipelines != nil {
+		model.GrantAllPipelines = types.BoolValue(*permissions.AllPipelines.Authorized)
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
@@ -131,6 +152,12 @@ func (r *EnvironmentResource) Update(ctx context.Context, req resource.UpdateReq
 	_, err := r.client.UpdateEnvironment(ctx, model.ProjectId, int(model.Id.ValueInt64()), model.Name, *description)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Environment with Id '%d' failed to update", model.Id.ValueInt64()), err.Error())
+		return
+	}
+
+	_, err = r.client.GrantAllPipelines(ctx, model.ProjectId, pipelines.PipelinePermissionsResourceTypeEnvironment, model.Id.String(), model.GrantAllPipelines.ValueBool())
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to grant environment access to all pipelines", err.Error())
 		return
 	}
 

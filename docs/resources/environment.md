@@ -17,8 +17,9 @@ data "azuredevops_project" "sandbox" {
 }
 
 resource "azuredevops_environment" "production" {
-  name       = "Production"
-  project_id = data.azuredevops_project.sandbox.id
+  grant_all_pipelines = true
+  name                = "Production"
+  project_id          = data.azuredevops_project.sandbox.id
 }
 ```
 
@@ -27,6 +28,7 @@ resource "azuredevops_environment" "production" {
 
 ### Required
 
+- `grant_all_pipelines` (Boolean) Set to true to grant access to all pipelines in the project.
 - `name` (String) The name which should be used for this environment.
 - `project_id` (String) The ID of the project. Changing this forces a new environment to be created.
 
