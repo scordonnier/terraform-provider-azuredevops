@@ -3,6 +3,7 @@ data "azuredevops_project" "sandbox" {
 }
 
 resource "azuredevops_environment" "production" {
-  name       = "Production"
-  project_id = data.azuredevops_project.sandbox.id
+  grant_all_pipelines = true
+  name                = "Production"
+  project_id          = data.azuredevops_project.sandbox.id
 }

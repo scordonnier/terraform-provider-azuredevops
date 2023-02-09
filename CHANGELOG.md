@@ -1,3 +1,9 @@
+## v0.6.1
+
+FEATURES:
+
+**Update Resource** `azuredevops_environment` : Add new property `grant_all_pipelines`<br/>
+
 ## v0.6.0
 
 FEATURES:
