@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/go-hclog v1.4.0
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
-	github.com/hashicorp/terraform-plugin-framework-validators v0.9.0
+	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	golang.org/x/exp v0.0.0-20221227203929-1b447090c38c
 	gopkg.in/yaml.v3 v3.0.1
