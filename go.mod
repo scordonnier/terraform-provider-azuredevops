@@ -5,9 +5,9 @@ go 1.19
 require (
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/google/uuid v1.3.0
+	github.com/hashicorp/terraform-plugin-framework v1.2.0
 	github.com/hashicorp/go-hclog v1.5.0
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
-	github.com/hashicorp/terraform-plugin-framework v1.1.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	golang.org/x/exp v0.0.0-20221227203929-1b447090c38c
@@ -34,7 +34,7 @@ require (
 	github.com/hashicorp/terraform-exec v0.18.1 // indirect
 	github.com/hashicorp/terraform-json v0.15.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.14.3 // indirect
-	github.com/hashicorp/terraform-plugin-log v0.7.0 // indirect
+	github.com/hashicorp/terraform-plugin-log v0.8.0 // indirect
 	github.com/hashicorp/terraform-registry-address v0.1.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
