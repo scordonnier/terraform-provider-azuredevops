@@ -219,6 +219,13 @@ func getServiceEndpointAuthorization(args *CreateOrUpdateServiceEndpointArgs) *E
 				Scheme: utils.String(ServiceEndpointAuthorizationSchemeUsernamePassword),
 			}
 		}
+	case ServiceEndpointTypeSonarCloud:
+		return &EndpointAuthorization{
+			Parameters: &map[string]string{
+				ServiceEndpointAuthorizationParamsApiToken: args.Token,
+			},
+			Scheme: utils.String(ServiceEndpointAuthorizationSchemeToken),
+		}
 	case ServiceEndpointTypeVsAppCenter:
 		return &EndpointAuthorization{
 			Parameters: &map[string]string{
@@ -281,6 +288,8 @@ func getServiceEndpointUrl(args *CreateOrUpdateServiceEndpointArgs) *string {
 		return utils.String(args.Url)
 	case ServiceEndpointTypeNpm:
 		return utils.String(args.Url)
+	case ServiceEndpointTypeSonarCloud:
+		return utils.String("https://sonarcloud.io")
 	case ServiceEndpointTypeVsAppCenter:
 		return utils.String("https://api.appcenter.ms/v0.1")
 	default:

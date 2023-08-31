@@ -109,6 +109,7 @@ func (p *AzureDevOpsProvider) Resources(_ context.Context) []func() resource.Res
 		serviceendpoints.NewServiceEndpointNpmResource,
 		serviceendpoints.NewServiceEndpointPermissionsResource,
 		serviceendpoints.NewServiceEndpointShareResource,
+		serviceendpoints.NewServiceEndpointSonarCloudResource,
 		serviceendpoints.NewServiceEndpointVsAppCenterResource,
 		workitems.NewAreaPermissionsResource,
 		workitems.NewAreaResource,

@@ -46,6 +46,7 @@ const (
 	ServiceEndpointTypeKubernetes        = "kubernetes"
 	ServiceEndpointTypeNuGet             = "externalnugetfeed"
 	ServiceEndpointTypeNpm               = "externalnpmregistry"
+	ServiceEndpointTypeSonarCloud        = "sonarcloud"
 	ServiceEndpointTypeVsAppCenter       = "vsmobilecenter"
 )
 
