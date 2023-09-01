@@ -2,7 +2,7 @@ package serviceendpoints
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -58,12 +58,12 @@ func (r *ServiceEndpointShareResource) Schema(_ context.Context, _ resource.Sche
 					validators.UUID(),
 				},
 			},
-			"project_ids": schema.ListAttribute{
+			"project_ids": schema.SetAttribute{
 				MarkdownDescription: "The IDs of the projects to share the service endpoint.",
 				Required:            true,
 				ElementType:         types.StringType,
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(validators.UUID()),
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(validators.UUID()),
 				},
 			},
 		},

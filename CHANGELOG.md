@@ -4,6 +4,8 @@ FEATURES:
 
 **New Resource** `azuredevops_serviceendpoint_sonarcloud`<br/>
 
+And also various improvements and bug fixes.
+
 ## v0.6.1
 
 FEATURES:
