@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/hashicorp/go-hclog v1.5.0
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
-	github.com/hashicorp/terraform-plugin-framework v1.4.0
+	github.com/hashicorp/terraform-plugin-framework v1.4.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
